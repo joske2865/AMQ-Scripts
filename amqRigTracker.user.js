@@ -2,7 +2,7 @@
 // @name         AMQ Rig Tracker
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  Rig tracker for AMQ, writes the rig in the scoreboard, next to player's score, works for all gamemodes and for infinitely many players
+// @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
@@ -33,7 +33,7 @@ let settingsData = [
             {
                 label: "Write rig to chat",
                 id: "smRigTrackerChat",
-                popover: "Writes the rig to chat. Requires exactly 2 players, used for AMQ League games",
+                popover: "Writes the rig to chat. Used for AMQ League games, requires 2 players, automatically disabled if the requirement is not met",
                 enables: ["smRigTrackerAnime", "smRigTrackerPlayerNames", "smRigTrackerScore", "smRigTrackerFinalResult"],
                 offset: 1,
                 default: false
@@ -49,7 +49,7 @@ let settingsData = [
             {
                 label: "English",
                 id: "smRigTrackerAnimeEnglish",
-                popover: "English anime titles",
+                popover: "English anime names",
                 unchecks: ["smRigTrackerAnimeRomaji"],
                 offset: 3,
                 default: false
@@ -57,7 +57,7 @@ let settingsData = [
             {
                 label: "Romaji",
                 id: "smRigTrackerAnimeRomaji",
-                popover: "Romaji anime titles",
+                popover: "Romaji anime names",
                 unchecks: ["smRigTrackerAnimeEnglish"],
                 offset: 3,
                 default: true
@@ -470,7 +470,7 @@ function writeResultsToChat() {
             }
         }
     }
-    
+
     gameChat.$chatInputField.val(oldMessage);
 }
 
@@ -508,7 +508,7 @@ $("#smRigTrackerScoreboard").click(function () {
     }
 });
 
-// initialise the listeners
+// bind listeners
 quizReadyRigTracker.bindListener();
 answerResultsRigTracker.bindListener();
 quizEndRigTracker.bindListener();
