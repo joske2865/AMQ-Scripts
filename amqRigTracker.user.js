@@ -5,6 +5,8 @@
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
+// @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
+// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
 // @grant        none
 // @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
 // ==/UserScript==
