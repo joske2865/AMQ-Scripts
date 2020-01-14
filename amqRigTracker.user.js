@@ -326,7 +326,12 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
             writeResultsToChat();
         }
     }
-})
+});
+
+// New rooms listener for the room browser, used for detecting when the player leaves a lobby (mid-game or otherwise)
+let newRoomsListener = new Listener("New Rooms", (rooms) => {
+    clearPlayerData();
+});
 
 // Creates the rig counters on the scoreboard and sets them to 0
 function initialiseScoreboard() {
@@ -484,6 +489,7 @@ $("#smRigTracker").click(function () {
         answerResultsRigTracker.unbindListener();
         quizEndRigTracker.unbindListener();
         returnLobbyVoteListener.unbindListener();
+        newRoomsListener.unbindListener();
         clearScoreboard();
     }
     else {
@@ -491,6 +497,7 @@ $("#smRigTracker").click(function () {
         answerResultsRigTracker.bindListener();
         quizEndRigTracker.bindListener();
         returnLobbyVoteListener.bindListener();
+        newRoomsListener.bindListener();
         if ($("#smRigTrackerScoreboard").prop("checked")) {
             initialiseScoreboard();
             writeRigToScoreboard();
@@ -515,6 +522,7 @@ quizReadyRigTracker.bindListener();
 answerResultsRigTracker.bindListener();
 quizEndRigTracker.bindListener();
 returnLobbyVoteListener.bindListener();
+newRoomsListener.bindListener();
 
 // CSS stuff
 GM_addStyle(`
