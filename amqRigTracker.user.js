@@ -294,6 +294,12 @@ let answerResultsRigTracker = new Listener("answer results", (result) => {
     if (!playerDataReady) {
         initialisePlayerData();
     }
+    if (!scoreboardReady && $("#smRigTrackerScoreboard").prop("checked")) {
+        initialiseScoreboard();
+        if (playerDataReady) {
+            writeRigToScoreboard();
+        }
+    }
     if (playerDataReady) {
         for (let player of result.players) {
             if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0) {
@@ -372,10 +378,12 @@ function clearPlayerData() {
 
 // Writes the current rig to scoreboard
 function writeRigToScoreboard() {
-    for (let entryId in quiz.scoreboard.playerEntries) {
-        let entry = quiz.scoreboard.playerEntries[entryId];
-        let rigCounter = entry.$entry.find(".qpsPlayerRig");
-        rigCounter.text(playerData[entryId].rig);
+    if (playerDataReady) {
+        for (let entryId in quiz.scoreboard.playerEntries) {
+            let entry = quiz.scoreboard.playerEntries[entryId];
+            let rigCounter = entry.$entry.find(".qpsPlayerRig");
+            rigCounter.text(playerData[entryId].rig);
+        }
     }
 }
 
