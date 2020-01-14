@@ -285,6 +285,7 @@ let quizReadyRigTracker = new Listener("quiz ready", (data) => {
         answerResultsRigTracker.unbindListener();
         quizEndRigTracker.unbindListener();
         returnLobbyVoteListener.unbindListener();
+        newRoomsListener.unbindListener();
     }
 });
 
