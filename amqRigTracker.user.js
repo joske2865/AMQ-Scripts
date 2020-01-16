@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      0.1.1
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
