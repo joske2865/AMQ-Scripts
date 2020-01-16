@@ -1,3 +1,15 @@
+// ==UserScript==
+// @name         AMQ Notes Gain Display
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Adds a display above your notes count to display how many notes you gained (or lost), disappears after 5 seconds
+// @author       TheJoseph98
+// @match        https://animemusicquiz.com/*
+// @grant        none
+// ==/UserScript==
+
+if (!window.setupDocumentDone) return;
+
 $("#currencyText")
     .after($("<div></div>")
         .attr("id", "currencyGain")
@@ -20,7 +32,7 @@ XpBar.prototype.creditsGain = function(creditsGain) {
         $creditsGain.show();
     }
     else {
-        $creditsGain.hide();  
+        $creditsGain.hide();
     }
     setTimeout(function () {
         $creditsGain.hide();
