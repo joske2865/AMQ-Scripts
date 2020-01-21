@@ -25,17 +25,8 @@ let $creditsGain = $("#currencyGain");
 
 let creditsGainListener = new Listener("quiz xp credit gain", (data) => {
     let creditsGain = data.credit - xpBar.currentCreditCount;
-    if (creditsGain > 0) {
-        $creditsGain.text("+" + creditsGain);
-        $creditsGain.show();
-    }
-    else if (creditsGain < 0){
-        $creditsGain.text(creditsGain);
-        $creditsGain.show();
-    }
-    else {
-        $creditsGain.hide();
-    }
+    $creditsGain.text("+" + creditsGain);
+    $creditsGain.show();
     setTimeout(function () {
         $creditsGain.hide();
     }, 5000);
