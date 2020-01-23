@@ -1,8 +1,8 @@
 # AMQ-Scripts
 
-### Instalation
+### Installation
 
-Requires Tampermonkey (Firefox) or Greasemonkey (Chrome).
+Requires Tampermonkey (Chrome) or Greasemonkey (Firefox).
 
 - Step 1) Select a script you want to install  
 - Step 2) Click "raw"   
