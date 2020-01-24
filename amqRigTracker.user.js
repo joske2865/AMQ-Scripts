@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    http://tampermonkey.net/
-// @version      0.1.1
+// @version      0.2
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -22,7 +22,7 @@ let playerData = {};
 let settingsData = [
     {
         containerId: "smRigTrackerOptions",
-        title: "Rig Tracker",
+        title: "Rig Tracker Options",
         data: [
             {
                 label: "Track Rig",
@@ -87,32 +87,45 @@ let settingsData = [
                 default: true
             },
             {
+                label: "Write rig to scoreboard",
+                id: "smRigTrackerScoreboard",
+                popover: "Writes the rig to the scoreboards next to each person's score",
+                offset: 1,
+                default: true
+            }
+        ]
+    },
+    {
+        containerId: "smRigTrackerFinalOptions",
+        title: "Final Results Options",
+        data: [
+            {
                 label: "On quiz end",
                 id: "smRigTrackerQuizEnd",
                 popover: "Write the final results at the end of the quiz",
                 enables: ["smRigTrackerQuizEndNames", "smRigTrackerQuizEndScore", "smRigTrackerQuizEndRig"],
-                offset: 3,
+                offset: 0,
                 default: true
             },
             {
                 label: "Player Names",
                 id: "smRigTrackerQuizEndNames",
                 popover: "Include player names on final results when the quiz ends",
-                offset: 4,
+                offset: 1,
                 default: true
             },
             {
                 label: "Score",
                 id: "smRigTrackerQuizEndScore",
                 popover: "Include the final score on final result when the quiz ends",
-                offset: 4,
+                offset: 1,
                 default: true
             },
             {
                 label: "Rig",
                 id: "smRigTrackerQuizEndRig",
                 popover: "Include the final rig on final results when the quiz ends",
-                offset: 4,
+                offset: 1,
                 default: true
             },
             {
@@ -120,36 +133,29 @@ let settingsData = [
                 id: "smRigTrackerLobby",
                 popover: "Write the final results when returning to lobby",
                 enables: ["smRigTrackerLobbyNames", "smRigTrackerLobbyScore", "smRigTrackerLobbyRig"],
-                offset: 3,
+                offset: 0,
                 default: false
             },
             {
                 label: "Player Names",
                 id: "smRigTrackerLobbyNames",
                 popover: "Include player names on final results when returning to lobby",
-                offset: 4,
+                offset: 1,
                 default: false
             },
             {
                 label: "Score",
                 id: "smRigTrackerLobbyScore",
                 popover: "Include the final score on final result when returning to lobby",
-                offset: 4,
+                offset: 1,
                 default: false
             },
             {
                 label: "Rig",
                 id: "smRigTrackerLobbyRig",
                 popover: "Include the final rig on final results when returning to lobby",
-                offset: 4,
-                default: false
-            },
-            {
-                label: "Write rig to scoreboard",
-                id: "smRigTrackerScoreboard",
-                popover: "Writes the rig to the scoreboards next to each person's score",
                 offset: 1,
-                default: true
+                default: false
             }
         ]
     }
@@ -242,10 +248,11 @@ for (let setting of settingsData) {
 // Updates the enabled checkboxes, checks each node recursively
 function updateEnabled(settingId) {
     let parent;
-    settingsData.forEach((setting) => {
+    settingsData.some((setting) => {
         parent = setting.data.find((data) => {
             return data.id === settingId;
         });
+        return parent !== undefined;
     });
     if (parent === undefined) {
         return;
