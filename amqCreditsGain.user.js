@@ -2,7 +2,7 @@
 // @name         AMQ Notes Gain Display
 // @namespace    http://tampermonkey.net/
 // @version      1.1
-// @description  Adds a display above your notes count to display how many notes you gained (or lost), disappears after 5 seconds
+// @description  Adds a display above your notes count to display how many notes you gained, disappears after 5 seconds
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
