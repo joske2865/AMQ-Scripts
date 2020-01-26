@@ -24,9 +24,6 @@ let commandListener = new Listener("Game Chat Message", (payload) => {
 
 			shuffle(players);
 
-			let message = "";
-			players = [];
-
 			for (let teamId = 0; teamId < players.length / playersPerTeam; teamId++) {
 				message += "Team " + (teamId + 1) + ": ";
 				for (let playerId = 0; playerId < playersPerTeam; playerId++) {
@@ -42,6 +39,8 @@ let commandListener = new Listener("Game Chat Message", (payload) => {
 				message = "";
 			}
 
+			let message = "";
+			players = [];
 		}
 		else {
 			gameChat.systemMessage("Must be in pre-game lobby");
