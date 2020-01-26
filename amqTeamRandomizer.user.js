@@ -6,7 +6,6 @@
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
@@ -19,7 +18,7 @@ let commandListener = new Listener("Game Chat Message", (payload) => {
         if (lobby.inLobby) {
             let message = "";
             sendChatMessage("Randomizing teams...");
-            
+
             for (let playerId in lobby.players) {
                 players.push(lobby.players[playerId]._name);
             }
