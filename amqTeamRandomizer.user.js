@@ -17,7 +17,9 @@ let playersPerTeam = 2;
 let commandListener = new Listener("Game Chat Message", (payload) => {
 	if (payload.sender === selfName && payload.message === "/teams") {
 		if (lobby.inLobby) {
+			let message = "";
 			sendChatMessage("Randomizing teams...");
+			
 			for (let playerId in lobby.players) {
 				players.push(lobby.players[playerId]._name);
 			}
@@ -39,7 +41,6 @@ let commandListener = new Listener("Game Chat Message", (payload) => {
 				message = "";
 			}
 
-			let message = "";
 			players = [];
 		}
 		else {
