@@ -9,6 +9,8 @@
 // @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
 // ==/UserScript==
 
+if (!window.setupDocumentDone) return;
+
 let players = [];
 let playersPerTeam = 2;
 
