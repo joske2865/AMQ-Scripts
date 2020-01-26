@@ -21,13 +21,16 @@ let quizReadyListener = new Listener("quiz ready", data => {
 
 let resultListener = new Listener("answer results", result => {
     let newSong = {
-        anime: result.songInfo.animeNames.romaji,
+        animeEnglish: result.songInfo.animeNames.english,
+        animeRomaji: result.songInfo.animeNames.romaji,
         name: result.songInfo.songName,
         artist: result.songInfo.artist,
         type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
         correctCount: result.players.filter(player => player.correct === true).length,
-        video: getVideoURL(result.songInfo.urlMap),
-        audio: getMP3URL(result.songInfo.urlMap)
+        startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
+        length: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration,
+        linkWebm: getVideoURL(result.songInfo.urlMap),
+        linkMP3: getMP3URL(result.songInfo.urlMap)
     };
     console.log(newSong);
     songs.push(newSong);
