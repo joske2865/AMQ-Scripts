@@ -15,38 +15,38 @@ let players = [];
 let playersPerTeam = 2;
 
 let commandListener = new Listener("Game Chat Message", (payload) => {
-	if (payload.sender === selfName && payload.message === "/teams") {
-		if (lobby.inLobby) {
-			let message = "";
-			sendChatMessage("Randomizing teams...");
-			
-			for (let playerId in lobby.players) {
-				players.push(lobby.players[playerId]._name);
-			}
+    if (payload.sender === selfName && payload.message === "/teams") {
+        if (lobby.inLobby) {
+            let message = "";
+            sendChatMessage("Randomizing teams...");
+            
+            for (let playerId in lobby.players) {
+                players.push(lobby.players[playerId]._name);
+            }
 
-			shuffle(players);
+            shuffle(players);
 
-			for (let teamId = 0; teamId < players.length / playersPerTeam; teamId++) {
-				message += "Team " + (teamId + 1) + ": ";
-				for (let playerId = 0; playerId < playersPerTeam; playerId++) {
-					let playerIdx = teamId * playersPerTeam + playerId;
-					if (playerId === 0 && playerIdx < players.length) {
-						message += players[playerIdx];
-					}
-					if (playerId !== 0 && playerIdx < players.length) {
-						message += "/" + players[playerIdx];
-					}
-				}
-				sendChatMessage(message);
-				message = "";
-			}
+            for (let teamId = 0; teamId < players.length / playersPerTeam; teamId++) {
+                message += "Team " + (teamId + 1) + ": ";
+                for (let playerId = 0; playerId < playersPerTeam; playerId++) {
+                    let playerIdx = teamId * playersPerTeam + playerId;
+                    if (playerId === 0 && playerIdx < players.length) {
+                        message += players[playerIdx];
+                    }
+                    if (playerId !== 0 && playerIdx < players.length) {
+                        message += "/" + players[playerIdx];
+                    }
+                }
+                sendChatMessage(message);
+                message = "";
+            }
 
-			players = [];
-		}
-		else {
-			gameChat.systemMessage("Must be in pre-game lobby");
-		}
-	}
+            players = [];
+        }
+        else {
+            gameChat.systemMessage("Must be in pre-game lobby");
+        }
+    }
 });
 
 
@@ -63,8 +63,8 @@ function shuffle(array) {
 }
 
 function sendChatMessage(message) {
-	gameChat.$chatInputField.val(message);
-	gameChat.sendMessage();
+    gameChat.$chatInputField.val(message);
+    gameChat.sendMessage();
 }
 
 commandListener.bindListener();
