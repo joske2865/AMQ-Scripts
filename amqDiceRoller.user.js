@@ -16,7 +16,8 @@ let diceResult;
 
 let commandListener = new Listener("Game Chat Message", (payload) => {
     if (payload.sender === selfName && payload.message.startsWith(command)) {
-        let args = payload.message.split(/\s+/);        if (args[1] !== undefined) {
+        let args = payload.message.split(/\s+/);        
+        if (args[1] !== undefined) {
             maxRoll = parseInt(args[1].trim());
             if (isNaN(maxRoll)) {
                 sendChatMessage("Please enter a valid number");
