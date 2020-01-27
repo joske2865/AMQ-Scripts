@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AMQ Notes and XP Gain Display
 // @namespace    http://tampermonkey.net/
-// @version      1.2
-// @description  Adds 2 displays above your xp bar and note count to indicated how much you gained of each after guessing a song or at the end of the round, disappears after 5 seconds
+// @version      1.3
+// @description  Adds 2 displays above your xp bar and note count to indicated how much you gained of each after guessing a song, at the end of the round or after submitting a song in expand library, disappears after 5 seconds
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
@@ -33,9 +33,26 @@ $("#currencyText")
 let $creditsGain = $("#currencyGain");
 let $expGain = $("#expGain");
 
-let creditsGainListener = new Listener("quiz xp credit gain", (data) => {
-    let creditsGain = data.credit - xpBar.currentCreditCount;
-    let expGain = data.xpInfo.xpIntoLevel - Math.round(xpBar._xpPercent*10000);
+let quizCreditsGainListener = new Listener("quiz xp credit gain", (data) => {
+    displayGain(data.xpInfo.xpIntoLevel, data.credit);
+});
+
+let expandCreditsGainListener = new Listener("expandLibrary answer", (result) => {
+    if (result.succ) {
+        displayGain(result.xpInfo.xpIntoLevel, result.credits);
+    }
+});
+
+function getCurrentXP() {
+    if (xpBar.level < 20) {
+        return Math.round(xpBar._xpPercent*(500 * xpBar.level));
+    }
+    return Math.round(xpBar._xpPercent*10000);
+}
+
+function displayGain(xp, credits) {
+    let creditsGain = credits - xpBar.currentCreditCount;
+    let expGain = xp - getCurrentXP();
     $creditsGain.text("+" + creditsGain);
     $creditsGain.show();
     $expGain.text("+" + expGain);
@@ -44,6 +61,7 @@ let creditsGainListener = new Listener("quiz xp credit gain", (data) => {
         $creditsGain.hide();
         $expGain.hide();
     }, 5000);
-});
+}
 
-creditsGainListener.bindListener();
+quizCreditsGainListener.bindListener();
+expandCreditsGainListener.bindListener();
