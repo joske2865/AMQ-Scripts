@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Notes and XP Gain Display
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.3.1
 // @description  Adds 2 displays above your xp bar and note count to indicated how much you gained of each after guessing a song, at the end of the round or after submitting a song in expand library, disappears after 5 seconds
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -34,25 +34,31 @@ let $creditsGain = $("#currencyGain");
 let $expGain = $("#expGain");
 
 let quizCreditsGainListener = new Listener("quiz xp credit gain", (data) => {
-    displayGain(data.xpInfo.xpIntoLevel, data.credit);
+    displayGain(data, data.credit);
 });
 
 let expandCreditsGainListener = new Listener("expandLibrary answer", (result) => {
     if (result.succ) {
-        displayGain(result.xpInfo.xpIntoLevel, result.credits);
+        displayGain(result, result.credits);
     }
 });
 
-function getCurrentXP() {
-    if (xpBar.level < 20) {
-        return Math.round(xpBar._xpPercent*(500 * xpBar.level));
+function calculateXPGain(data) {
+    if (xpBar.level < 20 && data.level > xpBar.level) {
+        return data.xpInfo.xpIntoLevel + 500 * xpBar.level - Math.round(xpBar._xpPercent * (500 * xpBar.level));
     }
-    return Math.round(xpBar._xpPercent*10000);
+    if (xpBar.level < 20 && data.level === xpBar.level) {
+        return data.xpInfo.xpIntoLevel - Math.round(xpBar._xpPercent * (500 * xpBar.level));
+    }
+    if (xpBar.level >= 20 && data.level > xpBar.level) {
+        return data.xpInfo.xpIntoLevel + 10000 - Math.round(xpBar._xpPercent * 10000);
+    }
+    return data.xpInfo.xpIntoLevel - Math.round(xpBar._xpPercent * 10000)
 }
 
-function displayGain(xp, credits) {
+function displayGain(data, credits) {
     let creditsGain = credits - xpBar.currentCreditCount;
-    let expGain = xp - getCurrentXP();
+    let expGain = calculateXPGain(data);
     $creditsGain.text("+" + creditsGain);
     $creditsGain.show();
     $expGain.text("+" + expGain);
