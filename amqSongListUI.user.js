@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Adds a song list modal window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -108,13 +108,43 @@ function createHistoryWindow() {
         .attr("class", "table floatingContainer");
     modalHistoryBody.append(historyTable);
     modalHistoryDialog.append($("<div></div>")
-        .attr("class", "resizerList")
+        .attr("class", "resizerList bottom-right")
         .css("width", "10px")
         .css("height", "10px")
         .css("background-color", "rgba(0, 0, 0, 0)")
         .css("position", "absolute")
-        .css("right", "0")
-        .css("bottom", "0")
+        .css("right", "-5px")
+        .css("bottom", "-5px")
+        .css("cursor", "se-resize")
+    );
+    modalHistoryDialog.append($("<div></div>")
+        .attr("class", "resizerList bottom-left")
+        .css("width", "10px")
+        .css("height", "10px")
+        .css("background-color", "rgba(0, 0, 0, 0)")
+        .css("position", "absolute")
+        .css("right", "calc(100% - 5px)")
+        .css("bottom", "-5px")
+        .css("cursor", "ne-resize")
+    );
+    modalHistoryDialog.append($("<div></div>")
+        .attr("class", "resizerList top-right")
+        .css("width", "10px")
+        .css("height", "10px")
+        .css("background-color", "rgba(0, 0, 0, 0)")
+        .css("position", "absolute")
+        .css("right", "-5px")
+        .css("bottom", "calc(100% - 5px)")
+        .css("cursor", "ne-resize")
+    );
+    modalHistoryDialog.append($("<div></div>")
+        .attr("class", "resizerList top-left")
+        .css("width", "10px")
+        .css("height", "10px")
+        .css("background-color", "rgba(0, 0, 0, 0)")
+        .css("position", "absolute")
+        .css("right", "calc(100% - 5px)")
+        .css("bottom", "calc(100% - 5px)")
         .css("cursor", "se-resize")
     );
     addTableHeader();
@@ -237,13 +267,43 @@ function createInfoWindow() {
     modalInfoDialog.append(modalInfoContent);
     modalInfo.append(modalInfoDialog);
     modalInfoDialog.append($("<div></div>")
-        .attr("class", "resizerInfo")
+        .attr("class", "resizerInfo bottom-right")
         .css("width", "10px")
         .css("height", "10px")
         .css("background-color", "rgba(0, 0, 0, 0)")
         .css("position", "absolute")
-        .css("right", "0")
-        .css("bottom", "0")
+        .css("right", "-5px")
+        .css("bottom", "-5px")
+        .css("cursor", "se-resize")
+    );
+    modalInfoDialog.append($("<div></div>")
+        .attr("class", "resizerInfo bottom-left")
+        .css("width", "10px")
+        .css("height", "10px")
+        .css("background-color", "rgba(0, 0, 0, 0)")
+        .css("position", "absolute")
+        .css("right", "calc(100% - 5px)")
+        .css("bottom", "-5px")
+        .css("cursor", "se-resize")
+    );
+    modalInfoDialog.append($("<div></div>")
+        .attr("class", "resizerInfo top-right")
+        .css("width", "10px")
+        .css("height", "10px")
+        .css("background-color", "rgba(0, 0, 0, 0)")
+        .css("position", "absolute")
+        .css("right", "-5px")
+        .css("bottom", "calc(100% - 5px)")
+        .css("cursor", "se-resize")
+    );
+    modalInfoDialog.append($("<div></div>")
+        .attr("class", "resizerInfo top-left")
+        .css("width", "10px")
+        .css("height", "10px")
+        .css("background-color", "rgba(0, 0, 0, 0)")
+        .css("position", "absolute")
+        .css("right", "calc(100% - 5px)")
+        .css("bottom", "calc(100% - 5px)")
         .css("cursor", "se-resize")
     );
     $("#gameContainer").append(modalInfo);
@@ -270,16 +330,28 @@ function updateInfo(song) {
     let guessedContainer = $("<div></div>")
         .attr("id", "guessedContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>Guessed</b></h5>");
+        .html("<h5><b>Guessed (" + song.guessed.length + ")</b></h5>");
     let fromListContainer = $("<div></div>")
         .attr("id", "fromListContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>From Lists</b></h5>");
+        .html("<h5><b>From Lists (" + song.fromList.length + ")</b></h5>");
     let urlContainer = $("<div></div>")
         .attr("id", "urlContainer")
-        .attr("class", "urls")
-        .html("<h5><b>Urls</b></h5>");
+        .attr("class", "bottomRow")
+        .html("<h5><b>URLs</b></h5>");
 
+    let topRow = $("<div></div>")
+        .attr("class", "row")
+        .append(songNameContainer)
+        .append(artistContainer)
+        .append(animeContainer)
+        .append(typeContainer);
+
+    let bottomRow = $("<div></div>")
+        .attr("class", "row")
+        .append(guessedContainer)
+        .append(fromListContainer)
+        .append(urlContainer);
     let listContainer = $("<ul></ul>");
     for (let guessed of song.guessed) {
         listContainer.append($("<li></li>")
@@ -311,13 +383,8 @@ function updateInfo(song) {
     }
     urlContainer.append(listContainer);
 
-    modalInfoBody.append(songNameContainer);
-    modalInfoBody.append(artistContainer);
-    modalInfoBody.append(animeContainer);
-    modalInfoBody.append(typeContainer);
-    modalInfoBody.append(guessedContainer);
-    modalInfoBody.append(fromListContainer);
-    modalInfoBody.append(urlContainer);
+    modalInfoBody.append(topRow);
+    modalInfoBody.append(bottomRow);
 }
 
 function clearInfo() {
@@ -363,7 +430,7 @@ let answerResultsListener = new Listener("answer results", (result) => {
         urls: result.songInfo.urlMap,
         guessed: Object.values(result.players).filter((tmpPlayer) => tmpPlayer.correct === true).map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name),
         fromList: Object.values(result.players).filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0)
-                                               .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name + "(" + listStatus[tmpPlayer.listStatus] +
+                                               .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name + " (" + listStatus[tmpPlayer.listStatus] +
                                                    ((tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? (", " + tmpPlayer.showScore + ")") : ")" ))
     };
     let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
@@ -398,6 +465,7 @@ quizOverListener.bindListener();
 createHistoryWindow();
 createInfoWindow();
 
+// Code for resizing the modal windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let resizableList = $(".resizableList");
 let resizerList = $(".resizerList");
 
@@ -407,25 +475,90 @@ resizerList.mousedown(function (event) {
     let startY = event.originalEvent.clientY;
     let startWidth = resizableList.width();
     let startHeight = resizableList.height();
-    $(document.documentElement).mousemove(function (event) {
-        let newWidth = startWidth + event.originalEvent.clientX - startX;
-        if (newWidth < 300) {
-            newWidth = 300;
-        }
-        resizableList.width(newWidth);
-        modalHistoryContent.width(newWidth+30);
-        modalHistoryDialog.width(newWidth+32);
-        let newHeight = startHeight + event.originalEvent.clientY - startY;
-        if (newHeight < 10) {
-            newHeight = 10;
-        }
-        resizableList.height(newHeight);
-
-    });
+    let newWidth = startWidth;
+    let newHeight = startHeight;
+    let newLeft = startX;
+    let newTop = startY;
+    if ($(this).hasClass("bottom-right")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth + event.originalEvent.clientX - startX;
+            if (newWidth < 300) {
+                newWidth = 300;
+            }
+            resizableList.width(newWidth);
+            modalHistoryContent.width(newWidth+30);
+            modalHistoryDialog.width(newWidth+32);
+            newHeight = startHeight + event.originalEvent.clientY - startY;
+            if (newHeight < 200) {
+                newHeight = 200;
+            }
+            resizableList.height(newHeight);
+        });
+    }
+    if ($(this).hasClass("bottom-left")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth - event.originalEvent.clientX + startX;
+            newLeft = event.originalEvent.clientX;
+            if (newWidth < 300) {
+                newWidth = 300;
+                newLeft = startWidth - newWidth + startX;
+            }
+            modalHistoryDialog.css("left", newLeft + "px");
+            resizableList.width(newWidth);
+            modalHistoryContent.width(newWidth+30);
+            modalHistoryDialog.width(newWidth+32);
+            newHeight = startHeight + event.originalEvent.clientY - startY;
+            if (newHeight < 200) {
+                newHeight = 200;
+            }
+            resizableList.height(newHeight);
+        });
+    }
+    if ($(this).hasClass("top-right")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth + event.originalEvent.clientX - startX;
+            if (newWidth < 300) {
+                newWidth = 300;
+            }
+            resizableList.width(newWidth);
+            modalHistoryContent.width(newWidth+30);
+            modalHistoryDialog.width(newWidth+32);
+            newHeight = startHeight - event.originalEvent.clientY + startY;
+            newTop = event.originalEvent.clientY - 32;
+            if (newHeight < 200) {
+                newHeight = 200;
+                newTop = startHeight - newHeight + startY;
+            }
+            modalHistoryDialog.css("top", newTop + "px");
+            resizableList.height(newHeight);
+        });
+    }
+    if ($(this).hasClass("top-left")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth - event.originalEvent.clientX + startX;
+            newLeft = event.originalEvent.clientX;
+            if (newWidth < 300) {
+                newWidth = 300;
+                newLeft = startWidth - newWidth + startX;
+            }
+            modalHistoryDialog.css("left", newLeft + "px");
+            resizableList.width(newWidth);
+            modalHistoryContent.width(newWidth+30);
+            modalHistoryDialog.width(newWidth+32);
+            newHeight = startHeight - event.originalEvent.clientY + startY;
+            newTop = event.originalEvent.clientY - 32;
+            if (newHeight < 200) {
+                newHeight = 200;
+                newTop = startHeight - newHeight + startY;
+            }
+            modalHistoryDialog.css("top", newTop + "px");
+            resizableList.height(newHeight);
+        });
+    }
     $(document.documentElement).mouseup(function (event) {
         $(document.documentElement).off("mousemove");
         $(document.documentElement).off("mouseup");
-        modalHistory.css("user-select", "all");
+        modalInfo.css("user-select", "text");
     });
 });
 
@@ -438,36 +571,103 @@ resizerInfo.mousedown(function (event) {
     let startY = event.originalEvent.clientY;
     let startWidth = resizableInfo.width();
     let startHeight = resizableInfo.height();
-    $(document.documentElement).mousemove(function (event) {
-        let newWidth = startWidth + event.originalEvent.clientX - startX;
-        if (newWidth < 300) {
-            newWidth = 300;
-        }
-        resizableInfo.width(newWidth);
-        modalInfoContent.width(newWidth+30);
-        modalInfoDialog.width(newWidth+32);
-        let newHeight = startHeight + event.originalEvent.clientY - startY;
-        if (newHeight < 200) {
-            newHeight = 200;
-        }
-        resizableInfo.height(newHeight);
-
-    });
+    let newWidth = startWidth;
+    let newHeight = startHeight;
+    let newLeft = startX;
+    let newTop = startY;
+    if ($(this).hasClass("bottom-right")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth + event.originalEvent.clientX - startX;
+            if (newWidth < 300) {
+                newWidth = 300;
+            }
+            resizableInfo.width(newWidth);
+            modalInfoContent.width(newWidth+30);
+            modalInfoDialog.width(newWidth+32);
+            newHeight = startHeight + event.originalEvent.clientY - startY;
+            if (newHeight < 200) {
+                newHeight = 200;
+            }
+            resizableInfo.height(newHeight);
+        });
+    }
+    if ($(this).hasClass("bottom-left")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth - event.originalEvent.clientX + startX;
+            newLeft = event.originalEvent.clientX;
+            if (newWidth < 300) {
+                newWidth = 300;
+                newLeft = startWidth - newWidth + startX;
+            }
+            modalInfoDialog.css("left", newLeft + "px");
+            resizableInfo.width(newWidth);
+            modalInfoContent.width(newWidth+30);
+            modalInfoDialog.width(newWidth+32);
+            newHeight = startHeight + event.originalEvent.clientY - startY;
+            if (newHeight < 200) {
+                newHeight = 200;
+            }
+            resizableInfo.height(newHeight);
+        });
+    }
+    if ($(this).hasClass("top-right")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth + event.originalEvent.clientX - startX;
+            if (newWidth < 300) {
+                newWidth = 300;
+            }
+            resizableInfo.width(newWidth);
+            modalInfoContent.width(newWidth+30);
+            modalInfoDialog.width(newWidth+32);
+            newHeight = startHeight - event.originalEvent.clientY + startY;
+            newTop = event.originalEvent.clientY - 32;
+            if (newHeight < 200) {
+                newHeight = 200;
+                newTop = startHeight - newHeight + startY;
+            }
+            modalInfoDialog.css("top", newTop + "px");
+            resizableInfo.height(newHeight);
+        });
+    }
+    if ($(this).hasClass("top-left")) {
+        $(document.documentElement).mousemove(function (event) {
+            newWidth = startWidth - event.originalEvent.clientX + startX;
+            newLeft = event.originalEvent.clientX;
+            if (newWidth < 300) {
+                newWidth = 300;
+                newLeft = startWidth - newWidth + startX;
+            }
+            modalInfoDialog.css("left", newLeft + "px");
+            resizableInfo.width(newWidth);
+            modalInfoContent.width(newWidth+30);
+            modalInfoDialog.width(newWidth+32);
+            newHeight = startHeight - event.originalEvent.clientY + startY;
+            newTop = event.originalEvent.clientY - 32;
+            if (newHeight < 200) {
+                newHeight = 200;
+                newTop = startHeight - newHeight + startY;
+            }
+            modalInfoDialog.css("top", newTop + "px");
+            resizableInfo.height(newHeight);
+        });
+    }
     $(document.documentElement).mouseup(function (event) {
         $(document.documentElement).off("mousemove");
         $(document.documentElement).off("mouseup");
-        modalInfo.css("user-select", "all");
+        modalInfo.css("user-select", "text");
     });
 });
 
+//
 $("#songResultModal").find(".modal-dialog").draggable({
-    handle: "#modalHistoryHeader",
+    handle: "#modalHistoryHeader"
 });
 
 $("#songInfoModal").find(".modal-dialog").draggable({
-    handle: "#modalInfoHeader",
+    handle: "#modalInfoHeader"
 });
 
+// CSS
 GM_addStyle(`
 .songData {
     height: 50px;
@@ -489,26 +689,28 @@ GM_addStyle(`
     width: 23%;
     float: inline-start;
     margin: 1%;
+    min-width: 140px;
     text-align: center;
     height: 200px;
 }
 #guessedContainer {
     width: 16%;
     float: inline-start;
-    margin: 1%;
+    min-width: 110px;
+    margin: auto;
     text-align: center;
 }
 #fromListContainer {
-    width: 30%;
+    width: 25%;
     float: inline-start;
-    margin: 1%;
+    min-width: 130px;
+    margin: auto;
     text-align: center;
 }
-
 #urlContainer {
-    width: 48%;
+    width: 40%;
     float: inline-start;
-    margin: 1%;
+    margin: auto;
     text-align: center;
 }
 #qpResultsButton {
