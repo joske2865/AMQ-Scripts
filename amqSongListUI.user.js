@@ -284,7 +284,7 @@ function createInfoWindow() {
         .css("position", "absolute")
         .css("right", "calc(100% - 5px)")
         .css("bottom", "-5px")
-        .css("cursor", "se-resize")
+        .css("cursor", "ne-resize")
     );
     modalInfoDialog.append($("<div></div>")
         .attr("class", "resizerInfo top-right")
@@ -294,7 +294,7 @@ function createInfoWindow() {
         .css("position", "absolute")
         .css("right", "-5px")
         .css("bottom", "calc(100% - 5px)")
-        .css("cursor", "se-resize")
+        .css("cursor", "ne-resize")
     );
     modalInfoDialog.append($("<div></div>")
         .attr("class", "resizerInfo top-left")
