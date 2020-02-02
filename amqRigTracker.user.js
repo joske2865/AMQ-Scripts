@@ -431,10 +431,8 @@ function writeRigToChat(animeTitle) {
     // Send "Something went wrong" in case the message is empty for some reason
     if (message === "") {
         message = "Something went wrong";
-        console.debug("player data:");
-        console.debug(playerData);
-        console.debug("tmp data:");
-        console.debug(tmpData);
+        console.debug("player data: " + playerData);
+        console.debug("tmp data: " + tmpData);
     }
     let oldMessage = gameChat.$chatInputField.val();
     gameChat.$chatInputField.val(message);
@@ -548,12 +546,16 @@ GM_addStyle(`
         padding-right: 5px;
         opacity: 0.3;
     }
+    .customCheckboxContainer {
+        display: flex;
+    }
     .customCheckboxContainer > div {
         display: inline-block;
         margin: 5px 0px;
     }
     .customCheckboxContainer > .customCheckboxContainerLabel {
         margin-left: 5px;
+        margin-top: 5px;
         font-weight: normal;
     }
     .offset1 {
