@@ -428,12 +428,6 @@ function writeRigToChat(animeTitle) {
             }
         }
     }
-    // Send "Something went wrong" in case the message is empty for some reason
-    if (message === "") {
-        message = "Something went wrong";
-        console.debug("player data: " + playerData);
-        console.debug("tmp data: " + tmpData);
-    }
     let oldMessage = gameChat.$chatInputField.val();
     gameChat.$chatInputField.val(message);
     gameChat.sendMessage();
