@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.3
-// @description  Adds a song list modal window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
+// @version      1.4
+// @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
@@ -14,62 +14,60 @@ if (!window.setupDocumentDone) return;
 
 let titlePreference = 1; // 0 for English anime names, 1 for Romaji anime names
 
-let modalList;
-let modalInfo;
-let modalListDialog;
-let modalInfoDialog;
-let modalListContent;
-let modalInfoContent;
-let modalListHeader;
-let modalInfoHeader;
-let modalListOptions;
-let modalInfoOptions;
-let modalListBody;
-let modalInfoBody;
-let closeButtonList;
-let closeButtonInfo;
-let modalListTitle;
-let modalInfoTitle;
-let listButton;
-let listTable;
+let listWindow;
+let listWindowResizer;
+let listWindowContent;
+let listWindowHeader;
+let listWindowOptions;
+let listWindowBody;
+let listWindowOpenButton;
+let listWindowCloseButton;
+let listWindowTable;
+
+let infoWindow;
+let infoWindowResizer
+let infoWindowContent;
+let infoWindowHeader;
+let infoWindowBody;
+let infoWindowCloseButton;
+
 let songListJSON = [];
-let player = {
-    name: "N/A",
-    isPlayer: false,
-    id: 0
-};
 
 
 function createListWindow() {
-    // create modal window
-    modalList = $("<div></div>")
-        .attr("id", "songListModal")
-        .attr("class", "modal fade")
-        .attr("tabindex", "-1")
-        .attr("role", "dialog")
-        .css("overflow-y", "hidden");
-
-    // create modal dialog
-    modalListDialog = $("<div></div>")
-        .attr("class", "modal-dialog")
-        .attr("role", "document")
+    // create list window
+    listWindow = $("<div></div>")
+        .attr("id", "listWindow")
+        .css("z-index", "1060")
+        .css("overflow-y", "hidden")
         .css("width", "640px")
+        .css("height", "480px")
         .css("position", "absolute")
+        .css("top", "0px")
+        .css("left", "0px")
         .css("overflow-y", "initial !important")
-        .css("margin", "0px");
+        .css("margin", "0px")
+        .css("background-color", "#424242")
+        .css("border", "1px solid rgba(27, 27, 27, 0.2)")
+        .css("box-shadow", "0 5px 15px rgba(0,0,0,.5)")
+        .css("user-select", "text")
+        .css("display", "none");
 
-    // create modal content
-    modalListContent = $("<div></div>")
-        .attr("class", "modal-content");
-
-    // create modal header
-    modalListHeader = $("<div></div>")
+    // create list header
+    listWindowHeader = $("<div></div>")
         .attr("class", "modal-header")
-        .attr("id", "modalListHeader");
+        .attr("id", "listWindowHeader")
+        .css("width", "100%")
+        .css("cursor", "move")
+        .append($("<h2></h2>")
+            .attr("class", "modal-title")
+            .text("Song List")
+        )
 
     // create the options tab
-    modalListOptions = $("<div></div>")
+    listWindowOptions = $("<div></div>")
         .attr("class", "songListOptions")
+        .css("width", "100%")
         .append($("<textarea></textarea>")
             .attr("id", "copyBoxJSON")
             .css("position", "absolute")
@@ -94,91 +92,115 @@ function createListWindow() {
                 createNewTable();
             })
         )
+        .append($("<div></div>")
+            .attr("class", "slCheckboxContainer")
+            .append($("<div></div>")
+                .attr("class", "slCheckbox")
+                .append($("<div></div>")
+                    .attr("class", "customCheckbox")
+                    .append($("<input id='slAutoClear' type='checkbox'>")
+                        .prop("checked", true)
+                    )
+                    .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label></label>")
+                    .text("Auto clear list")
+                    .popover({
+                        content: "Automatically clears the list on quiz start, quiz end or when leaving the lobby",
+                        placement: "top",
+                        trigger: "hover"
+                    })
+                )
+            )
+            .append($("<div></div>")
+                .attr("class", "slCheckbox")
+                .append($("<div></div>")
+                    .attr("class", "customCheckbox")
+                    .append($("<input id='slAutoScroll' type='checkbox'>")
+                        .prop("checked", true)
+                    )
+                    .append($("<label for='slAutoScroll'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label></label>")
+                    .text("Auto scroll")
+                    .popover({
+                        content: "Automatically scrolls to the bottom of the list on each new entry added",
+                        placement: "top",
+                        trigger: "hover"
+                    })
+                )
+            )
+        );
 
-    // create modal body
-    modalListBody = $("<div></div>")
+    // create list body
+    listWindowBody = $("<div></div>")
         .attr("class", "modal-body resizableList")
+        .attr("id", "listWindowBody")
         .css("overflow-y", "auto")
-        .css("height", "480px");
+        .css("height", "340px")
+        .css("width", "100%");
+
+    listWindowContent = $("<div></div>")
+        .attr("id", "listWindowContent")
+        .css("width", "100%")
+        .css("position", "absolute")
+        .css("top", "0px");
 
     // create close button
-    closeButtonList = $("<div></div>")
+    listWindowCloseButton = $("<div></div>")
         .attr("class", "close")
         .attr("type", "button")
-        .attr("data-dismiss", "modal")
-        .attr("aria-label", "Close")
-        .html("<span aria-hidden=\"true\">×</span>");
+        .html("<span aria-hidden=\"true\">×</span>")
+        .click(() => {
+            listWindow.hide();
+        });
 
-    // create modal window title
-    modalListTitle = $("<h2></h2>")
-        .attr("class", "modal-title")
-        .text("Song List");
+    listWindowResizer = $("<div></div>")
+        .attr("class", "listResizers")
+        .append($("<div></div>")
+            .attr("class", "listResizer top-left")
+        )
+        .append($("<div></div>")
+            .attr("class", "listResizer top-right")
+        )
+        .append($("<div></div>")
+            .attr("class", "listResizer bottom-left")
+        )
+        .append($("<div></div>")
+            .attr("class", "listResizer bottom-right")
+        );
 
     // link nodes
-    modalListHeader.append(closeButtonList);
-    modalListHeader.append(modalListTitle);
-    modalListContent.append(modalListHeader);
-    modalListContent.append(modalListOptions);
-    modalListContent.append(modalListBody);
-    modalListDialog.append(modalListContent);
-    modalList.append(modalListDialog);
-    $("#gameContainer").append(modalList);
-
-    // button to access the song results
-    listButton = $("<div></div>")
-        .attr("id", "qpResultsButton")
-        .attr("class", "button floatingContainer")
-        .attr("data-toggle", "modal")
-        .attr("data-target", "#songListModal")
-        .html("<h1>Song List</h1>");
-
-    $("#qpInfoHider").parent().parent().append(listButton);
+    listWindowHeader.prepend(listWindowCloseButton);
+    listWindowContent.append(listWindowHeader);
+    listWindowContent.append(listWindowOptions);
+    listWindowContent.append(listWindowBody);
+    listWindow.append(listWindowContent);
+    listWindow.prepend(listWindowResizer);
+    $("#gameContainer").append(listWindow);
 
     // create results table
-    listTable = $("<table></table>")
-        .attr("id", "resultsTable")
+    listWindowTable = $("<table></table>")
+        .attr("id", "listWindowTable")
         .attr("class", "table floatingContainer");
-    modalListBody.append(listTable);
-    modalListDialog.append($("<div></div>")
-        .attr("class", "resizerList bottom-right")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "-5px")
-        .css("bottom", "-5px")
-        .css("cursor", "se-resize")
-    );
-    modalListDialog.append($("<div></div>")
-        .attr("class", "resizerList bottom-left")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "calc(100% - 5px)")
-        .css("bottom", "-5px")
-        .css("cursor", "ne-resize")
-    );
-    modalListDialog.append($("<div></div>")
-        .attr("class", "resizerList top-right")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "-5px")
-        .css("bottom", "calc(100% - 5px)")
-        .css("cursor", "ne-resize")
-    );
-    modalListDialog.append($("<div></div>")
-        .attr("class", "resizerList top-left")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "calc(100% - 5px)")
-        .css("bottom", "calc(100% - 5px)")
-        .css("cursor", "se-resize")
-    );
+    listWindowBody.append(listWindowTable);
+
+    // button to access the song results
+    listWindowOpenButton = $("<div></div>")
+        .attr("id", "qpSongListButton")
+        .attr("class", "button floatingContainer")
+        .html("<h1>Song List</h1>")
+        .click(() => {
+            if(listWindow.is(":visible")) {
+                listWindow.hide();
+            }
+            else {
+                listWindow.show();
+            }
+        });
+
+    $("#qpInfoHider").parent().parent().append(listWindowOpenButton);
+
     addTableHeader();
 }
 
@@ -189,7 +211,7 @@ function createNewTable() {
 }
 
 function clearTable() {
-    listTable.children().remove();
+    listWindowTable.children().remove();
 }
 
 function addTableHeader() {
@@ -215,15 +237,16 @@ function addTableHeader() {
     header.append(artistCol);
     header.append(animeCol);
     header.append(typeCol);
-    listTable.append(header);
+    listWindowTable.append(header);
 }
 
 function addTableEntry(newSong, newSongJSON) {
     let newRow = $("<tr></tr>")
         .attr("class", "songData clickAble")
-        .attr("data-toggle", "modal")
-        .attr("data-target", "#songInfoModal")
         .click(function () {
+            if (!infoWindow.is(":visible")) {
+                infoWindow.show();
+            }
             updateInfo(newSong, newSongJSON);
         });
 
@@ -254,103 +277,85 @@ function addTableEntry(newSong, newSongJSON) {
     newRow.append(artist);
     newRow.append(anime);
     newRow.append(type);
-    listTable.append(newRow);
+    listWindowTable.append(newRow);
 }
 
 function createInfoWindow() {
-    // create modal window
-    modalInfo = $("<div></div>")
-        .attr("id", "songInfoModal")
-        .attr("class", "modal fade")
-        .attr("tabindex", "-1")
-        .attr("role", "dialog")
-        .css("overflow-y", "hidden");
-
-    // create modal dialog
-    modalInfoDialog = $("<div></div>")
-        .attr("class", "modal-dialog")
-        .attr("role", "document")
-        .css("width", "640px")
+    // create info window
+    infoWindow = $("<div></div>")
+        .attr("id", "infoWindow")
+        .css("z-index", "1065")
+        .css("overflow-y", "hidden")
+        .css("width", "720px")
+        .css("height", "480px")
         .css("position", "absolute")
-        .css("overflow-y", "initial !auto")
-        .css("margin", "0px");
+        .css("top", "0px")
+        .css("left", "0px")
+        .css("overflow-y", "initial !important")
+        .css("margin", "0px")
+        .css("background-color", "#424242")
+        .css("border", "1px solid rgba(27, 27, 27, 0.2)")
+        .css("box-shadow", "0 5px 15px rgba(0,0,0,.5)")
+        .css("user-select", "text")
+        .css("display", "none");
 
-    // create modal content
-    modalInfoContent = $("<div><div>")
-        .attr("class", "modal-content");
-
-    // create modal header
-    modalInfoHeader = $("<div></div>")
+    // create info header
+    infoWindowHeader = $("<div></div>")
         .attr("class", "modal-header")
-        .attr("id", "modalInfoHeader");
+        .attr("id", "infoWindowHeader")
+        .css("width", "100%")
+        .css("cursor", "move")
+        .append($("<h2></h2>")
+            .attr("class", "modal-title")
+            .text("Song Info")
+        )
 
-    // create modal body
-    modalInfoBody = $("<div></div>")
+    // create info body
+    infoWindowBody = $("<div></div>")
         .attr("class", "modal-body resizableInfo")
+        .attr("id", "infoWindowBody")
         .css("overflow-y", "auto")
-        .css("height", "480px");
+        .css("height", "405px")
+        .css("width", "100%");
 
-    // create close button
-    closeButtonInfo = $("<button></button>")
+    // create info content
+    infoWindowContent = $("<div></div>")
+        .attr("id", "infoWindowContent")
+        .css("width", "100%")
+        .css("position", "absolute")
+        .css("top", "0px");
+
+    // create info window close button
+    infoWindowCloseButton = $("<button></button>")
         .attr("class", "close")
         .attr("type", "button")
-        .attr("data-dismiss", "modal")
-        .attr("aria-label", "Close")
-        .html("<span aria-hidden=\"true\">×</span>");
+        .html("<span aria-hidden=\"true\">×</span>")
+        .click(() => {
+            infoWindow.hide();
+        })
 
-    // create modal window title
-    modalInfoTitle = $("<h2></h2>")
-        .attr("class", "modal-title")
-        .text("Song Info");
+    infoWindowResizer = $("<div></div>")
+        .attr("class", "infoResizers")
+        .append($("<div></div>")
+            .attr("class", "infoResizer top-left")
+        )
+        .append($("<div></div>")
+            .attr("class", "infoResizer top-right")
+        )
+        .append($("<div></div>")
+            .attr("class", "infoResizer bottom-left")
+        )
+        .append($("<div></div>")
+            .attr("class", "infoResizer bottom-right")
+        );
 
     // link nodes
-    modalInfoHeader.append(closeButtonInfo);
-    modalInfoHeader.append(modalInfoTitle);
-    modalInfoContent.append(modalInfoHeader);
-    modalInfoContent.append(modalInfoBody);
-    modalInfoDialog.append(modalInfoContent);
-    modalInfo.append(modalInfoDialog);
-    modalInfoDialog.append($("<div></div>")
-        .attr("class", "resizerInfo bottom-right")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "-5px")
-        .css("bottom", "-5px")
-        .css("cursor", "se-resize")
-    );
-    modalInfoDialog.append($("<div></div>")
-        .attr("class", "resizerInfo bottom-left")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "calc(100% - 5px)")
-        .css("bottom", "-5px")
-        .css("cursor", "ne-resize")
-    );
-    modalInfoDialog.append($("<div></div>")
-        .attr("class", "resizerInfo top-right")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "-5px")
-        .css("bottom", "calc(100% - 5px)")
-        .css("cursor", "ne-resize")
-    );
-    modalInfoDialog.append($("<div></div>")
-        .attr("class", "resizerInfo top-left")
-        .css("width", "10px")
-        .css("height", "10px")
-        .css("background-color", "rgba(0, 0, 0, 0)")
-        .css("position", "absolute")
-        .css("right", "calc(100% - 5px)")
-        .css("bottom", "calc(100% - 5px)")
-        .css("cursor", "se-resize")
-    );
-    $("#gameContainer").append(modalInfo);
+    infoWindowHeader.prepend(infoWindowCloseButton);
+    infoWindowContent.append(infoWindowHeader);
+    infoWindowContent.append(infoWindowBody);
+    infoWindow.append(infoWindowContent);
+    infoWindow.prepend(infoWindowResizer);
+    $("#gameContainer").append(infoWindow);
 }
 
 function updateInfo(song, songJSON) {
@@ -435,34 +440,22 @@ function updateInfo(song, songJSON) {
     }
     urlContainer.append(listContainer);
 
-    modalInfoBody.append(topRow);
-    modalInfoBody.append(bottomRow);
+    infoWindowBody.append(topRow);
+    infoWindowBody.append(bottomRow);
 }
 
 function clearInfo() {
-    modalInfoBody.children().remove();
+    infoWindowBody.children().remove();
 }
 
-// get player's id and playing status (player or spectator) at the start of the quiz
+// reset song list for the new round
 let quizReadyListener = new Listener("quiz ready", (data) => {
-    // reset song list for the new round
-    player.name = selfName;
-    player.isPlayer = false;
-    player.id = 0;
-    let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
-        return tmpPlayer._name === player.name
-    });
-    if (findPlayer !== undefined) {
-        player.isPlayer = true;
-        player.id = findPlayer.gamePlayerId;
+    if ($("#slAutoClear").prop("checked")) {
+        createNewTable();
     }
-    else {
-        player.isPlayer = false;
-    }
-    createNewTable();
 });
 
-// get song info and info on who guessed the song and from whose lists is it
+// get song data on answer reveal
 let answerResultsListener = new Listener("answer results", (result) => {
     let listStatus = {
         1: "Watching",
@@ -502,18 +495,11 @@ let answerResultsListener = new Listener("answer results", (result) => {
         linkMP3: getMP3URL(newSong.urls)
     };
     let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
-        return tmpPlayer._name === player.name
+        return tmpPlayer._name === selfName && tmpPlayer.avatarSlot._disabled === false
     });
     if (findPlayer !== undefined) {
-        player.isPlayer = true;
-        player.id = findPlayer.gamePlayerId;
-    }
-    else {
-        player.isPlayer = false;
-    }
-    if (player.isPlayer) {
         let playerIdx = Object.values(result.players).findIndex(tmpPlayer => {
-            return player.id === tmpPlayer.gamePlayerId
+            return findPlayer.gamePlayerId === tmpPlayer.gamePlayerId
         });
         newSong.correct = result.players[playerIdx].correct;
     }
@@ -551,12 +537,16 @@ function getMP3URL(URLMap) {
 
 // reset songs on returning to lobby
 let quizOverListener = new Listener("quiz over", (roomSettings) => {
-    createNewTable();
+    if ($("#slAutoClear").prop("checked")) {
+        createNewTable();
+    }
 });
 
 // triggers when loading rooms in the lobby, but this is to detect when a player leaves the lobby to reset the song list table
 let quizLeaveListener = new Listener("New Rooms", (rooms) => {
-    createNewTable();
+    if ($("#slAutoClear").prop("checked")) {
+        createNewTable();
+    }
 });
 
 quizReadyListener.bindListener();
@@ -568,211 +558,190 @@ createListWindow();
 createInfoWindow();
 
 // Code for resizing the modal windows, this is horrible, don't look at it, don't touch it, don't question how it works
-let resizableList = $(".resizableList");
-let resizerList = $(".resizerList");
+let listResizers = $(".listResizers");
+let infoResizers = $(".infoResizers");
 const MIN_LIST_WIDTH = 450;
 const MIN_LIST_HEIGHT = 300;
+const MIN_INFO_WIDTH = 450;
+const MIN_INFO_HEIGHT = 300;
+let startWidth = 0;
+let startHeight = 0;
+let startX = 0;
+let startY = 0;
+let startMouseX = 0;
+let startMouseY = 0;
 
-resizerList.mousedown(function (event) {
-    modalList.css("user-select", "none");
-    let startX = event.originalEvent.clientX;
-    let startY = event.originalEvent.clientY;
-    let startWidth = resizableList.width();
-    let startHeight = resizableList.height();
-    let newWidth = startWidth;
-    let newHeight = startHeight;
-    let newLeft = startX;
-    let newTop = startY;
-    if ($(this).hasClass("bottom-right")) {
+listResizers.find(".listResizer").each(function (index, resizer) {
+    $(resizer).mousedown(function (event) {
+        listWindow.css("user-select", "none");
+        startWidth = listWindow.width();
+        startHeight = listWindow.height();
+        startX = listWindow.position().left;
+        startY = listWindow.position().top;
+        startMouseX = event.originalEvent.clientX;
+        startMouseY = event.originalEvent.clientY;
+        let curResizer = $(this);
         $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < MIN_LIST_WIDTH) {
-                newWidth = MIN_LIST_WIDTH;
+            if (curResizer.hasClass("bottom-right")) {
+                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    listWindow.width(newWidth);
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    listWindowBody.height(newHeight-168);
+                    listWindow.height(newHeight);
+                }
             }
-            resizableList.width(newWidth);
-            modalListContent.width(newWidth+30);
-            modalListDialog.width(newWidth+32);
-            newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < MIN_LIST_HEIGHT) {
-                newHeight = MIN_LIST_HEIGHT;
+            if (curResizer.hasClass("bottom-left")) {
+                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
+                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    listWindow.width(newWidth);
+                    listWindow.css("left", newLeft + "px");
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    listWindowBody.height(newHeight-168);
+                    listWindow.height(newHeight);
+                }
             }
-            resizableList.height(newHeight);
+            if (curResizer.hasClass("top-right")) {
+                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
+                let newTop = startY + (event.originalEvent.clientY - startMouseY);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    listWindow.width(newWidth);
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    listWindow.css("top", newTop + "px");
+                    listWindowBody.height(newHeight-168);
+                    listWindow.height(newHeight);
+                }
+            }
+            if (curResizer.hasClass("top-left")) {
+                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
+                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
+                let newTop = startY + (event.originalEvent.clientY - startMouseY);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    listWindow.width(newWidth);
+                    listWindow.css("left", newLeft + "px");
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    listWindow.css("top", newTop + "px");
+                    listWindowBody.height(newHeight-168);
+                    listWindow.height(newHeight);
+                }
+            }
         });
-    }
-    if ($(this).hasClass("bottom-left")) {
-        $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth - event.originalEvent.clientX + startX;
-            newLeft = event.originalEvent.clientX;
-            if (newWidth < MIN_LIST_WIDTH) {
-                newWidth = MIN_LIST_WIDTH;
-                newLeft = startWidth - newWidth + startX;
-            }
-            modalListDialog.css("left", newLeft + "px");
-            resizableList.width(newWidth);
-            modalListContent.width(newWidth+30);
-            modalListDialog.width(newWidth+32);
-            newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < MIN_LIST_HEIGHT) {
-                newHeight = MIN_LIST_HEIGHT;
-            }
-            resizableList.height(newHeight);
+        $(document.documentElement).mouseup(function (event) {
+            $(document.documentElement).off("mousemove");
+            $(document.documentElement).off("mouseup");
+            listWindow.css("user-select", "text");
         });
-    }
-    if ($(this).hasClass("top-right")) {
-        $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < MIN_LIST_WIDTH) {
-                newWidth = MIN_LIST_WIDTH;
-            }
-            resizableList.width(newWidth);
-            modalListContent.width(newWidth+30);
-            modalListDialog.width(newWidth+32);
-            newHeight = startHeight - event.originalEvent.clientY + startY;
-            newTop = event.originalEvent.clientY - 32;
-            if (newHeight < MIN_LIST_HEIGHT) {
-                newHeight = MIN_LIST_HEIGHT;
-                newTop = startHeight - newHeight + startY;
-            }
-            modalListDialog.css("top", newTop + "px");
-            resizableList.height(newHeight);
-        });
-    }
-    if ($(this).hasClass("top-left")) {
-        $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth - event.originalEvent.clientX + startX;
-            newLeft = event.originalEvent.clientX;
-            if (newWidth < MIN_LIST_WIDTH) {
-                newWidth = MIN_LIST_WIDTH;
-                newLeft = startWidth - newWidth + startX;
-            }
-            modalListDialog.css("left", newLeft + "px");
-            resizableList.width(newWidth);
-            modalListContent.width(newWidth+30);
-            modalListDialog.width(newWidth+32);
-            newHeight = startHeight - event.originalEvent.clientY + startY;
-            newTop = event.originalEvent.clientY - 32;
-            if (newHeight < MIN_LIST_HEIGHT) {
-                newHeight = MIN_LIST_HEIGHT;
-                newTop = startHeight - newHeight + startY;
-            }
-            modalListDialog.css("top", newTop + "px");
-            resizableList.height(newHeight);
-        });
-    }
-    $(document.documentElement).mouseup(function (event) {
-        $(document.documentElement).off("mousemove");
-        $(document.documentElement).off("mouseup");
-        modalInfo.css("user-select", "text");
     });
 });
 
-let resizableInfo = $(".resizableInfo");
-let resizerInfo = $(".resizerInfo");
-const MIN_INFO_WIDTH = 450;
-const MIN_INFO_HEIGHT = 300;
-
-resizerInfo.mousedown(function (event) {
-    modalInfo.css("user-select", "none");
-    let startX = event.originalEvent.clientX;
-    let startY = event.originalEvent.clientY;
-    let startWidth = resizableInfo.width();
-    let startHeight = resizableInfo.height();
-    let newWidth = startWidth;
-    let newHeight = startHeight;
-    let newLeft = startX;
-    let newTop = startY;
-    if ($(this).hasClass("bottom-right")) {
+infoResizers.find(".infoResizer").each(function (index, resizer) {
+    $(resizer).mousedown(function (event) {
+        infoWindow.css("user-select", "none");
+        startWidth = infoWindow.width();
+        startHeight = infoWindow.height();
+        startX = infoWindow.position().left;
+        startY = infoWindow.position().top;
+        startMouseX = event.originalEvent.clientX;
+        startMouseY = event.originalEvent.clientY;
+        let curResizer = $(this);
         $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < MIN_INFO_WIDTH) {
-                newWidth = MIN_INFO_WIDTH;
+            if (curResizer.hasClass("bottom-right")) {
+                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    infoWindow.width(newWidth);
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    infoWindowBody.height(newHeight-103);
+                    infoWindow.height(newHeight);
+                }
             }
-            resizableInfo.width(newWidth);
-            modalInfoContent.width(newWidth+30);
-            modalInfoDialog.width(newWidth+32);
-            newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < MIN_INFO_HEIGHT) {
-                newHeight = MIN_INFO_HEIGHT;
+            if (curResizer.hasClass("bottom-left")) {
+                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
+                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    infoWindow.width(newWidth);
+                    infoWindow.css("left", newLeft + "px");
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    infoWindowBody.height(newHeight-103);
+                    infoWindow.height(newHeight);
+                }
             }
-            resizableInfo.height(newHeight);
+            if (curResizer.hasClass("top-right")) {
+                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
+                let newTop = startY + (event.originalEvent.clientY - startMouseY);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    infoWindow.width(newWidth);
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    infoWindow.css("top", newTop + "px");
+                    infoWindowBody.height(newHeight-103);
+                    infoWindow.height(newHeight);
+                }
+            }
+            if (curResizer.hasClass("top-left")) {
+                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
+                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
+                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
+                let newTop = startY + (event.originalEvent.clientY - startMouseY);
+                if (newWidth > MIN_LIST_WIDTH) {
+                    infoWindow.width(newWidth);
+                    infoWindow.css("left", newLeft + "px");
+                }
+                if (newHeight > MIN_LIST_HEIGHT) {
+                    infoWindow.css("top", newTop + "px");
+                    infoWindowBody.height(newHeight-103);
+                    infoWindow.height(newHeight);
+                }
+            }
         });
-    }
-    if ($(this).hasClass("bottom-left")) {
-        $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth - event.originalEvent.clientX + startX;
-            newLeft = event.originalEvent.clientX;
-            if (newWidth < MIN_INFO_WIDTH) {
-                newWidth = MIN_INFO_WIDTH;
-                newLeft = startWidth - newWidth + startX;
-            }
-            modalInfoDialog.css("left", newLeft + "px");
-            resizableInfo.width(newWidth);
-            modalInfoContent.width(newWidth+30);
-            modalInfoDialog.width(newWidth+32);
-            newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < MIN_INFO_HEIGHT) {
-                newHeight = MIN_INFO_HEIGHT;
-            }
-            resizableInfo.height(newHeight);
+        $(document.documentElement).mouseup(function (event) {
+            $(document.documentElement).off("mousemove");
+            $(document.documentElement).off("mouseup");
+            infoWindow.css("user-select", "text");
         });
-    }
-    if ($(this).hasClass("top-right")) {
-        $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < MIN_INFO_WIDTH) {
-                newWidth = MIN_INFO_WIDTH;
-            }
-            resizableInfo.width(newWidth);
-            modalInfoContent.width(newWidth+30);
-            modalInfoDialog.width(newWidth+32);
-            newHeight = startHeight - event.originalEvent.clientY + startY;
-            newTop = event.originalEvent.clientY - 32;
-            if (newHeight < MIN_INFO_HEIGHT) {
-                newHeight = MIN_INFO_HEIGHT;
-                newTop = startHeight - newHeight + startY;
-            }
-            modalInfoDialog.css("top", newTop + "px");
-            resizableInfo.height(newHeight);
-        });
-    }
-    if ($(this).hasClass("top-left")) {
-        $(document.documentElement).mousemove(function (event) {
-            newWidth = startWidth - event.originalEvent.clientX + startX;
-            newLeft = event.originalEvent.clientX;
-            if (newWidth < MIN_INFO_WIDTH) {
-                newWidth = MIN_INFO_WIDTH;
-                newLeft = startWidth - newWidth + startX;
-            }
-            modalInfoDialog.css("left", newLeft + "px");
-            resizableInfo.width(newWidth);
-            modalInfoContent.width(newWidth+30);
-            modalInfoDialog.width(newWidth+32);
-            newHeight = startHeight - event.originalEvent.clientY + startY;
-            newTop = event.originalEvent.clientY - 32;
-            if (newHeight < MIN_INFO_HEIGHT) {
-                newHeight = MIN_INFO_HEIGHT;
-                newTop = startHeight - newHeight + startY;
-            }
-            modalInfoDialog.css("top", newTop + "px");
-            resizableInfo.height(newHeight);
-        });
-    }
-    $(document.documentElement).mouseup(function (event) {
-        $(document.documentElement).off("mousemove");
-        $(document.documentElement).off("mouseup");
-        modalInfo.css("user-select", "text");
     });
 });
 
 // draggable windows
-$("#songListModal").find(".modal-dialog").draggable({
-    handle: "#modalListHeader",
+$("#listWindow").draggable({
+    handle: "#listWindowHeader",
     containment: "#gameContainer"
 });
 
-$("#songInfoModal").find(".modal-dialog").draggable({
-    handle: "#modalInfoHeader",
+$("#infoWindow").draggable({
+    handle: "#infoWindowHeader",
     containment: "#gameContainer"
+});
+
+// lowers the z-index when a modal window is shown so it doesn't overlap
+$(".modal").on("show.bs.modal", () => {
+    listWindow.css("z-index", "1030");
+    infoWindow.css("z-index", "1040");
+});
+
+$(".modal").on("hidden.bs.modal", () => {
+    listWindow.css("z-index", "1060");
+    infoWindow.css("z-index", "1070");
+});
+
+// Auto scrolls the list on new entry added
+document.getElementById("listWindowTable").addEventListener("DOMNodeInserted", function() {
+    if ($("#slAutoScroll").prop("checked")) {
+        $("#listWindowBody").scrollTop($("#listWindowBody").get(0).scrollHeight);
+    }
 });
 
 // CSS
@@ -831,19 +800,93 @@ GM_addStyle(`
     margin: 1%;
     text-align: center;
 }
-#qpResultsButton {
+#qpSongListButton {
     width: 150px;
     margin: auto;
     margin-bottom: 10px;
     margin-top: -5px;
 }
-#qpResultsButton > h1 {
+#qpSongListButton > h1 {
     padding: 5px;
     font-size: 28px;
+    user-select: none;
 }
 .songListOptionsButton {
     float: right;
     margin-top: 15px;
     margin-right: 10px;
+}
+.slCheckboxContainer {
+    width: 130px;
+    float: right;
+    user-select: none;
+}
+.slCheckbox {
+    display: flex;
+    margin: 5px;
+}
+.slCheckbox > label {
+    font-weight: normal;
+    margin-left: 5px;
+}
+.listResizers {
+    width: 100%;
+    height: 100%;
+}
+.listResizer {
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    z-index: 100;
+}
+.listResizer.top-left {
+    top: 0px;
+    left: 0px;
+    cursor: nwse-resize;
+}
+.listResizer.top-right {
+    top: 0px;
+    right: 0px;
+    cursor: nesw-resize;
+}
+.listResizer.bottom-left {
+    bottom: 0px;
+    left: 0px;
+    cursor: nesw-resize;
+}
+.listResizer.bottom-right {
+    bottom: 0px;
+    right: 0px;
+    cursor: nwse-resize;
+}
+.infoResizers {
+    width: 100%;
+    height: 100%;
+}
+.infoResizer {
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    z-index: 100;
+}
+.infoResizer.top-left {
+    top: 0px;
+    left: 0px;
+    cursor: nwse-resize;
+}
+.infoResizer.top-right {
+    top: 0px;
+    right: 0px;
+    cursor: nesw-resize;
+}
+.infoResizer.bottom-left {
+    bottom: 0px;
+    left: 0px;
+    cursor: nesw-resize;
+}
+.infoResizer.bottom-right {
+    bottom: 0px;
+    right: 0px;
+    cursor: nwse-resize;
 }
 `);
