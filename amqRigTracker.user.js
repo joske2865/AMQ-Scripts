@@ -206,7 +206,7 @@ for (let setting of settingsData) {
                     .append($("<input id='" + data.id + "' type='checkbox'>")
                         .prop("checked", data.default !== undefined ? data.default : false)
                     )
-                    .append($("<label for='" + data.id + "'>✔</label>"))
+                    .append($("<label for='" + data.id + "'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                 )
                 .append($("<label></label>")
                     .addClass("customCheckboxContainerLabel")
