@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Adds a song list modal window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -14,24 +14,25 @@ if (!window.setupDocumentDone) return;
 
 let titlePreference = 1; // 0 for English anime names, 1 for Romaji anime names
 
-let modalHistory;
+let modalList;
 let modalInfo;
-let modalHistoryDialog;
+let modalListDialog;
 let modalInfoDialog;
-let modalHistoryContent;
+let modalListContent;
 let modalInfoContent;
-let modalHistoryHeader;
+let modalListHeader;
 let modalInfoHeader;
-let modalHistoryBody;
+let modalListOptions;
+let modalInfoOptions;
+let modalListBody;
 let modalInfoBody;
-let closeButtonHistory;
+let closeButtonList;
 let closeButtonInfo;
-let modalHistoryTitle;
+let modalListTitle;
 let modalInfoTitle;
-let historyButton;
-let historyTable;
-let songs = [];
-let lastRoundSongs = [];
+let listButton;
+let listTable;
+let songListJSON = [];
 let player = {
     name: "N/A",
     isPlayer: false,
@@ -39,16 +40,17 @@ let player = {
 };
 
 
-function createHistoryWindow() {
+function createListWindow() {
     // create modal window
-    modalHistory = $("<div></div>")
-        .attr("id", "songResultModal")
+    modalList = $("<div></div>")
+        .attr("id", "songListModal")
         .attr("class", "modal fade")
         .attr("tabindex", "-1")
         .attr("role", "dialog")
+        .css("overflow-y", "hidden");
 
     // create modal dialog
-    modalHistoryDialog = $("<div></div>")
+    modalListDialog = $("<div></div>")
         .attr("class", "modal-dialog")
         .attr("role", "document")
         .css("width", "640px")
@@ -57,22 +59,50 @@ function createHistoryWindow() {
         .css("margin", "0px");
 
     // create modal content
-    modalHistoryContent = $("<div></div>")
+    modalListContent = $("<div></div>")
         .attr("class", "modal-content");
 
     // create modal header
-    modalHistoryHeader = $("<div></div>")
+    modalListHeader = $("<div></div>")
         .attr("class", "modal-header")
-        .attr("id", "modalHistoryHeader");
+        .attr("id", "modalListHeader");
+
+    // create the options tab
+    modalListOptions = $("<div></div>")
+        .attr("class", "songListOptions")
+        .append($("<textarea></textarea>")
+            .attr("id", "copyBoxJSON")
+            .css("position", "absolute")
+            .css("top", "9999px")
+        )
+        .append($("<button></button>")
+            .attr("id", "copySongListJSON")
+            .attr("class", "btn btn-primary songListOptionsButton")
+            .attr("type", "button")
+            .text("Copy JSON Data")
+            .click(() => {
+                $("#copyBoxJSON").val(JSON.stringify(songListJSON, null, 4)).select();
+                document.execCommand("copy");
+                $("#copyBoxJSON").val("").blur()
+            })
+        )
+        .append($("<button></button>")
+            .attr("class", "btn btn-default songListOptionsButton")
+            .attr("type", "button")
+            .text("Clear List")
+            .click(() => {
+                createNewTable();
+            })
+        )
 
     // create modal body
-    modalHistoryBody = $("<div></div>")
+    modalListBody = $("<div></div>")
         .attr("class", "modal-body resizableList")
         .css("overflow-y", "auto")
         .css("height", "480px");
 
     // create close button
-    closeButtonHistory = $("<div></div>")
+    closeButtonList = $("<div></div>")
         .attr("class", "close")
         .attr("type", "button")
         .attr("data-dismiss", "modal")
@@ -80,35 +110,36 @@ function createHistoryWindow() {
         .html("<span aria-hidden=\"true\">×</span>");
 
     // create modal window title
-    modalHistoryTitle = $("<h2></h2>")
+    modalListTitle = $("<h2></h2>")
         .attr("class", "modal-title")
         .text("Song List");
 
     // link nodes
-    modalHistoryHeader.append(closeButtonHistory);
-    modalHistoryHeader.append(modalHistoryTitle);
-    modalHistoryContent.append(modalHistoryHeader);
-    modalHistoryContent.append(modalHistoryBody);
-    modalHistoryDialog.append(modalHistoryContent);
-    modalHistory.append(modalHistoryDialog);
-    $("#gameContainer").append(modalHistory);
+    modalListHeader.append(closeButtonList);
+    modalListHeader.append(modalListTitle);
+    modalListContent.append(modalListHeader);
+    modalListContent.append(modalListOptions);
+    modalListContent.append(modalListBody);
+    modalListDialog.append(modalListContent);
+    modalList.append(modalListDialog);
+    $("#gameContainer").append(modalList);
 
     // button to access the song results
-    historyButton = $("<div></div>")
+    listButton = $("<div></div>")
         .attr("id", "qpResultsButton")
         .attr("class", "button floatingContainer")
         .attr("data-toggle", "modal")
-        .attr("data-target", "#songResultModal")
+        .attr("data-target", "#songListModal")
         .html("<h1>Song List</h1>");
 
-    $("#qpInfoHider").parent().parent().append(historyButton);
+    $("#qpInfoHider").parent().parent().append(listButton);
 
     // create results table
-    historyTable = $("<table></table>")
+    listTable = $("<table></table>")
         .attr("id", "resultsTable")
         .attr("class", "table floatingContainer");
-    modalHistoryBody.append(historyTable);
-    modalHistoryDialog.append($("<div></div>")
+    modalListBody.append(listTable);
+    modalListDialog.append($("<div></div>")
         .attr("class", "resizerList bottom-right")
         .css("width", "10px")
         .css("height", "10px")
@@ -118,7 +149,7 @@ function createHistoryWindow() {
         .css("bottom", "-5px")
         .css("cursor", "se-resize")
     );
-    modalHistoryDialog.append($("<div></div>")
+    modalListDialog.append($("<div></div>")
         .attr("class", "resizerList bottom-left")
         .css("width", "10px")
         .css("height", "10px")
@@ -128,7 +159,7 @@ function createHistoryWindow() {
         .css("bottom", "-5px")
         .css("cursor", "ne-resize")
     );
-    modalHistoryDialog.append($("<div></div>")
+    modalListDialog.append($("<div></div>")
         .attr("class", "resizerList top-right")
         .css("width", "10px")
         .css("height", "10px")
@@ -138,7 +169,7 @@ function createHistoryWindow() {
         .css("bottom", "calc(100% - 5px)")
         .css("cursor", "ne-resize")
     );
-    modalHistoryDialog.append($("<div></div>")
+    modalListDialog.append($("<div></div>")
         .attr("class", "resizerList top-left")
         .css("width", "10px")
         .css("height", "10px")
@@ -152,43 +183,48 @@ function createHistoryWindow() {
 }
 
 function createNewTable() {
-    songs = [];
+    songListJSON = [];
     clearTable();
     addTableHeader();
 }
 
 function clearTable() {
-    historyTable.children().remove();
+    listTable.children().remove();
 }
 
 function addTableHeader() {
     let header = $("<tr></tr>")
         .attr("class", "header")
     let numberCol = $("<td></td>")
+        .attr("class", "songNumber")
         .html("<b>Number</b>");
     let nameCol = $("<td></td>")
+        .attr("class", "songName")
         .html("<b>Song Name</b>");
     let artistCol = $("<td></td>")
+        .attr("class", "songArtist")
         .html("<b>Artist</b>");
     let animeCol = $("<td></td>")
+        .attr("class", "animeName")
         .html("<b>Anime</b>");
     let typeCol = $("<td></td>")
+        .attr("class", "songType")
         .html("<b>Type</b>");
     header.append(numberCol);
     header.append(nameCol);
     header.append(artistCol);
     header.append(animeCol);
     header.append(typeCol);
-    historyTable.append(header);
+    listTable.append(header);
 }
 
-function addTableEntry(newSong) {
+function addTableEntry(newSong, newSongJSON) {
     let newRow = $("<tr></tr>")
         .attr("class", "songData clickAble")
         .attr("data-toggle", "modal")
         .attr("data-target", "#songInfoModal")
         .click(function () {
-            updateInfo(newSong);
+            updateInfo(newSong, newSongJSON);
         });
 
     // add a slight green or red tint for correct or incorrect answers
@@ -199,21 +235,26 @@ function addTableEntry(newSong) {
         newRow.css("background", "rgba(255, 0, 0, 0.07)");
     }
     let songNumber = $("<td></td>")
+        .attr("class", "songNumber")
         .text(newSong.songNumber);
     let songName = $("<td></td>")
+        .attr("class", "songName")
         .text(newSong.name);
     let artist = $("<td></td>")
+        .attr("class", "songArtist")
         .text(newSong.artist);
     let anime = $("<td></td>")
-        .text(newSong.anime);
+        .attr("class", "animeName")
+        .text(Object.values(newSong.anime)[titlePreference]);
     let type = $("<td></td>")
+        .attr("class", "songType")
         .text(newSong.type);
     newRow.append(songNumber);
     newRow.append(songName);
     newRow.append(artist);
     newRow.append(anime);
     newRow.append(type);
-    historyTable.append(newRow);
+    listTable.append(newRow);
 }
 
 function createInfoWindow() {
@@ -223,12 +264,13 @@ function createInfoWindow() {
         .attr("class", "modal fade")
         .attr("tabindex", "-1")
         .attr("role", "dialog")
+        .css("overflow-y", "hidden");
 
     // create modal dialog
     modalInfoDialog = $("<div></div>")
         .attr("class", "modal-dialog")
         .attr("role", "document")
-        .css("width", "400px")
+        .css("width", "640px")
         .css("position", "absolute")
         .css("overflow-y", "initial !auto")
         .css("margin", "0px");
@@ -246,7 +288,7 @@ function createInfoWindow() {
     modalInfoBody = $("<div></div>")
         .attr("class", "modal-body resizableInfo")
         .css("overflow-y", "auto")
-        .css("height", "300px");
+        .css("height", "480px");
 
     // create close button
     closeButtonInfo = $("<button></button>")
@@ -311,8 +353,11 @@ function createInfoWindow() {
     $("#gameContainer").append(modalInfo);
 }
 
-function updateInfo(song) {
+function updateInfo(song, songJSON) {
     clearInfo();
+    let startPoint = Math.floor(song.startSample / 60) + ":" + (song.startSample % 60 < 10 ? "0" + (song.startSample % 60) : song.startSample % 60);
+    let videoLength = Math.round(song.videoLength);
+    let totalLength = Math.floor(videoLength / 60) + ":" + (videoLength % 60 < 10 ? "0" + (videoLength % 60) : videoLength % 60);
     let songNameContainer = $("<div></div>")
         .attr("id", "songNameContainer")
         .attr("class", "topRow")
@@ -324,19 +369,23 @@ function updateInfo(song) {
     let animeContainer = $("<div></div>")
         .attr("id", "animeContainer")
         .attr("class", "topRow")
-        .html("<h5><b>Anime</b></h5><p>" + song.anime + "</p>");
+        .html("<h5><b>Anime</b></h5><p><b>English: </b>" + song.anime.english + "<br><b>Romaji: </b>" + song.anime.romaji + "</p>");
     let typeContainer = $("<div></div>")
         .attr("id", "typeContainer")
         .attr("class", "topRow")
         .html("<h5><b>Type</b></h5><p>" + song.type + "</p>");
+    let sampleContainer = $("<div></div>")
+        .attr("id", "sampleContainer")
+        .attr("class", "topRow")
+        .html("<h5><b>Sample Point</b></h5><p>" + startPoint + "/" + totalLength + "</p>");
     let guessedContainer = $("<div></div>")
         .attr("id", "guessedContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>Guessed (" + song.guessed.length + ")</b></h5>");
+        .html("<h5><b>Guessed (" + song.guessed.length + "/" + song.totalPlayers + ")</b></h5>");
     let fromListContainer = $("<div></div>")
         .attr("id", "fromListContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>From Lists (" + song.fromList.length + ")</b></h5>");
+        .html("<h5><b>From Lists (" + song.fromList.length + "/" + song.totalPlayers + ")</b></h5>");
     let urlContainer = $("<div></div>")
         .attr("id", "urlContainer")
         .attr("class", "bottomRow")
@@ -347,7 +396,8 @@ function updateInfo(song) {
         .append(songNameContainer)
         .append(artistContainer)
         .append(animeContainer)
-        .append(typeContainer);
+        .append(typeContainer)
+        .append(sampleContainer);
 
     let bottomRow = $("<div></div>")
         .attr("class", "row")
@@ -425,15 +475,31 @@ let answerResultsListener = new Listener("answer results", (result) => {
     let newSong = {
         name: result.songInfo.songName,
         artist: result.songInfo.artist,
-        anime: Object.values(result.songInfo.animeNames)[titlePreference],
-        songNumber: parseInt(document.getElementById("qpCurrentSongCount").innerText),
-        type: (result.songInfo.type === 1) ? ("Opening " + result.songInfo.typeNumber) :
-        ((result.songInfo.type === 2) ? ("Ending " + result.songInfo.typeNumber) : ("Insert Song")),
+        anime: result.songInfo.animeNames,
+        songNumber: parseInt($("#qpCurrentSongCount").text()),
+        totalPlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
+        type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
         urls: result.songInfo.urlMap,
+        startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
+        videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
         guessed: Object.values(result.players).filter((tmpPlayer) => tmpPlayer.correct === true).map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name),
         fromList: Object.values(result.players).filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0)
                                                .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name + " (" + listStatus[tmpPlayer.listStatus] +
                                                    ((tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? (", " + tmpPlayer.showScore + ")") : ")" ))
+    };
+    let newSongJSON = {
+        songNumber: newSong.songNumber,
+        animeEnglish: newSong.anime.english,
+        animeRomaji: newSong.anime.romaji,
+        songName: newSong.name,
+        artist: newSong.artist,
+        type: newSong.type,
+        correctCount: newSong.guessed.length,
+        totalPlayers: newSong.totalPlayers,
+        startSample: newSong.startSample,
+        videoLength: newSong.videoLength,
+        linkWebm: getVideoURL(newSong.urls),
+        linkMP3: getMP3URL(newSong.urls)
     };
     let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
         return tmpPlayer._name === player.name
@@ -451,9 +517,37 @@ let answerResultsListener = new Listener("answer results", (result) => {
         });
         newSong.correct = result.players[playerIdx].correct;
     }
-    addTableEntry(newSong);
-    songs.push(newSong);
+    addTableEntry(newSong, newSongJSON);
+    songListJSON.push(newSongJSON);
 });
+
+let videoHosts = ["catbox", "animethemes", "openingsmoe"];
+let mp3Hosts = ["catbox"];
+let videoResolutions = [720, 480];
+
+function getVideoURL(URLMap) {
+    for (let host of videoHosts) {
+        if (URLMap[host] !== undefined) {
+            for (let resolution of videoResolutions) {
+                if (URLMap[host][resolution] !== undefined) {
+                    return URLMap[host][resolution];
+                }
+            }
+        }
+    }
+    return null;
+}
+
+function getMP3URL(URLMap) {
+    for (let host of mp3Hosts) {
+        if (URLMap[host] !== undefined) {
+            if (URLMap[host][0] !== undefined) {
+                return URLMap[host][0];
+            }
+        }
+    }
+    return null;
+}
 
 // reset songs on returning to lobby
 let quizOverListener = new Listener("quiz over", (roomSettings) => {
@@ -470,15 +564,17 @@ answerResultsListener.bindListener();
 quizOverListener.bindListener();
 quizLeaveListener.bindListener();
 
-createHistoryWindow();
+createListWindow();
 createInfoWindow();
 
 // Code for resizing the modal windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let resizableList = $(".resizableList");
 let resizerList = $(".resizerList");
+const MIN_LIST_WIDTH = 450;
+const MIN_LIST_HEIGHT = 300;
 
 resizerList.mousedown(function (event) {
-    modalHistory.css("user-select", "none");
+    modalList.css("user-select", "none");
     let startX = event.originalEvent.clientX;
     let startY = event.originalEvent.clientY;
     let startWidth = resizableList.width();
@@ -490,15 +586,15 @@ resizerList.mousedown(function (event) {
     if ($(this).hasClass("bottom-right")) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < 400) {
-                newWidth = 400;
+            if (newWidth < MIN_LIST_WIDTH) {
+                newWidth = MIN_LIST_WIDTH;
             }
             resizableList.width(newWidth);
-            modalHistoryContent.width(newWidth+30);
-            modalHistoryDialog.width(newWidth+32);
+            modalListContent.width(newWidth+30);
+            modalListDialog.width(newWidth+32);
             newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < 300) {
-                newHeight = 300;
+            if (newHeight < MIN_LIST_HEIGHT) {
+                newHeight = MIN_LIST_HEIGHT;
             }
             resizableList.height(newHeight);
         });
@@ -507,17 +603,17 @@ resizerList.mousedown(function (event) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth - event.originalEvent.clientX + startX;
             newLeft = event.originalEvent.clientX;
-            if (newWidth < 400) {
-                newWidth = 400;
+            if (newWidth < MIN_LIST_WIDTH) {
+                newWidth = MIN_LIST_WIDTH;
                 newLeft = startWidth - newWidth + startX;
             }
-            modalHistoryDialog.css("left", newLeft + "px");
+            modalListDialog.css("left", newLeft + "px");
             resizableList.width(newWidth);
-            modalHistoryContent.width(newWidth+30);
-            modalHistoryDialog.width(newWidth+32);
+            modalListContent.width(newWidth+30);
+            modalListDialog.width(newWidth+32);
             newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < 300) {
-                newHeight = 300;
+            if (newHeight < MIN_LIST_HEIGHT) {
+                newHeight = MIN_LIST_HEIGHT;
             }
             resizableList.height(newHeight);
         });
@@ -525,19 +621,19 @@ resizerList.mousedown(function (event) {
     if ($(this).hasClass("top-right")) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < 400) {
-                newWidth = 400;
+            if (newWidth < MIN_LIST_WIDTH) {
+                newWidth = MIN_LIST_WIDTH;
             }
             resizableList.width(newWidth);
-            modalHistoryContent.width(newWidth+30);
-            modalHistoryDialog.width(newWidth+32);
+            modalListContent.width(newWidth+30);
+            modalListDialog.width(newWidth+32);
             newHeight = startHeight - event.originalEvent.clientY + startY;
             newTop = event.originalEvent.clientY - 32;
-            if (newHeight < 300) {
-                newHeight = 300;
+            if (newHeight < MIN_LIST_HEIGHT) {
+                newHeight = MIN_LIST_HEIGHT;
                 newTop = startHeight - newHeight + startY;
             }
-            modalHistoryDialog.css("top", newTop + "px");
+            modalListDialog.css("top", newTop + "px");
             resizableList.height(newHeight);
         });
     }
@@ -545,21 +641,21 @@ resizerList.mousedown(function (event) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth - event.originalEvent.clientX + startX;
             newLeft = event.originalEvent.clientX;
-            if (newWidth < 400) {
-                newWidth = 400;
+            if (newWidth < MIN_LIST_WIDTH) {
+                newWidth = MIN_LIST_WIDTH;
                 newLeft = startWidth - newWidth + startX;
             }
-            modalHistoryDialog.css("left", newLeft + "px");
+            modalListDialog.css("left", newLeft + "px");
             resizableList.width(newWidth);
-            modalHistoryContent.width(newWidth+30);
-            modalHistoryDialog.width(newWidth+32);
+            modalListContent.width(newWidth+30);
+            modalListDialog.width(newWidth+32);
             newHeight = startHeight - event.originalEvent.clientY + startY;
             newTop = event.originalEvent.clientY - 32;
-            if (newHeight < 300) {
-                newHeight = 300;
+            if (newHeight < MIN_LIST_HEIGHT) {
+                newHeight = MIN_LIST_HEIGHT;
                 newTop = startHeight - newHeight + startY;
             }
-            modalHistoryDialog.css("top", newTop + "px");
+            modalListDialog.css("top", newTop + "px");
             resizableList.height(newHeight);
         });
     }
@@ -572,6 +668,8 @@ resizerList.mousedown(function (event) {
 
 let resizableInfo = $(".resizableInfo");
 let resizerInfo = $(".resizerInfo");
+const MIN_INFO_WIDTH = 450;
+const MIN_INFO_HEIGHT = 300;
 
 resizerInfo.mousedown(function (event) {
     modalInfo.css("user-select", "none");
@@ -586,15 +684,15 @@ resizerInfo.mousedown(function (event) {
     if ($(this).hasClass("bottom-right")) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < 400) {
-                newWidth = 400;
+            if (newWidth < MIN_INFO_WIDTH) {
+                newWidth = MIN_INFO_WIDTH;
             }
             resizableInfo.width(newWidth);
             modalInfoContent.width(newWidth+30);
             modalInfoDialog.width(newWidth+32);
             newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < 300) {
-                newHeight = 300;
+            if (newHeight < MIN_INFO_HEIGHT) {
+                newHeight = MIN_INFO_HEIGHT;
             }
             resizableInfo.height(newHeight);
         });
@@ -603,8 +701,8 @@ resizerInfo.mousedown(function (event) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth - event.originalEvent.clientX + startX;
             newLeft = event.originalEvent.clientX;
-            if (newWidth < 400) {
-                newWidth = 400;
+            if (newWidth < MIN_INFO_WIDTH) {
+                newWidth = MIN_INFO_WIDTH;
                 newLeft = startWidth - newWidth + startX;
             }
             modalInfoDialog.css("left", newLeft + "px");
@@ -612,8 +710,8 @@ resizerInfo.mousedown(function (event) {
             modalInfoContent.width(newWidth+30);
             modalInfoDialog.width(newWidth+32);
             newHeight = startHeight + event.originalEvent.clientY - startY;
-            if (newHeight < 300) {
-                newHeight = 300;
+            if (newHeight < MIN_INFO_HEIGHT) {
+                newHeight = MIN_INFO_HEIGHT;
             }
             resizableInfo.height(newHeight);
         });
@@ -621,16 +719,16 @@ resizerInfo.mousedown(function (event) {
     if ($(this).hasClass("top-right")) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth + event.originalEvent.clientX - startX;
-            if (newWidth < 300) {
-                newWidth = 300;
+            if (newWidth < MIN_INFO_WIDTH) {
+                newWidth = MIN_INFO_WIDTH;
             }
             resizableInfo.width(newWidth);
             modalInfoContent.width(newWidth+30);
             modalInfoDialog.width(newWidth+32);
             newHeight = startHeight - event.originalEvent.clientY + startY;
             newTop = event.originalEvent.clientY - 32;
-            if (newHeight < 200) {
-                newHeight = 200;
+            if (newHeight < MIN_INFO_HEIGHT) {
+                newHeight = MIN_INFO_HEIGHT;
                 newTop = startHeight - newHeight + startY;
             }
             modalInfoDialog.css("top", newTop + "px");
@@ -641,8 +739,8 @@ resizerInfo.mousedown(function (event) {
         $(document.documentElement).mousemove(function (event) {
             newWidth = startWidth - event.originalEvent.clientX + startX;
             newLeft = event.originalEvent.clientX;
-            if (newWidth < 300) {
-                newWidth = 300;
+            if (newWidth < MIN_INFO_WIDTH) {
+                newWidth = MIN_INFO_WIDTH;
                 newLeft = startWidth - newWidth + startX;
             }
             modalInfoDialog.css("left", newLeft + "px");
@@ -651,8 +749,8 @@ resizerInfo.mousedown(function (event) {
             modalInfoDialog.width(newWidth+32);
             newHeight = startHeight - event.originalEvent.clientY + startY;
             newTop = event.originalEvent.clientY - 32;
-            if (newHeight < 200) {
-                newHeight = 200;
+            if (newHeight < MIN_INFO_HEIGHT) {
+                newHeight = MIN_INFO_HEIGHT;
                 newTop = startHeight - newHeight + startY;
             }
             modalInfoDialog.css("top", newTop + "px");
@@ -666,9 +764,9 @@ resizerInfo.mousedown(function (event) {
     });
 });
 
-//
-$("#songResultModal").find(".modal-dialog").draggable({
-    handle: "#modalHistoryHeader",
+// draggable windows
+$("#songListModal").find(".modal-dialog").draggable({
+    handle: "#modalListHeader",
     containment: "#gameContainer"
 });
 
@@ -679,6 +777,10 @@ $("#songInfoModal").find(".modal-dialog").draggable({
 
 // CSS
 GM_addStyle(`
+.songListOptions {
+    border-bottom: 1px solid #6d6d6d;
+    height: 65px;
+}
 .songData {
     height: 50px;
 }
@@ -686,6 +788,12 @@ GM_addStyle(`
     vertical-align: middle;
     border: 1px solid black;
     text-align: center;
+}
+.songNumber {
+    min-width: 60px;
+}
+.songType {
+    min-width: 80px;
 }
 .header {
     height: 30px;
@@ -696,24 +804,24 @@ GM_addStyle(`
     vertical-align: middle;
 }
 .topRow {
-    width: 23%;
+    width: 18%;
     float: inline-start;
     margin: 1%;
-    min-width: 140px;
+    min-width: 125px;
     text-align: center;
     height: 200px;
 }
 #guessedContainer {
     width: 16%;
     float: inline-start;
-    min-width: 110px;
+    min-width: 125px;
     margin: 1%;
     text-align: center;
 }
 #fromListContainer {
     width: 25%;
     float: inline-start;
-    min-width: 130px;
+    min-width: 145px;
     margin: 1%;
     text-align: center;
 }
@@ -724,12 +832,18 @@ GM_addStyle(`
     text-align: center;
 }
 #qpResultsButton {
-    width: 240px;
+    width: 150px;
     margin: auto;
     margin-bottom: 10px;
     margin-top: -5px;
 }
 #qpResultsButton > h1 {
     padding: 5px;
+    font-size: 28px;
+}
+.songListOptionsButton {
+    float: right;
+    margin-top: 15px;
+    margin-right: 10px;
 }
 `);
