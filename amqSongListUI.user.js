@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.5
+// @version      1.5.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
