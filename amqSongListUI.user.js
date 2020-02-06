@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      1.5
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -11,8 +11,6 @@
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
-
-let titlePreference = 1; // 0 for English anime names, 1 for Romaji anime names
 
 let listWindow;
 let listWindowResizer;
@@ -31,8 +29,13 @@ let infoWindowHeader;
 let infoWindowBody;
 let infoWindowCloseButton;
 
-let songListJSON = [];
+let settingsWindow;
+let settingsWindowContent;
+let settingsWindowHeader;
+let settingsWindowBody;
+let settingsWindowCloseButton;
 
+let songListJSON = [];
 
 function createListWindow() {
     // create list window
@@ -92,44 +95,30 @@ function createListWindow() {
                 createNewTable();
             })
         )
+        .append($("<button></button>")
+            .attr("class", "btn btn-default songListOptionsButton")
+            .attr("type", "button")
+            .text("Open in new tab")
+            .click(() => {
+                openInNewTab();
+            })
+        )
+        .append($("<button></button>")
+            .attr("class", "btn btn-default songListOptionsButton")
+            .attr("type", "button")
+            .text("Settings")
+            .click(() => {
+                if (settingsWindow.is(":visible")) {
+                    settingsWindow.hide()
+                }
+                else {
+                    settingsWindow.show();
+                }
+            })
+        )
         .append($("<div></div>")
             .attr("class", "slCheckboxContainer")
-            .append($("<div></div>")
-                .attr("class", "slCheckbox")
-                .append($("<div></div>")
-                    .attr("class", "customCheckbox")
-                    .append($("<input id='slAutoClear' type='checkbox'>")
-                        .prop("checked", true)
-                    )
-                    .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                )
-                .append($("<label></label>")
-                    .text("Auto clear list")
-                    .popover({
-                        content: "Automatically clears the list on quiz start, quiz end or when leaving the lobby",
-                        placement: "top",
-                        trigger: "hover"
-                    })
-                )
-            )
-            .append($("<div></div>")
-                .attr("class", "slCheckbox")
-                .append($("<div></div>")
-                    .attr("class", "customCheckbox")
-                    .append($("<input id='slAutoScroll' type='checkbox'>")
-                        .prop("checked", true)
-                    )
-                    .append($("<label for='slAutoScroll'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                )
-                .append($("<label></label>")
-                    .text("Auto scroll")
-                    .popover({
-                        content: "Automatically scrolls to the bottom of the list on each new entry added",
-                        placement: "top",
-                        trigger: "hover"
-                    })
-                )
-            )
+
         );
 
     // create list body
@@ -193,6 +182,8 @@ function createListWindow() {
         .click(() => {
             if(listWindow.is(":visible")) {
                 listWindow.hide();
+                infoWindow.hide();
+                settingsWindow.hide();
             }
             else {
                 listWindow.show();
@@ -226,8 +217,12 @@ function addTableHeader() {
     let artistCol = $("<td></td>")
         .attr("class", "songArtist")
         .html("<b>Artist</b>");
-    let animeCol = $("<td></td>")
-        .attr("class", "animeName")
+    let animeEngCol = $("<td></td>")
+        .attr("class", "animeNameEnglish")
+        .html("<b>Anime</b>")
+        .hide();
+    let animeRomajiCol = $("<td></td>")
+        .attr("class", "animeNameRomaji")
         .html("<b>Anime</b>");
     let typeCol = $("<td></td>")
         .attr("class", "songType")
@@ -235,19 +230,20 @@ function addTableHeader() {
     header.append(numberCol);
     header.append(nameCol);
     header.append(artistCol);
-    header.append(animeCol);
+    header.append(animeEngCol);
+    header.append(animeRomajiCol);
     header.append(typeCol);
     listWindowTable.append(header);
 }
 
-function addTableEntry(newSong, newSongJSON) {
+function addTableEntry(newSong) {
     let newRow = $("<tr></tr>")
         .attr("class", "songData clickAble")
         .click(function () {
             if (!infoWindow.is(":visible")) {
                 infoWindow.show();
             }
-            updateInfo(newSong, newSongJSON);
+            updateInfo(newSong);
         });
 
     // add a slight green or red tint for correct or incorrect answers
@@ -266,18 +262,84 @@ function addTableEntry(newSong, newSongJSON) {
     let artist = $("<td></td>")
         .attr("class", "songArtist")
         .text(newSong.artist);
-    let anime = $("<td></td>")
-        .attr("class", "animeName")
-        .text(Object.values(newSong.anime)[titlePreference]);
+    let animeEng = $("<td></td>")
+        .attr("class", "animeNameEnglish")
+        .text(newSong.anime.english)
+    let animeRomaji = $("<td></td>")
+        .attr("class", "animeNameRomaji")
+        .text(newSong.anime.romaji);
     let type = $("<td></td>")
         .attr("class", "songType")
         .text(newSong.type);
+
+    if ($("#slAnimeTitleEnglish").prop("checked")) {
+        animeRomaji.hide();
+    }
+    if ($("#slAnimeTitleRomaji").prop("checked")) {
+        animeEng.hide();
+    }
     newRow.append(songNumber);
     newRow.append(songName);
     newRow.append(artist);
-    newRow.append(anime);
+    newRow.append(animeEng);
+    newRow.append(animeRomaji);
     newRow.append(type);
     listWindowTable.append(newRow);
+}
+
+function openInNewTab() {
+    window.open("", "_blank").document.write(`
+    <html>
+        <head>
+            <link rel="stylesheet" type="text/css" href="https://animemusicquiz.com/css/main.css">
+            <link rel="stylesheet" type="text/css" href="https://animemusicquiz.com/css/libraries/bootstrap.min.css">
+            <title>Song List</title>
+            <style type="text/css">
+                body {
+                    background-image: url('https://animemusicquiz.com/img/backgrounds/normal/bg-x1.jpg');
+                    background-repeat: no-repeat;
+                    background-attachment: fixed;
+                    background-position: center;
+                    background-size: auto;
+                }
+                #slContainer {
+                    width: 98%;
+                    margin: auto;
+                }
+                #slContainer * {
+                    color: #d9d9d9;
+                }
+                #slContainer tr {
+                    background-color: #424242;
+                }
+                #slContainer .songData {
+                    height: 50px;
+                    cursor: auto;
+                    user-select: text;
+                }
+                #slContainer .songData td {
+                    vertical-align: middle;
+                    border: 1px solid black;
+                    text-align: center
+                }
+                #slContainer .header > td {
+                    vertical-align: middle;
+                    border: 1px solid black;
+                    text-align: center;
+                    height: 30px;
+                }
+                #slContainer .songNumber {
+                    min-width: 60px;
+                }
+                #slContainer .songType {
+                    min-width: 90px;
+                }
+            </style>
+        </head>
+        <body>
+            <div id="slContainer">` + $("#listWindowBody").html() + `</div>
+        </body>
+    </html>`);
 }
 
 function createInfoWindow() {
@@ -358,7 +420,7 @@ function createInfoWindow() {
     $("#gameContainer").append(infoWindow);
 }
 
-function updateInfo(song, songJSON) {
+function updateInfo(song) {
     clearInfo();
     let startPoint = Math.floor(song.startSample / 60) + ":" + (song.startSample % 60 < 10 ? "0" + (song.startSample % 60) : song.startSample % 60);
     let videoLength = Math.round(song.videoLength);
@@ -446,6 +508,167 @@ function updateInfo(song, songJSON) {
 
 function clearInfo() {
     infoWindowBody.children().remove();
+}
+
+function createsettingsWindow() {
+    // create info window
+    settingsWindow = $("<div></div>")
+        .attr("id", "settingsWindow")
+        .css("z-index", "1070")
+        .css("overflow-y", "hidden")
+        .css("width", "300px")
+        .css("height", "200px")
+        .css("position", "absolute")
+        .css("top", "0px")
+        .css("left", "0px")
+        .css("overflow-y", "initial !important")
+        .css("margin", "0px")
+        .css("background-color", "#424242")
+        .css("border", "1px solid rgba(27, 27, 27, 0.2)")
+        .css("box-shadow", "0 5px 15px rgba(0,0,0,.5)")
+        .css("user-select", "text")
+        .css("display", "none");
+
+    // create options header
+    settingsWindowHeader = $("<div></div>")
+        .attr("class", "modal-header")
+        .attr("id", "settingsWindowHeader")
+        .css("width", "100%")
+        .css("cursor", "move")
+        .append($("<h2></h2>")
+            .attr("class", "modal-title")
+            .text("Settings")
+        );
+
+    // create options body
+    settingsWindowBody = $("<div></div>")
+        .attr("class", "modal-body")
+        .attr("id", "settingsWindowBody")
+        .css("overflow-y", "auto")
+        .css("height", "125px")
+        .css("width", "100%")
+        .append($("<div></div>")
+            .attr("id", "slListSettings")
+            .text("List Settings")
+            .append($("<div></div>")
+                .attr("class", "slCheckbox")
+                .append($("<div></div>")
+                    .attr("class", "customCheckbox")
+                    .append($("<input id='slAutoClear' type='checkbox'>")
+                        .prop("checked", true)
+                    )
+                    .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label></label>")
+                    .text("Auto clear list")
+                    .popover({
+                        content: "Automatically clears the list on quiz start, quiz end or when leaving the lobby",
+                        placement: "top",
+                        trigger: "hover",
+                        container: "body",
+                        animation: false
+                    })
+                )
+            )
+            .append($("<div></div>")
+                .attr("class", "slCheckbox")
+                .append($("<div></div>")
+                    .attr("class", "customCheckbox")
+                    .append($("<input id='slAutoScroll' type='checkbox'>")
+                        .prop("checked", true)
+                    )
+                    .append($("<label for='slAutoScroll'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label></label>")
+                    .text("Auto scroll")
+                    .popover({
+                        content: "Automatically scrolls to the bottom of the list on each new entry added",
+                        placement: "top",
+                        trigger: "hover",
+                        container: "body",
+                        animation: false
+                    })
+                )
+            )
+        )
+        
+        .append($("<div></div>")
+            .attr("id", "slAnimeTitleSettings")
+            .text("Anime Titles")
+            .append($("<div></div>")
+                .attr("class", "slCheckbox")
+                .append($("<div></div>")
+                    .attr("class", "customCheckbox")
+                    .append($("<input id='slAnimeTitleEnglish' type='checkbox'>")
+                        .prop("checked", false)
+                        .click(function() {
+                            if ($(this).prop("checked")) {
+                                $("#slAnimeTitleRomaji").prop("checked", false);
+                                $(".animeNameRomaji").hide();
+                                $(".animeNameEnglish").show();
+                            }
+                            else {
+                                $("#slAnimeTitleRomaji").prop("checked", true);
+                                $(".animeNameRomaji").show();
+                                $(".animeNameEnglish").hide();
+                            }
+                        })
+                    )
+                    .append($("<label for='slAnimeTitleEnglish'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label></label>")
+                    .text("English")
+                )
+            )
+            .append($("<div></div>")
+                .attr("class", "slCheckbox")
+                .append($("<div></div>")
+                    .attr("class", "customCheckbox")
+                    .append($("<input id='slAnimeTitleRomaji' type='checkbox'>")
+                        .prop("checked", true)
+                        .click(function() {
+                            if ($(this).prop("checked")) {
+                                $("#slAnimeTitleEnglish").prop("checked", false);
+                                $(".animeNameRomaji").show();
+                                $(".animeNameEnglish").hide();
+                            }
+                            else {
+                                $("#slAnimeTitleEnglish").prop("checked", true);
+                                $(".animeNameRomaji").hide();
+                                $(".animeNameEnglish").show();
+                            }
+                        })
+                    )
+                    .append($("<label for='slAnimeTitleRomaji'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label></label>")
+                    .text("Romaji")
+                )
+            )
+        )
+
+    // create options content
+    settingsWindowContent = $("<div></div>")
+        .attr("id", "settingsWindowContent")
+        .css("width", "100%")
+        .css("position", "absolute")
+        .css("top", "0px");
+
+    // create options window close button
+    settingsWindowCloseButton = $("<button></button>")
+        .attr("class", "close")
+        .attr("type", "button")
+        .html("<span aria-hidden=\"true\">×</span>")
+        .click(() => {
+            settingsWindow.hide();
+        });
+
+    // link nodes
+    settingsWindowHeader.prepend(settingsWindowCloseButton);
+    settingsWindowContent.append(settingsWindowHeader);
+    settingsWindowContent.append(settingsWindowBody);
+    settingsWindow.append(settingsWindowContent);
+    $("#gameContainer").append(settingsWindow);
 }
 
 // reset song list for the new round
@@ -556,12 +779,13 @@ quizLeaveListener.bindListener();
 
 createListWindow();
 createInfoWindow();
+createsettingsWindow();
 
 // Code for resizing the modal windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let listResizers = $(".listResizers");
 let infoResizers = $(".infoResizers");
-const MIN_LIST_WIDTH = 450;
-const MIN_LIST_HEIGHT = 300;
+const MIN_LIST_WIDTH = 475;
+const MIN_LIST_HEIGHT = 350;
 const MIN_INFO_WIDTH = 450;
 const MIN_INFO_HEIGHT = 300;
 let startWidth = 0;
@@ -726,15 +950,33 @@ $("#infoWindow").draggable({
     containment: "#gameContainer"
 });
 
+$("#settingsWindow").draggable({
+    handle: "#settingsWindowHeader",
+    containment: "#gameContainer"
+});
+
 // lowers the z-index when a modal window is shown so it doesn't overlap
 $(".modal").on("show.bs.modal", () => {
     listWindow.css("z-index", "1030");
-    infoWindow.css("z-index", "1040");
+    infoWindow.css("z-index", "1035");
+    settingsWindow.css("z-index", "1040");
 });
 
 $(".modal").on("hidden.bs.modal", () => {
     listWindow.css("z-index", "1060");
-    infoWindow.css("z-index", "1070");
+    infoWindow.css("z-index", "1065");
+    settingsWindow.css("z-index", "1070");
+});
+
+// lowers the z-index when hovering over a label
+$(".slCheckbox label").hover(() => {
+    listWindow.css("z-index", "1030");
+    infoWindow.css("z-index", "1035");
+    settingsWindow.css("z-index", "1040");
+}, () => {
+    listWindow.css("z-index", "1060");
+    infoWindow.css("z-index", "1065");
+    settingsWindow.css("z-index", "1070");
 });
 
 // Auto scrolls the list on new entry added
@@ -761,6 +1003,9 @@ GM_addStyle(`
 .songNumber {
     min-width: 60px;
 }
+.songName {
+    min-width: 85px;
+}
 .songType {
     min-width: 80px;
 }
@@ -781,24 +1026,25 @@ GM_addStyle(`
     height: 200px;
 }
 #guessedContainer {
-    width: 16%;
+    width: 20%;
     float: inline-start;
-    min-width: 125px;
+    min-width: 130px;
     margin: 1%;
     text-align: center;
 }
 #fromListContainer {
-    width: 25%;
+    width: 30%;
     float: inline-start;
-    min-width: 145px;
+    min-width: 150px;
     margin: 1%;
     text-align: center;
 }
 #urlContainer {
-    width: 50%;
+    width: 44%;
     float: inline-start;
     margin: 1%;
     text-align: center;
+    min-width: 350px;
 }
 #qpSongListButton {
     width: 150px;
@@ -828,6 +1074,18 @@ GM_addStyle(`
 .slCheckbox > label {
     font-weight: normal;
     margin-left: 5px;
+}
+#slListSettings {
+    width: 50%;
+    float: left;
+    text-align: center;
+    font-weight: bold;
+}
+#slAnimeTitleSettings {
+    width: 50%;
+    float: left;
+    text-align: center;
+    font-weight: bold;
 }
 .listResizers {
     width: 100%;
