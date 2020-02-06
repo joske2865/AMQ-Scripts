@@ -142,6 +142,8 @@ function createListWindow() {
         .html("<span aria-hidden=\"true\">×</span>")
         .click(() => {
             listWindow.hide();
+            infoWindow.hide();
+            settingsWindow.hide();
         });
 
     listWindowResizer = $("<div></div>")
@@ -988,6 +990,15 @@ document.getElementById("listWindowTable").addEventListener("DOMNodeInserted", f
 
 // CSS
 GM_addStyle(`
+#listWindow .close {
+    font-size: 32px;
+}
+#infoWindow .close {
+    font-size: 32px;
+}
+#settingsWindow .close {
+    font-size: 32px;
+}
 .songListOptions {
     border-bottom: 1px solid #6d6d6d;
     height: 65px;
