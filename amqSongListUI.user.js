@@ -350,7 +350,7 @@ function addTableEntry(newSong) {
         .text(newSong.type);
     let guessesCounter = $("<td></td>")
         .attr("class", "guessesCounter")
-        .text(newSong.guessed.length + "/" + newSong.totalPlayers + " (" + Math.round(newSong.guessed.length/newSong.totalPlayers*100) + "%)")
+        .text(newSong.guessed.length + "/" + newSong.totalPlayers + " (" + parseFloat((newSong.guessed.length/newSong.totalPlayers*100).toFixed(2)) + "%)")
     let samplePoint = $("<td></td>")
         .attr("class", "samplePoint")
         .text(formatSamplePoint(newSong.startSample, newSong.videoLength));
@@ -596,11 +596,11 @@ function updateInfo(song) {
     let guessedContainer = $("<div></div>")
         .attr("id", "guessedContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>Guessed (" + song.guessed.length + "/" + song.totalPlayers + ")</b></h5>");
+        .html("<h5><b>Guessed (" + song.guessed.length + "/" + song.totalPlayers + ", " + parseFloat((song.guessed.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
     let fromListContainer = $("<div></div>")
         .attr("id", "fromListContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>From Lists (" + song.fromList.length + "/" + song.totalPlayers + ")</b></h5>");
+        .html("<h5><b>From Lists (" + song.fromList.length + "/" + Object.values(quiz.players).length + ", " + parseFloat((song.fromList.length/Object.values(quiz.players).length*100).toFixed(2)) + "%)</b></h5>");
     let urlContainer = $("<div></div>")
         .attr("id", "urlContainer")
         .attr("class", "bottomRow")
@@ -635,6 +635,16 @@ function updateInfo(song) {
     }
     fromListContainer.append(listContainer);
 
+    if (song.fromList.length === 0) {
+        fromListContainer.hide();
+        guessedContainer.css("width", "33%");
+        urlContainer.css("width", "63%");
+    }
+    else {
+        fromListContainer.show();
+        guessedContainer.css("width", "20%");
+        urlContainer.css("width", "44%");
+    }
     listContainer = $("<ul></ul>");
     for (let host in song.urls) {
         for (let resolution in song.urls[host]) {
@@ -1003,7 +1013,7 @@ let answerResultsListener = new Listener("answer results", (result) => {
             })
             .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name),
         fromList: Object.values(result.players)
-            .filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0)
+            .filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0 && tmpPlayer.listStatus !== null)
             .sort((a, b) => {
                 if (a.answerNumber !== undefined) {
                     return a.answerNumber - b.answerNumber; 
