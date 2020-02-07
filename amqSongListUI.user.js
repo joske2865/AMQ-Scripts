@@ -350,7 +350,7 @@ function addTableEntry(newSong) {
         .text(newSong.type);
     let guessesCounter = $("<td></td>")
         .attr("class", "guessesCounter")
-        .text(newSong.guessed.length + "/" + newSong.totalPlayers + " (" + parseFloat((newSong.guessed.length/newSong.totalPlayers*100).toFixed(2)) + "%)")
+        .text(newSong.guessed.length + "/" + newSong.activePlayers + " (" + parseFloat((newSong.guessed.length/newSong.activePlayers*100).toFixed(2)) + "%)")
     let samplePoint = $("<td></td>")
         .attr("class", "samplePoint")
         .text(formatSamplePoint(newSong.startSample, newSong.videoLength));
@@ -596,11 +596,11 @@ function updateInfo(song) {
     let guessedContainer = $("<div></div>")
         .attr("id", "guessedContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>Guessed (" + song.guessed.length + "/" + song.totalPlayers + ", " + parseFloat((song.guessed.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
+        .html("<h5><b>Guessed (" + song.guessed.length + "/" + song.activePlayers + ", " + parseFloat((song.guessed.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
     let fromListContainer = $("<div></div>")
         .attr("id", "fromListContainer")
         .attr("class", "bottomRow")
-        .html("<h5><b>From Lists (" + song.fromList.length + "/" + Object.values(quiz.players).length + ", " + parseFloat((song.fromList.length/Object.values(quiz.players).length*100).toFixed(2)) + "%)</b></h5>");
+        .html("<h5><b>From Lists (" + song.fromList.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
     let urlContainer = $("<div></div>")
         .attr("id", "urlContainer")
         .attr("class", "bottomRow")
@@ -998,7 +998,8 @@ let answerResultsListener = new Listener("answer results", (result) => {
         artist: result.songInfo.artist,
         anime: result.songInfo.animeNames,
         songNumber: parseInt($("#qpCurrentSongCount").text()),
-        totalPlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
+        activePlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
+        totalPlayers: Object.values(quiz.players).length,
         type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
         urls: result.songInfo.urlMap,
         startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
@@ -1031,7 +1032,7 @@ let answerResultsListener = new Listener("answer results", (result) => {
         artist: newSong.artist,
         type: newSong.type,
         correctCount: newSong.guessed.length,
-        totalPlayers: newSong.totalPlayers,
+        activePlayers: newSong.activePlayers,
         startSample: newSong.startSample,
         videoLength: newSong.videoLength,
         linkWebm: getVideoURL(newSong.urls),
