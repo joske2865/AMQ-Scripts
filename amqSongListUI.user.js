@@ -286,10 +286,10 @@ function addTableEntry(newSong) {
         .attr("class", "songType")
         .text(newSong.type);
 
-    if ($("#slAnimeTitleEnglish").prop("checked")) {
+    if ($("#slAnimeTitleSelect").val() === "english") {
         animeRomaji.hide();
     }
-    if ($("#slAnimeTitleRomaji").prop("checked")) {
+    if ($("#slAnimeTitleSelect").val() === "romaji") {
         animeEng.hide();
     }
     newRow.append(songNumber);
@@ -619,55 +619,27 @@ function createsettingsWindow() {
         .append($("<div></div>")
             .attr("id", "slAnimeTitleSettings")
             .text("Anime Titles")
-            .append($("<div></div>")
-                .attr("class", "slCheckbox")
-                .append($("<div></div>")
-                    .attr("class", "customCheckbox")
-                    .append($("<input id='slAnimeTitleEnglish' type='checkbox'>")
-                        .prop("checked", false)
-                        .click(function() {
-                            if ($(this).prop("checked")) {
-                                $("#slAnimeTitleRomaji").prop("checked", false);
-                                $(".animeNameRomaji").hide();
-                                $(".animeNameEnglish").show();
-                            }
-                            else {
-                                $("#slAnimeTitleRomaji").prop("checked", true);
-                                $(".animeNameRomaji").show();
-                                $(".animeNameEnglish").hide();
-                            }
-                        })
-                    )
-                    .append($("<label for='slAnimeTitleEnglish'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                )
-                .append($("<label></label>")
+            .append($("<select></select>")
+                .attr("id", "slAnimeTitleSelect")
+                .append($("<option></option>")
                     .text("English")
+                    .attr("value", "english")
                 )
-            )
-            .append($("<div></div>")
-                .attr("class", "slCheckbox")
-                .append($("<div></div>")
-                    .attr("class", "customCheckbox")
-                    .append($("<input id='slAnimeTitleRomaji' type='checkbox'>")
-                        .prop("checked", true)
-                        .click(function() {
-                            if ($(this).prop("checked")) {
-                                $("#slAnimeTitleEnglish").prop("checked", false);
-                                $(".animeNameRomaji").show();
-                                $(".animeNameEnglish").hide();
-                            }
-                            else {
-                                $("#slAnimeTitleEnglish").prop("checked", true);
-                                $(".animeNameRomaji").hide();
-                                $(".animeNameEnglish").show();
-                            }
-                        })
-                    )
-                    .append($("<label for='slAnimeTitleRomaji'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                )
-                .append($("<label></label>")
+                .append($("<option></option>")
                     .text("Romaji")
+                    .attr("value", "romaji")
+                    .attr("selected", "selected")
                 )
+                .change(function () {
+                    if ($(this).val() === "romaji") {
+                        $(".animeNameRomaji").show();
+                        $(".animeNameEnglish").hide();
+                    }
+                    if ($(this).val() === "english") {
+                        $(".animeNameRomaji").hide();
+                        $(".animeNameEnglish").show();
+                    }
+                })
             )
         )
 
@@ -1020,6 +992,14 @@ GM_addStyle(`
 }
 #settingsWindow .close {
     font-size: 32px;
+}
+#slAnimeTitleSelect {
+    color: black;
+    font-weight: normal;
+    width: 75%;
+    margin-top: 5px;
+    border: 1px;
+    margin-right: 1px;
 }
 .songListOptions {
     border-bottom: 1px solid #6d6d6d;
