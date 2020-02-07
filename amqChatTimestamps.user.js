@@ -17,7 +17,7 @@ let gameChatObserver = new MutationObserver(mutations => {
         if (!mutation.addedNodes) return;
 
         for (let i = 0; i < mutation.addedNodes.length; i++) {
-         	let node = mutation.addedNodes[i];
+            let node = mutation.addedNodes[i];
             if ($(node).hasClass("gcTimestamp")) return;
             let d = new Date();
             let mins = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes();
