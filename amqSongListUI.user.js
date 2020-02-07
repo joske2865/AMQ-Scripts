@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.5.1
+// @version      1.6
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -234,19 +234,82 @@ function addTableHeader() {
     let animeEngCol = $("<td></td>")
         .attr("class", "animeNameEnglish")
         .html("<b>Anime</b>")
-        .hide();
     let animeRomajiCol = $("<td></td>")
         .attr("class", "animeNameRomaji")
         .html("<b>Anime</b>");
     let typeCol = $("<td></td>")
         .attr("class", "songType")
         .html("<b>Type</b>");
+    let guessesCol = $("<td></td>")
+        .attr("class", "guessesCounter")
+        .html("<b>Guesses</b>");
+    let sampleCol = $("<td></td>")
+        .attr("class", "samplePoint")
+        .html("<b>Sample</b>");
+
+    if ($("#slShowSongNumber").prop("checked")) {
+        numberCol.show();
+    }
+    else {
+        numberCol.hide();
+    }
+
+    if ($("#slShowSongName").prop("checked")) {
+        nameCol.show();
+    }
+    else {
+        nameCol.hide();
+    }
+
+    if ($("#slShowArtist").prop("checked")) {
+        artistCol.show();
+    }
+    else {
+        artistCol.hide();
+    }
+
+    if ($("#slShowAnime").prop("checked")) {
+        if ($("#slAnimeTitleSelect").val() === "english") {
+            animeRomajiCol.hide();
+        }
+        if ($("#slAnimeTitleSelect").val() === "romaji") {
+            animeEngCol.hide();
+        }
+    }
+    else {
+        animeRomajiCol.hide();
+        animeEngCol.hide();
+    }
+
+    if ($("#slShowType").prop("checked")) {
+        typeCol.show();
+    }
+    else {
+        typeCol.hide();
+    }
+
+    if ($("#slShowGuesses").prop("checked")) {
+        guessesCol.show();
+    }
+    else {
+        guessesCol.hide();
+    }
+
+    if ($("#slShowSamplePoint").prop("checked")) {
+        sampleCol.show();
+    }
+    else {
+        sampleCol.hide();
+    }
+
     header.append(numberCol);
     header.append(nameCol);
     header.append(artistCol);
     header.append(animeEngCol);
     header.append(animeRomajiCol);
     header.append(typeCol);
+    header.append(guessesCol);
+    header.append(sampleCol);
     listWindowTable.append(header);
 }
 
@@ -285,19 +348,76 @@ function addTableEntry(newSong) {
     let type = $("<td></td>")
         .attr("class", "songType")
         .text(newSong.type);
+    let guessesCounter = $("<td></td>")
+        .attr("class", "guessesCounter")
+        .text(newSong.guessed.length + "/" + newSong.totalPlayers + " (" + Math.round(newSong.guessed.length/newSong.totalPlayers*100) + "%)")
+    let samplePoint = $("<td></td>")
+        .attr("class", "samplePoint")
+        .text(formatSamplePoint(newSong.startSample, newSong.videoLength));
 
-    if ($("#slAnimeTitleSelect").val() === "english") {
-        animeRomaji.hide();
+    if ($("#slShowSongNumber").prop("checked")) {
+        songNumber.show();
     }
-    if ($("#slAnimeTitleSelect").val() === "romaji") {
+    else {
+        songNumber.hide();
+    }
+
+    if ($("#slShowSongName").prop("checked")) {
+        songName.show();
+    }
+    else {
+        songName.hide();
+    }
+
+    if ($("#slShowArtist").prop("checked")) {
+        artist.show();
+    }
+    else {
+        artist.hide();
+    }
+
+    if ($("#slShowAnime").prop("checked")) {
+        if ($("#slAnimeTitleSelect").val() === "english") {
+            animeRomaji.hide();
+        }
+        if ($("#slAnimeTitleSelect").val() === "romaji") {
+            animeEng.hide();
+        }
+    }
+    else {
+        animeRomaji.hide();
         animeEng.hide();
     }
+
+    if ($("#slShowType").prop("checked")) {
+        type.show();
+    }
+    else {
+        type.hide();
+    }
+
+    if ($("#slShowGuesses").prop("checked")) {
+        guessesCounter.show();
+    }
+    else {
+        guessesCounter.hide();
+    }
+
+    if ($("#slShowSamplePoint").prop("checked")) {
+        samplePoint.show();
+    }
+    else {
+        samplePoint.hide();
+    }
+
     newRow.append(songNumber);
     newRow.append(songName);
     newRow.append(artist);
     newRow.append(animeEng);
     newRow.append(animeRomaji);
     newRow.append(type);
+    newRow.append(guessesCounter);
+    newRow.append(samplePoint);
     listWindowTable.append(newRow);
     applyRegex(newRow, new RegExp(createAnimeSearchRegexQuery($("#slSearch").val()), "i"));
 }
@@ -309,6 +429,13 @@ function applyRegex(elem, searchRegex) {
     else {
         $(elem).hide();
     }
+}
+
+function formatSamplePoint(start, length) {
+    let startPoint = Math.floor(start / 60) + ":" + (start % 60 < 10 ? "0" + (start % 60) : start % 60);
+    let videoLength = Math.round(length);
+    let totalLength = Math.floor(videoLength / 60) + ":" + (videoLength % 60 < 10 ? "0" + (videoLength % 60) : videoLength % 60);
+    return startPoint + "/" + totalLength;
 }
 
 function openInNewTab() {
@@ -446,9 +573,6 @@ function createInfoWindow() {
 
 function updateInfo(song) {
     clearInfo();
-    let startPoint = Math.floor(song.startSample / 60) + ":" + (song.startSample % 60 < 10 ? "0" + (song.startSample % 60) : song.startSample % 60);
-    let videoLength = Math.round(song.videoLength);
-    let totalLength = Math.floor(videoLength / 60) + ":" + (videoLength % 60 < 10 ? "0" + (videoLength % 60) : videoLength % 60);
     let songNameContainer = $("<div></div>")
         .attr("id", "songNameContainer")
         .attr("class", "topRow")
@@ -468,7 +592,7 @@ function updateInfo(song) {
     let sampleContainer = $("<div></div>")
         .attr("id", "sampleContainer")
         .attr("class", "topRow")
-        .html("<h5><b>Sample Point</b></h5><p>" + startPoint + "/" + totalLength + "</p>");
+        .html("<h5><b>Sample Point</b></h5><p>" + formatSamplePoint(song.startSample, song.videoLength) + "</p>");
     let guessedContainer = $("<div></div>")
         .attr("id", "guessedContainer")
         .attr("class", "bottomRow")
@@ -541,7 +665,7 @@ function createsettingsWindow() {
         .css("z-index", "1070")
         .css("overflow-y", "hidden")
         .css("width", "300px")
-        .css("height", "200px")
+        .css("height", "325px")
         .css("position", "absolute")
         .css("top", "0px")
         .css("left", "0px")
@@ -569,7 +693,7 @@ function createsettingsWindow() {
         .attr("class", "modal-body")
         .attr("id", "settingsWindowBody")
         .css("overflow-y", "auto")
-        .css("height", "125px")
+        .css("height", "250px")
         .css("width", "100%")
         .append($("<div></div>")
             .attr("id", "slListSettings")
@@ -579,7 +703,7 @@ function createsettingsWindow() {
                 .append($("<div></div>")
                     .attr("class", "customCheckbox")
                     .append($("<input id='slAutoClear' type='checkbox'>")
-                        .prop("checked", true)
+                        .prop("checked", false)
                     )
                     .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                 )
@@ -631,15 +755,190 @@ function createsettingsWindow() {
                     .attr("selected", "selected")
                 )
                 .change(function () {
-                    if ($(this).val() === "romaji") {
-                        $(".animeNameRomaji").show();
+                    if ($("#slShowAnime").prop("checked")) {
+                        if ($(this).val() === "romaji") {
+                            $(".animeNameRomaji").show();
+                            $(".animeNameEnglish").hide();
+                        }
+                        if ($(this).val() === "english") {
+                            $(".animeNameRomaji").hide();
+                            $(".animeNameEnglish").show();
+                        }
+                    }
+                    else {
+                        $(".animeNameRomaji").hide();
                         $(".animeNameEnglish").hide();
                     }
-                    if ($(this).val() === "english") {
-                        $(".animeNameRomaji").hide();
-                        $(".animeNameEnglish").show();
-                    }
                 })
+            )
+        )
+
+        .append($("<div></div>")
+            .attr("id", "slTableSettings")
+            .append($("<div></div>")
+                .text("Table Display Settings")
+                .css("width", "100%")
+            )
+            .append($("<div></div>")
+                .attr("class", "slTableSettingsContainer")
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
+                        .append($("<input id='slShowSongNumber' type='checkbox'>")
+                            .prop("checked", true)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    $(".songNumber").show();
+                                }
+                                else {
+                                    $(".songNumber").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowSongNumber'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Song Number")
+                    )
+                )
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
+                        .append($("<input id='slShowSongName' type='checkbox'>")
+                            .prop("checked", true)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    $(".songName").show();
+                                }
+                                else {
+                                    $(".songName").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowSongName'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Song Name")
+                    )
+                )
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
+                        .append($("<input id='slShowArtist' type='checkbox'>")
+                            .prop("checked", true)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    $(".songArtist").show();
+                                }
+                                else {
+                                    $(".songArtist").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowArtist'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Artist")
+                    )
+                )
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
+                        .append($("<input id='slShowAnime' type='checkbox'>")
+                            .prop("checked", true)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    if ($("#slAnimeTitleSelect").val() === "romaji") {
+                                        $(".animeNameEnglish").hide();
+                                        $(".animeNameRomaji").show();
+                                    }
+                                    if ($("#slAnimeTitleSelect").val() === "english") {
+                                        $(".animeNameEnglish").show();
+                                        $(".animeNameRomaji").hide();
+                                    }
+                                }
+                                else {
+                                    $(".animeNameEnglish").hide();
+                                    $(".animeNameRomaji").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowAnime'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Anime")
+                    )
+                )
+            )
+            .append($("<div></div>")
+                .attr("class", "slTableSettingsContainer")
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
+                        .append($("<input id='slShowType' type='checkbox'>")
+                            .prop("checked", true)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    $(".songType").show();
+                                }
+                                else {
+                                    $(".songType").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowType'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Type")
+                    )
+                )
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
+                        .append($("<input id='slShowGuesses' type='checkbox'>")
+                            .prop("checked", false)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    $(".guessesCounter").show();
+                                }
+                                else {
+                                    $(".guessesCounter").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Guesses")
+                    )
+                )
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
+                        .append($("<input id='slShowSamplePoint' type='checkbox'>")
+                            .prop("checked", false)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    $(".samplePoint").show();
+                                }
+                                else {
+                                    $(".samplePoint").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowSamplePoint'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Sample Point")
+                    )
+                )
             )
         )
 
@@ -694,10 +993,25 @@ let answerResultsListener = new Listener("answer results", (result) => {
         urls: result.songInfo.urlMap,
         startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
         videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
-        guessed: Object.values(result.players).filter((tmpPlayer) => tmpPlayer.correct === true).map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name),
-        fromList: Object.values(result.players).filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0)
-                                               .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name + " (" + listStatus[tmpPlayer.listStatus] +
-                                                   ((tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? (", " + tmpPlayer.showScore + ")") : ")" ))
+        guessed: Object.values(result.players)
+            .filter((tmpPlayer) => tmpPlayer.correct === true)
+            .sort((a, b) => {
+                if (a.answerNumber !== undefined) {
+                    return a.answerNumber - b.answerNumber; 
+                }
+                return a.gamePlayerId - b.gamePlayerId;
+            })
+            .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name),
+        fromList: Object.values(result.players)
+            .filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0)
+            .sort((a, b) => {
+                if (a.answerNumber !== undefined) {
+                    return a.answerNumber - b.answerNumber; 
+                }
+                return a.gamePlayerId - b.gamePlayerId;
+            })
+            .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name + " (" + listStatus[tmpPlayer.listStatus] +
+                ((tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? (", " + tmpPlayer.showScore + ")") : ")" ))
     };
     let newSongJSON = {
         songNumber: newSong.songNumber,
@@ -773,9 +1087,9 @@ answerResultsListener.bindListener();
 quizOverListener.bindListener();
 quizLeaveListener.bindListener();
 
-createListWindow();
-createInfoWindow();
 createsettingsWindow();
+createInfoWindow();
+createListWindow();
 
 // Code for resizing the modal windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let listResizers = $(".listResizers");
@@ -1021,6 +1335,16 @@ GM_addStyle(`
     text-overflow: ellipsis;
     padding: 5px;
 }
+#slTableSettings {
+    float: left;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+}
+.slTableSettingsContainer {
+    float: left;
+    width: 50%;
+}
 .songData {
     height: 50px;
 }
@@ -1037,6 +1361,12 @@ GM_addStyle(`
 }
 .songType {
     min-width: 80px;
+}
+.guessesCounter {
+    min-width: 80px;
+}
+.samplePoint {
+    min-width: 75px;
 }
 .header {
     height: 30px;
