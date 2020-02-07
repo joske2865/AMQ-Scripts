@@ -77,10 +77,10 @@ function createListWindow() {
             .css("top", "9999px")
         )
         .append($("<button></button>")
-            .attr("id", "copySongListJSON")
+            .attr("id", "slCopyJSON")
             .attr("class", "btn btn-primary songListOptionsButton")
             .attr("type", "button")
-            .text("Copy JSON Data")
+            .text("Copy JSON")
             .click(() => {
                 $("#copyBoxJSON").val(JSON.stringify(songListJSON, null, 4)).select();
                 document.execCommand("copy");
@@ -98,7 +98,7 @@ function createListWindow() {
         .append($("<button></button>")
             .attr("class", "btn btn-default songListOptionsButton")
             .attr("type", "button")
-            .text("Open in new tab")
+            .text("New Tab")
             .click(() => {
                 openInNewTab();
             })
@@ -116,10 +116,22 @@ function createListWindow() {
                 }
             })
         )
-        .append($("<div></div>")
-            .attr("class", "slCheckboxContainer")
-
-        );
+        .append($("<input>")
+            .attr("id", "slSearch")
+            .attr("type", "text")
+            .attr("placeholder", "Search songs")
+            .on("input", function (event) {
+                let searchQuery = $(this).val();
+                let regexQuery = createAnimeSearchRegexQuery(searchQuery);
+                let searchRegex = new RegExp(regexQuery, "i");
+                $("tr.songData").each((index, elem) => {
+                    applyRegex(elem, searchRegex);
+                });
+            })
+            .click(() => {
+                quiz.setInputInFocus(false);
+            })
+        )
 
     // create list body
     listWindowBody = $("<div></div>")
@@ -287,6 +299,16 @@ function addTableEntry(newSong) {
     newRow.append(animeRomaji);
     newRow.append(type);
     listWindowTable.append(newRow);
+    applyRegex(newRow, new RegExp(createAnimeSearchRegexQuery($("#slSearch").val()), "i"));
+}
+
+function applyRegex(elem, searchRegex) {
+    if (searchRegex.test($(elem).text())) {
+        $(elem).show();
+    }
+    else {
+        $(elem).hide();
+    }
 }
 
 function openInNewTab() {
@@ -593,7 +615,7 @@ function createsettingsWindow() {
                 )
             )
         )
-        
+
         .append($("<div></div>")
             .attr("id", "slAnimeTitleSettings")
             .text("Anime Titles")
@@ -786,7 +808,7 @@ createsettingsWindow();
 // Code for resizing the modal windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let listResizers = $(".listResizers");
 let infoResizers = $(".infoResizers");
-const MIN_LIST_WIDTH = 475;
+const MIN_LIST_WIDTH = 580;
 const MIN_LIST_HEIGHT = 350;
 const MIN_INFO_WIDTH = 450;
 const MIN_INFO_HEIGHT = 300;
@@ -1003,6 +1025,22 @@ GM_addStyle(`
     border-bottom: 1px solid #6d6d6d;
     height: 65px;
 }
+.songListOptionsButton {
+    float: right;
+    margin-top: 15px;
+    margin-right: 10px;
+    padding: 6px 8px;
+}
+#slSearch {
+    width: 200px;
+    color: black;
+    margin: 15px 15px 0px 15px;
+    height: 35px;
+    border-radius: 4px;
+    border: 0;
+    text-overflow: ellipsis;
+    padding: 5px;
+}
 .songData {
     height: 50px;
 }
@@ -1067,11 +1105,6 @@ GM_addStyle(`
     padding: 5px;
     font-size: 28px;
     user-select: none;
-}
-.songListOptionsButton {
-    float: right;
-    margin-top: 15px;
-    margin-right: 10px;
 }
 .slCheckboxContainer {
     width: 130px;
