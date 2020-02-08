@@ -28,7 +28,7 @@ let resultListener = new Listener("answer results", result => {
         artist: result.songInfo.artist,
         type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
         correctCount: result.players.filter(player => player.correct === true).length,
-        totalPlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
+        activePlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
         startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
         videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
         linkWebm: getVideoURL(result.songInfo.urlMap),
