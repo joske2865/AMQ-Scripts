@@ -1010,16 +1010,17 @@ let answerResultsListener = new Listener("answer results", (result) => {
                 if (a.answerNumber !== undefined) {
                     return a.answerNumber - b.answerNumber; 
                 }
-                return a.gamePlayerId - b.gamePlayerId;
+                let p1name = quiz.players[a.gamePlayerId]._name;
+                let p2name = quiz.players[b.gamePlayerId]._name;
+                return p1name.localeCompare(p2name);
             })
             .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name),
         fromList: Object.values(result.players)
             .filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0 && tmpPlayer.listStatus !== null)
             .sort((a, b) => {
-                if (a.answerNumber !== undefined) {
-                    return a.answerNumber - b.answerNumber; 
-                }
-                return a.gamePlayerId - b.gamePlayerId;
+                let p1name = quiz.players[a.gamePlayerId]._name;
+                let p2name = quiz.players[b.gamePlayerId]._name;
+                return p1name.localeCompare(p2name);
             })
             .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name + " (" + listStatus[tmpPlayer.listStatus] +
                 ((tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? (", " + tmpPlayer.showScore + ")") : ")" ))
