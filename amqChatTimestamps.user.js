@@ -22,11 +22,11 @@ let gameChatObserver = new MutationObserver(mutations => {
             let d = new Date();
             let mins = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes();
             let hours = d.getHours() < 10 ? "0" + d.getHours() : d.getHours();
-            let dateFormat = hours + ":" + mins;
+            let timeFormat = hours + ":" + mins;
             $(node).prepend($("<span></span>")
                 .addClass("gcTimestamp")
                 .css("opacity", "0.5")
-                .text(dateFormat));
+                .text(timeFormat));
         }
     });
 });
