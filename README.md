@@ -2,7 +2,7 @@
 
 ### Installation
 
-Requires Tampermonkey (Chrome) or Greasemonkey (Firefox).
+Requires Tampermonkey or Greasemonkey browser extension.
 
 - Step 1) Select a script you want to install  
 - Step 2) Click "raw"   
