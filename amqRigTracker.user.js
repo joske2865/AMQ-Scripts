@@ -161,13 +161,13 @@ let settingsData = [
     }
 ];
 
-// Create the "Custom" tab in settings
+// Create the "Rig Tracker" tab in settings
 $("#settingModal .tabContainer")
     .append($("<div></div>")
         .addClass("tab leftRightButtonTop clickAble")
         .attr("onClick", "options.selectTab('settingsCustomContainer', this)")
         .append($("<h5></h5>")
-            .text("Custom")
+            .text("Rig Tracker")
         )
     );
 
@@ -247,22 +247,22 @@ for (let setting of settingsData) {
 
 // Updates the enabled checkboxes, checks each node recursively
 function updateEnabled(settingId) {
-    let parent;
+    let current;
     settingsData.some((setting) => {
-        parent = setting.data.find((data) => {
+        current = setting.data.find((data) => {
             return data.id === settingId;
         });
-        return parent !== undefined;
+        return current !== undefined;
     });
-    if (parent === undefined) {
+    if (current === undefined) {
         return;
     }
-    if (parent.enables === undefined) {
+    if (current.enables === undefined) {
         return;
     }
     else {
-        for (let enableId of parent.enables) {
-            if ($("#" + parent.id).prop("checked") && !$("#" + parent.id).parent().parent().hasClass("disabled")) {
+        for (let enableId of current.enables) {
+            if ($("#" + current.id).prop("checked") && !$("#" + current.id).parent().parent().hasClass("disabled")) {
                 $("#" + enableId).parent().parent().removeClass("disabled");
             }
             else {
