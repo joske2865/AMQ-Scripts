@@ -622,15 +622,24 @@ function updateInfo(song) {
     let listContainer = $("<ul></ul>");
     for (let guessed of song.guessed) {
         listContainer.append($("<li></li>")
-            .text(guessed)
+            .text(guessed.name + " (" + guessed.score + ")")
         );
     }
     guessedContainer.append(listContainer);
 
+    let listStatus = {
+        1: "Watching",
+        2: "Completed",
+        3: "On-Hold",
+        4: "Dropped",
+        5: "Plan to Watch",
+        6: "Looted"
+    };
+
     listContainer = $("<ul></ul>");
     for (let fromList of song.fromList) {
         listContainer.append($("<li></li>")
-            .text(fromList)
+            .text(fromList.name + " (" + listStatus[fromList.listStatus] + ((fromList.score !== null) ? ", " + fromList.score + ")" : ")"))
         );
     }
     fromListContainer.append(listContainer);
@@ -985,14 +994,6 @@ let quizReadyListener = new Listener("quiz ready", (data) => {
 
 // get song data on answer reveal
 let answerResultsListener = new Listener("answer results", (result) => {
-    let listStatus = {
-        1: "Watching",
-        2: "Completed",
-        3: "On Hold",
-        4: "Dropped",
-        5: "Planning",
-        6: "Looted"
-    };
     let newSong = {
         name: result.songInfo.songName,
         artist: result.songInfo.artist,
@@ -1008,13 +1009,19 @@ let answerResultsListener = new Listener("answer results", (result) => {
             .filter((tmpPlayer) => tmpPlayer.correct === true)
             .sort((a, b) => {
                 if (a.answerNumber !== undefined) {
-                    return a.answerNumber - b.answerNumber; 
+                    return a.answerNumber - b.answerNumber;
                 }
                 let p1name = quiz.players[a.gamePlayerId]._name;
                 let p2name = quiz.players[b.gamePlayerId]._name;
                 return p1name.localeCompare(p2name);
             })
-            .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name),
+            .map((tmpPlayer) => {
+                let tmpObj = {
+                    name: quiz.players[tmpPlayer.gamePlayerId]._name,
+                    score: tmpPlayer.score
+                };
+                return tmpObj;
+            }),
         fromList: Object.values(result.players)
             .filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0 && tmpPlayer.listStatus !== null)
             .sort((a, b) => {
@@ -1022,8 +1029,14 @@ let answerResultsListener = new Listener("answer results", (result) => {
                 let p2name = quiz.players[b.gamePlayerId]._name;
                 return p1name.localeCompare(p2name);
             })
-            .map((tmpPlayer) => quiz.players[tmpPlayer.gamePlayerId]._name + " (" + listStatus[tmpPlayer.listStatus] +
-                ((tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? (", " + tmpPlayer.showScore + ")") : ")" ))
+            .map((tmpPlayer) => {
+                let tmpObj = {
+                    name: quiz.players[tmpPlayer.gamePlayerId]._name,
+                    listStatus: tmpPlayer.listStatus,
+                    score: (tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? tmpPlayer.showScore : null
+                };
+                return tmpObj;
+            })
     };
     let newSongJSON = {
         songNumber: newSong.songNumber,
