@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.6
+// @version      1.7
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -499,8 +499,8 @@ function createInfoWindow() {
         .attr("id", "infoWindow")
         .css("z-index", "1065")
         .css("overflow-y", "hidden")
-        .css("width", "720px")
-        .css("height", "480px")
+        .css("width", "450px")
+        .css("height", "350px")
         .css("position", "absolute")
         .css("top", "0px")
         .css("left", "0px")
@@ -528,7 +528,7 @@ function createInfoWindow() {
         .attr("class", "modal-body resizableInfo")
         .attr("id", "infoWindowBody")
         .css("overflow-y", "auto")
-        .css("height", "405px")
+        .css("height", "275px")
         .css("width", "100%");
 
     // create info content
@@ -573,60 +573,104 @@ function createInfoWindow() {
 
 function updateInfo(song) {
     clearInfo();
+    let infoRow1 = $("<div></div>")
+        .attr("class", "infoRow");
+    let infoRow2 = $("<div></div>")
+        .attr("class", "infoRow");
+    let infoRow3 = $("<div></div>")
+        .attr("class", "infoRow");
+    let infoRow4 = $("<div></div>")
+        .attr("class", "infoRow");
+    
     let songNameContainer = $("<div></div>")
         .attr("id", "songNameContainer")
-        .attr("class", "topRow")
         .html("<h5><b>Song Name</b></h5><p>" + song.name + "</p>");
     let artistContainer = $("<div></div>")
         .attr("id", "artistContainer")
-        .attr("class", "topRow")
         .html("<h5><b>Artist</b></h5><p>" + song.artist + "</p>");
-    let animeContainer = $("<div></div>")
-        .attr("id", "animeContainer")
-        .attr("class", "topRow")
-        .html("<h5><b>Anime</b></h5><p><b>English: </b>" + song.anime.english + "<br><b>Romaji: </b>" + song.anime.romaji + "</p>");
+    let animeEnglishContainer = $("<div></div>")
+        .attr("id", "animeEnglishContainer")
+        .html("<h5><b>Anime English</b></h5><p>" + song.anime.english + "</p>");
+    let animeRomajiContainer = $("<div></div>")
+        .attr("id", "animeRomajiContainer")
+        .html("<h5><b>Anime Romaji</b></h5><p>" + song.anime.romaji + "</p>");
     let typeContainer = $("<div></div>")
         .attr("id", "typeContainer")
-        .attr("class", "topRow")
         .html("<h5><b>Type</b></h5><p>" + song.type + "</p>");
     let sampleContainer = $("<div></div>")
         .attr("id", "sampleContainer")
-        .attr("class", "topRow")
         .html("<h5><b>Sample Point</b></h5><p>" + formatSamplePoint(song.startSample, song.videoLength) + "</p>");
     let guessedContainer = $("<div></div>")
         .attr("id", "guessedContainer")
-        .attr("class", "bottomRow")
-        .html("<h5><b>Guessed (" + song.guessed.length + "/" + song.activePlayers + ", " + parseFloat((song.guessed.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
+        .html("<h5><b>Guessed<br>(" + song.guessed.length + "/" + song.activePlayers + ", " + parseFloat((song.guessed.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
     let fromListContainer = $("<div></div>")
         .attr("id", "fromListContainer")
-        .attr("class", "bottomRow")
-        .html("<h5><b>From Lists (" + song.fromList.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
+        .html("<h5><b>From Lists<br>(" + song.fromList.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
     let urlContainer = $("<div></div>")
         .attr("id", "urlContainer")
-        .attr("class", "bottomRow")
         .html("<h5><b>URLs</b></h5>");
 
-    let topRow = $("<div></div>")
-        .attr("class", "row")
-        .append(songNameContainer)
-        .append(artistContainer)
-        .append(animeContainer)
-        .append(typeContainer)
-        .append(sampleContainer);
+    infoRow1.append(songNameContainer);
+    infoRow1.append(artistContainer);
+    infoRow1.append(typeContainer);
 
-    let bottomRow = $("<div></div>")
-        .attr("class", "row")
-        .append(guessedContainer)
-        .append(fromListContainer)
-        .append(urlContainer);
-    let listContainer = $("<ul></ul>");
-    for (let guessed of song.guessed) {
-        listContainer.append($("<li></li>")
-            .text(guessed.name + " (" + guessed.score + ")")
-        );
+    infoRow2.append(animeEnglishContainer);
+    infoRow2.append(animeRomajiContainer);
+    infoRow2.append(sampleContainer);
+
+    infoRow3.append(urlContainer);
+
+    infoRow4.append(guessedContainer);
+    infoRow4.append(fromListContainer);
+
+    
+    if (song.fromList.length === 0) {
+        guessedContainer.css("width", "98%");
+        fromListContainer.hide();
+        if (song.guessed.length > 1) {
+            let guessedListLeft = $("<ul></ul>")
+                .attr("id", "guessedListLeft");
+            let guessedListRight = $("<ul></ul>")
+                .attr("id", "guessedListRight");
+            let i = 0;
+            for (let guessed of song.guessed) {
+                if (i++ % 2 === 0) {
+                    guessedListLeft.append($("<li></li>")
+                        .text(guessed.name + " (" + guessed.score + ")")
+                    );
+                }
+                else {
+                    guessedListRight.append($("<li></li>")
+                        .text(guessed.name + " (" + guessed.score + ")")
+                    );
+                }
+            }
+            guessedContainer.append(guessedListLeft);
+            guessedContainer.append(guessedListRight);
+        }
+        else {
+            let listContainer = $("<ul></ul>")
+                .attr("id", "guessedListContainer");
+            for (let guessed of song.guessed) {
+                listContainer.append($("<li></li>")
+                    .text(guessed.name + " (" + guessed.score + ")")
+                );
+            }
+            guessedContainer.append(listContainer);
+        }
     }
-    guessedContainer.append(listContainer);
-
+    else {
+        guessedContainer.css("width", "");
+        let listContainer = $("<ul></ul>")
+            .attr("id", "guessedListContainer");
+        fromListContainer.show();
+        for (let guessed of song.guessed) {
+            listContainer.append($("<li></li>")
+                .text(guessed.name + " (" + guessed.score + ")")
+            );
+        }
+        guessedContainer.append(listContainer);
+    }
     let listStatus = {
         1: "Watching",
         2: "Completed",
@@ -644,16 +688,6 @@ function updateInfo(song) {
     }
     fromListContainer.append(listContainer);
 
-    if (song.fromList.length === 0) {
-        fromListContainer.hide();
-        guessedContainer.css("width", "33%");
-        urlContainer.css("width", "63%");
-    }
-    else {
-        fromListContainer.show();
-        guessedContainer.css("width", "20%");
-        urlContainer.css("width", "44%");
-    }
     listContainer = $("<ul></ul>");
     for (let host in song.urls) {
         for (let resolution in song.urls[host]) {
@@ -669,8 +703,10 @@ function updateInfo(song) {
     }
     urlContainer.append(listContainer);
 
-    infoWindowBody.append(topRow);
-    infoWindowBody.append(bottomRow);
+    infoWindowBody.append(infoRow1);
+    infoWindowBody.append(infoRow2);
+    infoWindowBody.append(infoRow3);
+    infoWindowBody.append(infoRow4);
 }
 
 function clearInfo() {
@@ -1121,7 +1157,7 @@ let listResizers = $(".listResizers");
 let infoResizers = $(".infoResizers");
 const MIN_LIST_WIDTH = 580;
 const MIN_LIST_HEIGHT = 350;
-const MIN_INFO_WIDTH = 450;
+const MIN_INFO_WIDTH = 375;
 const MIN_INFO_HEIGHT = 300;
 let startWidth = 0;
 let startHeight = 0;
@@ -1216,10 +1252,10 @@ infoResizers.find(".infoResizer").each(function (index, resizer) {
             if (curResizer.hasClass("bottom-right")) {
                 let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
                 let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_LIST_WIDTH) {
+                if (newWidth > MIN_INFO_WIDTH) {
                     infoWindow.width(newWidth);
                 }
-                if (newHeight > MIN_LIST_HEIGHT) {
+                if (newHeight > MIN_INFO_HEIGHT) {
                     infoWindowBody.height(newHeight-103);
                     infoWindow.height(newHeight);
                 }
@@ -1228,11 +1264,11 @@ infoResizers.find(".infoResizer").each(function (index, resizer) {
                 let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
                 let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
                 let newLeft = startX + (event.originalEvent.clientX - startMouseX);
-                if (newWidth > MIN_LIST_WIDTH) {
+                if (newWidth > MIN_INFO_WIDTH) {
                     infoWindow.width(newWidth);
                     infoWindow.css("left", newLeft + "px");
                 }
-                if (newHeight > MIN_LIST_HEIGHT) {
+                if (newHeight > MIN_INFO_HEIGHT) {
                     infoWindowBody.height(newHeight-103);
                     infoWindow.height(newHeight);
                 }
@@ -1241,10 +1277,10 @@ infoResizers.find(".infoResizer").each(function (index, resizer) {
                 let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
                 let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
                 let newTop = startY + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_LIST_WIDTH) {
+                if (newWidth > MIN_INFO_WIDTH) {
                     infoWindow.width(newWidth);
                 }
-                if (newHeight > MIN_LIST_HEIGHT) {
+                if (newHeight > MIN_INFO_HEIGHT) {
                     infoWindow.css("top", newTop + "px");
                     infoWindowBody.height(newHeight-103);
                     infoWindow.height(newHeight);
@@ -1255,11 +1291,11 @@ infoResizers.find(".infoResizer").each(function (index, resizer) {
                 let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
                 let newLeft = startX + (event.originalEvent.clientX - startMouseX);
                 let newTop = startY + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_LIST_WIDTH) {
+                if (newWidth > MIN_INFO_WIDTH) {
                     infoWindow.width(newWidth);
                     infoWindow.css("left", newLeft + "px");
                 }
-                if (newHeight > MIN_LIST_HEIGHT) {
+                if (newHeight > MIN_INFO_HEIGHT) {
                     infoWindow.css("top", newTop + "px");
                     infoWindowBody.height(newHeight-103);
                     infoWindow.height(newHeight);
@@ -1401,34 +1437,60 @@ GM_addStyle(`
     text-align: center;
     vertical-align: middle;
 }
-.topRow {
+.infoRow {
+    width: 98%;
+    height: auto;
+    text-align: center;
+    clear: both;
+}
+.infoRow > div {
+    margin: 1%;
+    text-align: center;
+    float: left;
+}
+#songNameContainer {
+    width: 38%;
+    overflow-wrap: break-word;
+}
+#artistContainer {
+    width: 38%;
+    overflow-wrap: break-word;
+}
+#typeContainer {
     width: 18%;
-    float: inline-start;
-    margin: 1%;
-    min-width: 125px;
-    text-align: center;
-    height: 200px;
 }
-#guessedContainer {
-    width: 20%;
-    float: inline-start;
-    min-width: 130px;
-    margin: 1%;
-    text-align: center;
+#animeEnglishContainer {
+    width: 38%;
+    overflow-wrap: break-word;
 }
-#fromListContainer {
-    width: 30%;
-    float: inline-start;
-    min-width: 150px;
-    margin: 1%;
-    text-align: center;
+#animeRomajiContainer {
+    width: 38%;
+    overflow-wrap: break-word;
+}
+#sampleContainer {
+    width: 18%;
 }
 #urlContainer {
-    width: 44%;
-    float: inline-start;
-    margin: 1%;
-    text-align: center;
-    min-width: 350px;
+    width: 100%;
+}
+#guessedListLeft {
+    width: 50%;
+    float: left;
+}
+#guessedListRight {
+    width: 50%;
+    float: right;
+}
+#guessedContainer {
+    width: 48%;
+    float: left;
+}
+#fromListContainer {
+    width: 48%;
+    float: right;
+}
+.fromListHidden {
+    width: 100%;
 }
 #qpSongListButton {
     width: 150px;
