@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.7.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -41,27 +41,17 @@ function createListWindow() {
     // create list window
     listWindow = $("<div></div>")
         .attr("id", "listWindow")
+        .addClass("slWindow")
+        .css("position", "absolute")
         .css("z-index", "1060")
-        .css("overflow-y", "hidden")
         .css("width", "640px")
         .css("height", "480px")
-        .css("position", "absolute")
-        .css("top", "0px")
-        .css("left", "0px")
-        .css("overflow-y", "initial !important")
-        .css("margin", "0px")
-        .css("background-color", "#424242")
-        .css("border", "1px solid rgba(27, 27, 27, 0.2)")
-        .css("box-shadow", "0 5px 15px rgba(0,0,0,.5)")
-        .css("user-select", "text")
         .css("display", "none");
 
     // create list header
     listWindowHeader = $("<div></div>")
-        .attr("class", "modal-header")
+        .addClass("modal-header")
         .attr("id", "listWindowHeader")
-        .css("width", "100%")
-        .css("cursor", "move")
         .append($("<h2></h2>")
             .attr("class", "modal-title")
             .text("Song List")
@@ -69,8 +59,8 @@ function createListWindow() {
 
     // create the options tab
     listWindowOptions = $("<div></div>")
-        .attr("class", "songListOptions")
-        .css("width", "100%")
+        .addClass("slWindowOptions")
+        .attr("id", "listWindowOptions")
         .append($("<textarea></textarea>")
             .attr("id", "copyBoxJSON")
             .css("position", "absolute")
@@ -137,15 +127,12 @@ function createListWindow() {
     listWindowBody = $("<div></div>")
         .attr("class", "modal-body resizableList")
         .attr("id", "listWindowBody")
-        .css("overflow-y", "auto")
-        .css("height", "340px")
-        .css("width", "100%");
+        .addClass("slWindowBody")
+        .css("height", "340px");
 
     listWindowContent = $("<div></div>")
         .attr("id", "listWindowContent")
-        .css("width", "100%")
-        .css("position", "absolute")
-        .css("top", "0px");
+        .addClass("slWindowContent");
 
     // create close button
     listWindowCloseButton = $("<div></div>")
@@ -201,6 +188,7 @@ function createListWindow() {
             }
             else {
                 listWindow.show();
+                autoScrollList();
             }
         });
 
@@ -323,12 +311,14 @@ function addTableEntry(newSong) {
             updateInfo(newSong);
         });
 
+    let guesses = newSong.players.filter((tmpPlayer) => tmpPlayer.correct === true);
+
     // add a slight green or red tint for correct or incorrect answers
     if (newSong.correct === true) {
-        newRow.css("background", "rgba(0, 200, 0, 0.07)");
+        newRow.addClass("correctGuess");
     }
     if (newSong.correct === false) {
-        newRow.css("background", "rgba(255, 0, 0, 0.07)");
+        newRow.addClass("incorrectGuess");
     }
     let songNumber = $("<td></td>")
         .attr("class", "songNumber")
@@ -350,7 +340,7 @@ function addTableEntry(newSong) {
         .text(newSong.type);
     let guessesCounter = $("<td></td>")
         .attr("class", "guessesCounter")
-        .text(newSong.guessed.length + "/" + newSong.activePlayers + " (" + parseFloat((newSong.guessed.length/newSong.activePlayers*100).toFixed(2)) + "%)")
+        .text(guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)")
     let samplePoint = $("<td></td>")
         .attr("class", "samplePoint")
         .text(formatSamplePoint(newSong.startSample, newSong.videoLength));
@@ -432,6 +422,9 @@ function applyRegex(elem, searchRegex) {
 }
 
 function formatSamplePoint(start, length) {
+    if (isNaN(start) || isNaN(length)) {
+        return "Video not loaded";
+    }
     let startPoint = Math.floor(start / 60) + ":" + (start % 60 < 10 ? "0" + (start % 60) : start % 60);
     let videoLength = Math.round(length);
     let totalLength = Math.floor(videoLength / 60) + ":" + (videoLength % 60 < 10 ? "0" + (videoLength % 60) : videoLength % 60);
@@ -485,6 +478,12 @@ function openInNewTab() {
                 #slContainer .songType {
                     min-width: 90px;
                 }
+                #slContainer .correctGuess {
+                    background-color: rgba(0, 200, 0, 0.07);
+                }
+                #slContainer .incorrectGuess {
+                    background-color: rgba(255, 0, 0, 0.07);
+                }
             </style>
         </head>
         <body>
@@ -497,27 +496,17 @@ function createInfoWindow() {
     // create info window
     infoWindow = $("<div></div>")
         .attr("id", "infoWindow")
+        .addClass("slWindow")
+        .css("position", "absolute")
         .css("z-index", "1065")
-        .css("overflow-y", "hidden")
         .css("width", "450px")
         .css("height", "350px")
-        .css("position", "absolute")
-        .css("top", "0px")
-        .css("left", "0px")
-        .css("overflow-y", "initial !important")
-        .css("margin", "0px")
-        .css("background-color", "#424242")
-        .css("border", "1px solid rgba(27, 27, 27, 0.2)")
-        .css("box-shadow", "0 5px 15px rgba(0,0,0,.5)")
-        .css("user-select", "text")
         .css("display", "none");
 
     // create info header
     infoWindowHeader = $("<div></div>")
-        .attr("class", "modal-header")
+        .addClass("modal-header")
         .attr("id", "infoWindowHeader")
-        .css("width", "100%")
-        .css("cursor", "move")
         .append($("<h2></h2>")
             .attr("class", "modal-title")
             .text("Song Info")
@@ -527,16 +516,13 @@ function createInfoWindow() {
     infoWindowBody = $("<div></div>")
         .attr("class", "modal-body resizableInfo")
         .attr("id", "infoWindowBody")
-        .css("overflow-y", "auto")
-        .css("height", "275px")
-        .css("width", "100%");
+        .addClass("slWindowBody")
+        .css("height", "275px");
 
     // create info content
     infoWindowContent = $("<div></div>")
         .attr("id", "infoWindowContent")
-        .css("width", "100%")
-        .css("position", "absolute")
-        .css("top", "0px");
+        .addClass("slWindowContent");
 
     // create info window close button
     infoWindowCloseButton = $("<button></button>")
@@ -582,6 +568,8 @@ function updateInfo(song) {
     let infoRow4 = $("<div></div>")
         .attr("class", "infoRow");
     
+    let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
+
     let songNameContainer = $("<div></div>")
         .attr("id", "songNameContainer")
         .html("<h5><b>Song Name</b></h5><p>" + song.name + "</p>");
@@ -602,10 +590,10 @@ function updateInfo(song) {
         .html("<h5><b>Sample Point</b></h5><p>" + formatSamplePoint(song.startSample, song.videoLength) + "</p>");
     let guessedContainer = $("<div></div>")
         .attr("id", "guessedContainer")
-        .html("<h5><b>Guessed<br>(" + song.guessed.length + "/" + song.activePlayers + ", " + parseFloat((song.guessed.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
+        .html("<h5><b>Guessed<br>(" + guesses.length + "/" + song.activePlayers + ", " + parseFloat((guesses.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
     let fromListContainer = $("<div></div>")
         .attr("id", "fromListContainer")
-        .html("<h5><b>From Lists<br>(" + song.fromList.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
+        .html("<h5><b>From Lists<br>(" + guesses.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
     let urlContainer = $("<div></div>")
         .attr("id", "urlContainer")
         .html("<h5><b>URLs</b></h5>");
@@ -623,17 +611,16 @@ function updateInfo(song) {
     infoRow4.append(guessedContainer);
     infoRow4.append(fromListContainer);
 
-    
     if (song.fromList.length === 0) {
         guessedContainer.css("width", "98%");
         fromListContainer.hide();
-        if (song.guessed.length > 1) {
+        if (guesses.length > 1) {
             let guessedListLeft = $("<ul></ul>")
                 .attr("id", "guessedListLeft");
             let guessedListRight = $("<ul></ul>")
                 .attr("id", "guessedListRight");
             let i = 0;
-            for (let guessed of song.guessed) {
+            for (let guessed of guesses) {
                 if (i++ % 2 === 0) {
                     guessedListLeft.append($("<li></li>")
                         .text(guessed.name + " (" + guessed.score + ")")
@@ -651,7 +638,7 @@ function updateInfo(song) {
         else {
             let listContainer = $("<ul></ul>")
                 .attr("id", "guessedListContainer");
-            for (let guessed of song.guessed) {
+            for (let guessed of guesses) {
                 listContainer.append($("<li></li>")
                     .text(guessed.name + " (" + guessed.score + ")")
                 );
@@ -664,7 +651,7 @@ function updateInfo(song) {
         let listContainer = $("<ul></ul>")
             .attr("id", "guessedListContainer");
         fromListContainer.show();
-        for (let guessed of song.guessed) {
+        for (let guessed of guesses) {
             listContainer.append($("<li></li>")
                 .text(guessed.name + " (" + guessed.score + ")")
             );
@@ -694,7 +681,7 @@ function updateInfo(song) {
             let url = song.urls[host][resolution];
             let innerHTML = "";
             innerHTML += (host === "catbox" ? "Catbox " : (host === "animethemes" ? "AnimeThemes " : "OpeningsMoe "));
-            innerHTML += (resolution === "0") ? "MP3: " : (resolution === "480") ? "480p: " : (resolution === "720") ? "720p: " : "1080p: ";
+            innerHTML += (resolution === "0") ? "MP3: " : (resolution === "480") ? "480p: " : "720p: ";
             innerHTML += "<a href=\"" + url + "\" target=\"_blank\">" + url + "</a>";
             listContainer.append($("<li></li>")
                 .html(innerHTML)
@@ -714,42 +701,31 @@ function clearInfo() {
 }
 
 function createsettingsWindow() {
-    // create info window
+    // create settings window
     settingsWindow = $("<div></div>")
         .attr("id", "settingsWindow")
+        .addClass("slWindow")
+        .css("position", "absolute")
         .css("z-index", "1070")
-        .css("overflow-y", "hidden")
         .css("width", "300px")
         .css("height", "325px")
-        .css("position", "absolute")
-        .css("top", "0px")
-        .css("left", "0px")
-        .css("overflow-y", "initial !important")
-        .css("margin", "0px")
-        .css("background-color", "#424242")
-        .css("border", "1px solid rgba(27, 27, 27, 0.2)")
-        .css("box-shadow", "0 5px 15px rgba(0,0,0,.5)")
-        .css("user-select", "text")
         .css("display", "none");
 
-    // create options header
+    // create settings header
     settingsWindowHeader = $("<div></div>")
-        .attr("class", "modal-header")
+        .addClass("modal-header")
         .attr("id", "settingsWindowHeader")
-        .css("width", "100%")
-        .css("cursor", "move")
         .append($("<h2></h2>")
             .attr("class", "modal-title")
             .text("Settings")
         );
 
-    // create options body
+    // create settings body
     settingsWindowBody = $("<div></div>")
         .attr("class", "modal-body")
         .attr("id", "settingsWindowBody")
-        .css("overflow-y", "auto")
+        .addClass("slWindowBody")
         .css("height", "250px")
-        .css("width", "100%")
         .append($("<div></div>")
             .attr("id", "slListSettings")
             .text("List Settings")
@@ -997,14 +973,12 @@ function createsettingsWindow() {
             )
         )
 
-    // create options content
+    // create settings content
     settingsWindowContent = $("<div></div>")
         .attr("id", "settingsWindowContent")
-        .css("width", "100%")
-        .css("position", "absolute")
-        .css("top", "0px");
+        .addClass("slWindowContent");
 
-    // create options window close button
+    // create settings window close button
     settingsWindowCloseButton = $("<button></button>")
         .attr("class", "close")
         .attr("type", "button")
@@ -1041,8 +1015,7 @@ let answerResultsListener = new Listener("answer results", (result) => {
         urls: result.songInfo.urlMap,
         startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
         videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
-        guessed: Object.values(result.players)
-            .filter((tmpPlayer) => tmpPlayer.correct === true)
+        players: Object.values(result.players)
             .sort((a, b) => {
                 if (a.answerNumber !== undefined) {
                     return a.answerNumber - b.answerNumber;
@@ -1054,7 +1027,9 @@ let answerResultsListener = new Listener("answer results", (result) => {
             .map((tmpPlayer) => {
                 let tmpObj = {
                     name: quiz.players[tmpPlayer.gamePlayerId]._name,
-                    score: tmpPlayer.score
+                    score: (quiz.gameMode === "Standard") ? tmpPlayer.score : tmpPlayer.correctGuesses,
+                    correct: tmpPlayer.correct,
+                    active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled
                 };
                 return tmpObj;
             }),
@@ -1081,7 +1056,7 @@ let answerResultsListener = new Listener("answer results", (result) => {
         songName: newSong.name,
         artist: newSong.artist,
         type: newSong.type,
-        correctCount: newSong.guessed.length,
+        correctCount: newSong.players.filter((tmpPlayer) => tmpPlayer.correct === true).length,
         activePlayers: newSong.activePlayers,
         startSample: newSong.startSample,
         videoLength: newSong.videoLength,
@@ -1101,6 +1076,10 @@ let answerResultsListener = new Listener("answer results", (result) => {
     songListJSON.push(newSongJSON);
 });
 
+
+// Grab the video and mp3 links
+// Host priority: catbox > animethemes > openingsmoe
+// Video resolution priority: 720 (or 1080 if it's the only resolution available) > 480
 let videoHosts = ["catbox", "animethemes", "openingsmoe"];
 let mp3Hosts = ["catbox"];
 let videoResolutions = [720, 480];
@@ -1136,7 +1115,7 @@ let quizOverListener = new Listener("quiz over", (roomSettings) => {
     }
 });
 
-// triggers when loading rooms in the lobby, but this is to detect when a player leaves the lobby to reset the song list table
+// triggers when loading rooms in the lobby, this is to detect when a player leaves the lobby to reset the song list table
 let quizLeaveListener = new Listener("New Rooms", (rooms) => {
     if ($("#slAutoClear").prop("checked")) {
         createNewTable();
@@ -1152,7 +1131,7 @@ createsettingsWindow();
 createInfoWindow();
 createListWindow();
 
-// Code for resizing the modal windows, this is horrible, don't look at it, don't touch it, don't question how it works
+// Code for resizing the windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let listResizers = $(".listResizers");
 let infoResizers = $(".infoResizers");
 const MIN_LIST_WIDTH = 580;
@@ -1352,13 +1331,60 @@ $(".slCheckbox label").hover(() => {
 
 // Auto scrolls the list on new entry added
 document.getElementById("listWindowTable").addEventListener("DOMNodeInserted", function() {
+    autoScrollList();
+});
+
+function autoScrollList() {
     if ($("#slAutoScroll").prop("checked")) {
         $("#listWindowBody").scrollTop($("#listWindowBody").get(0).scrollHeight);
+    }
+}
+
+
+// Open the song list with pause/break key
+$(document.documentElement).keydown(function (event) {
+    if (event.which === 19) {
+        if (listWindow.is(":visible")) {
+            listWindow.hide();
+            infoWindow.hide();
+            settingsWindow.hide();
+        }
+        else {
+            listWindow.show();
+            autoScrollList();
+        }
     }
 });
 
 // CSS
 GM_addStyle(`
+.slWindow {
+    overflow-y: hidden;
+    top: 0px;
+    left: 0px;
+    margin: 0px;
+    background-color: #424242;
+    border: 1px solid rgba(27, 27, 27, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    user-select: text;
+}
+.slWindowOptions {
+    width: 100%;
+    height: 65px;
+    border-bottom: 1px solid #6d6d6d;
+}
+.slWindowBody {
+    width: 100%;
+    overflow-y: auto;
+}
+.slWindowContent {
+    width: 100%;
+    position: absolute;
+    top: 0px;
+}
+.slWindow .modal-header {
+    cursor: move;
+}
 #listWindow .close {
     font-size: 32px;
 }
@@ -1413,6 +1439,12 @@ GM_addStyle(`
     vertical-align: middle;
     border: 1px solid black;
     text-align: center;
+}
+.correctGuess {
+    background-color: rgba(0, 200, 0, 0.07);
+}
+.incorrectGuess {
+    background-color: rgba(255, 0, 0, 0.07);
 }
 .songNumber {
     min-width: 60px;
