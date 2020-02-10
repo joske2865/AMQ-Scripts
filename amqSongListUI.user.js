@@ -1027,7 +1027,7 @@ let answerResultsListener = new Listener("answer results", (result) => {
             .map((tmpPlayer) => {
                 let tmpObj = {
                     name: quiz.players[tmpPlayer.gamePlayerId]._name,
-                    score: (quiz.gameMode === "Standard") ? tmpPlayer.score : tmpPlayer.correctGuesses,
+                    score: (quiz.gameMode === "Standard" || quiz.gameMode === "Ranked") ? tmpPlayer.score : tmpPlayer.correctGuesses,
                     correct: tmpPlayer.correct,
                     active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled
                 };
