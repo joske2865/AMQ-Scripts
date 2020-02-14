@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      1.7.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -36,7 +36,6 @@ let settingsWindowBody;
 let settingsWindowCloseButton;
 
 let songListJSON = [];
-let exportData = [];
 
 function createListWindow() {
     // create list window
@@ -45,7 +44,7 @@ function createListWindow() {
         .addClass("slWindow")
         .css("position", "absolute")
         .css("z-index", "1060")
-        .css("width", "650px")
+        .css("width", "640px")
         .css("height", "480px")
         .css("display", "none");
 
@@ -71,12 +70,11 @@ function createListWindow() {
             .attr("id", "slCopyJSON")
             .attr("class", "btn btn-primary songListOptionsButton")
             .attr("type", "button")
-            .text("Export")
+            .text("Copy JSON")
             .click(() => {
                 $("#copyBoxJSON").val(JSON.stringify(songListJSON, null, 4)).select();
                 document.execCommand("copy");
-                $("#copyBoxJSON").val("").blur();
-                exportSongData();
+                $("#copyBoxJSON").val("").blur()
             })
         )
         .append($("<button></button>")
@@ -199,19 +197,8 @@ function createListWindow() {
     addTableHeader();
 }
 
-function exportSongData() {
-    let JSONData = new Blob([JSON.stringify(exportData, null, 4)], {type: "application/json"});
-    let tmpLink = $("<a></a>")
-        .attr("href", URL.createObjectURL(JSONData))
-        .attr("download", "export.json")
-    $(document.body).append(tmpLink);
-    tmpLink.get(0).click();
-    tmpLink.remove();
-}
-
 function createNewTable() {
     songListJSON = [];
-    exportData = [];
     clearTable();
     addTableHeader();
 }
@@ -580,7 +567,7 @@ function updateInfo(song) {
         .attr("class", "infoRow");
     let infoRow4 = $("<div></div>")
         .attr("class", "infoRow");
-
+    
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
     let songNameContainer = $("<div></div>")
@@ -1018,7 +1005,6 @@ let quizReadyListener = new Listener("quiz ready", (data) => {
 // get song data on answer reveal
 let answerResultsListener = new Listener("answer results", (result) => {
     let newSong = {
-        gameMode: quiz.gameMode,
         name: result.songInfo.songName,
         artist: result.songInfo.artist,
         anime: result.songInfo.animeNames,
@@ -1041,13 +1027,9 @@ let answerResultsListener = new Listener("answer results", (result) => {
             .map((tmpPlayer) => {
                 let tmpObj = {
                     name: quiz.players[tmpPlayer.gamePlayerId]._name,
-                    score: tmpPlayer.score,
-                    correctGuesses: (quiz.gameMode !== "Standard" && quiz.gameMode !== "Ranked") ? tmpPlayer.correctGuesses : tmpPlayer.score,
+                    score: (quiz.gameMode === "Standard" || quiz.gameMode === "Ranked") ? tmpPlayer.score : tmpPlayer.correctGuesses,
                     correct: tmpPlayer.correct,
-                    answer: quiz.players[tmpPlayer.gamePlayerId].avatarSlot.$answerContainerText.text(),
-                    active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled,
-                    position: tmpPlayer.position,
-                    positionSlot: tmpPlayer.positionSlot
+                    active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled
                 };
                 return tmpObj;
             }),
@@ -1090,8 +1072,7 @@ let answerResultsListener = new Listener("answer results", (result) => {
         });
         newSong.correct = result.players[playerIdx].correct;
     }
-    addTableEntry(newSong);
-    exportData.push(newSong);
+    addTableEntry(newSong, newSongJSON);
     songListJSON.push(newSongJSON);
 });
 
@@ -1153,7 +1134,7 @@ createListWindow();
 // Code for resizing the windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let listResizers = $(".listResizers");
 let infoResizers = $(".infoResizers");
-const MIN_LIST_WIDTH = 650;
+const MIN_LIST_WIDTH = 580;
 const MIN_LIST_HEIGHT = 350;
 const MIN_INFO_WIDTH = 375;
 const MIN_INFO_HEIGHT = 300;
