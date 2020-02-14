@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      1.7.1
+// @version      2.0
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -36,6 +36,7 @@ let settingsWindowBody;
 let settingsWindowCloseButton;
 
 let songListJSON = [];
+let exportData = [];
 
 function createListWindow() {
     // create list window
@@ -44,7 +45,7 @@ function createListWindow() {
         .addClass("slWindow")
         .css("position", "absolute")
         .css("z-index", "1060")
-        .css("width", "640px")
+        .css("width", "650px")
         .css("height", "480px")
         .css("display", "none");
 
@@ -70,11 +71,12 @@ function createListWindow() {
             .attr("id", "slCopyJSON")
             .attr("class", "btn btn-primary songListOptionsButton")
             .attr("type", "button")
-            .text("Copy JSON")
+            .text("Export")
             .click(() => {
                 $("#copyBoxJSON").val(JSON.stringify(songListJSON, null, 4)).select();
                 document.execCommand("copy");
-                $("#copyBoxJSON").val("").blur()
+                $("#copyBoxJSON").val("").blur();
+                exportSongData();
             })
         )
         .append($("<button></button>")
@@ -197,8 +199,19 @@ function createListWindow() {
     addTableHeader();
 }
 
+function exportSongData() {
+    let JSONData = new Blob([JSON.stringify(exportData, null, 4)], {type: "application/json"});
+    let tmpLink = $("<a></a>")
+        .attr("href", URL.createObjectURL(JSONData))
+        .attr("download", "export.json")
+    $(document.body).append(tmpLink);
+    tmpLink.get(0).click();
+    tmpLink.remove();
+}
+
 function createNewTable() {
     songListJSON = [];
+    exportData = [];
     clearTable();
     addTableHeader();
 }
@@ -567,7 +580,7 @@ function updateInfo(song) {
         .attr("class", "infoRow");
     let infoRow4 = $("<div></div>")
         .attr("class", "infoRow");
-    
+
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
     let songNameContainer = $("<div></div>")
@@ -593,7 +606,7 @@ function updateInfo(song) {
         .html("<h5><b>Guessed<br>(" + guesses.length + "/" + song.activePlayers + ", " + parseFloat((guesses.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
     let fromListContainer = $("<div></div>")
         .attr("id", "fromListContainer")
-        .html("<h5><b>From Lists<br>(" + guesses.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
+        .html("<h5><b>From Lists<br>(" + song.fromList.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
     let urlContainer = $("<div></div>")
         .attr("id", "urlContainer")
         .html("<h5><b>URLs</b></h5>");
@@ -1005,6 +1018,7 @@ let quizReadyListener = new Listener("quiz ready", (data) => {
 // get song data on answer reveal
 let answerResultsListener = new Listener("answer results", (result) => {
     let newSong = {
+        gameMode: quiz.gameMode,
         name: result.songInfo.songName,
         artist: result.songInfo.artist,
         anime: result.songInfo.animeNames,
@@ -1027,9 +1041,13 @@ let answerResultsListener = new Listener("answer results", (result) => {
             .map((tmpPlayer) => {
                 let tmpObj = {
                     name: quiz.players[tmpPlayer.gamePlayerId]._name,
-                    score: (quiz.gameMode === "Standard") ? tmpPlayer.score : tmpPlayer.correctGuesses,
+                    score: tmpPlayer.score,
+                    correctGuesses: (quiz.gameMode !== "Standard" && quiz.gameMode !== "Ranked") ? tmpPlayer.correctGuesses : tmpPlayer.score,
                     correct: tmpPlayer.correct,
-                    active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled
+                    answer: quiz.players[tmpPlayer.gamePlayerId].avatarSlot.$answerContainerText.text(),
+                    active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled,
+                    position: tmpPlayer.position,
+                    positionSlot: tmpPlayer.positionSlot
                 };
                 return tmpObj;
             }),
@@ -1072,7 +1090,8 @@ let answerResultsListener = new Listener("answer results", (result) => {
         });
         newSong.correct = result.players[playerIdx].correct;
     }
-    addTableEntry(newSong, newSongJSON);
+    addTableEntry(newSong);
+    exportData.push(newSong);
     songListJSON.push(newSongJSON);
 });
 
@@ -1134,7 +1153,7 @@ createListWindow();
 // Code for resizing the windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let listResizers = $(".listResizers");
 let infoResizers = $(".infoResizers");
-const MIN_LIST_WIDTH = 580;
+const MIN_LIST_WIDTH = 650;
 const MIN_LIST_HEIGHT = 350;
 const MIN_INFO_WIDTH = 375;
 const MIN_INFO_HEIGHT = 300;
