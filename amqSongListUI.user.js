@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      2.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -35,7 +35,6 @@ let settingsWindowHeader;
 let settingsWindowBody;
 let settingsWindowCloseButton;
 
-let songListJSON = [];
 let exportData = [];
 
 function createListWindow() {
@@ -62,20 +61,12 @@ function createListWindow() {
     listWindowOptions = $("<div></div>")
         .addClass("slWindowOptions")
         .attr("id", "listWindowOptions")
-        .append($("<textarea></textarea>")
-            .attr("id", "copyBoxJSON")
-            .css("position", "absolute")
-            .css("top", "9999px")
-        )
         .append($("<button></button>")
-            .attr("id", "slCopyJSON")
+            .attr("id", "slExport")
             .attr("class", "btn btn-primary songListOptionsButton")
             .attr("type", "button")
             .text("Export")
             .click(() => {
-                $("#copyBoxJSON").val(JSON.stringify(songListJSON, null, 4)).select();
-                document.execCommand("copy");
-                $("#copyBoxJSON").val("").blur();
                 exportSongData();
             })
         )
@@ -180,8 +171,8 @@ function createListWindow() {
     // button to access the song results
     listWindowOpenButton = $("<div></div>")
         .attr("id", "qpSongListButton")
-        .attr("class", "button floatingContainer")
-        .html("<h1>Song List</h1>")
+        .attr("class", "clickAble qpOption")
+        .html("<i aria-hidden=\"true\" class=\"fa fa-list-ol qpMenuItem\"></i>")
         .click(() => {
             if(listWindow.is(":visible")) {
                 listWindow.hide();
@@ -192,9 +183,16 @@ function createListWindow() {
                 listWindow.show();
                 autoScrollList();
             }
+        })
+        .popover({
+            placement: "bottom",
+            content: "Song List",
+            trigger: "hover"
         });
 
-    $("#qpInfoHider").parent().parent().append(listWindowOpenButton);
+    let oldWidth = $("#qpOptionContainer").width();
+    $("#qpOptionContainer").width(oldWidth + 35);
+    $("#qpOptionContainer > div").append(listWindowOpenButton);
 
     addTableHeader();
 }
@@ -210,7 +208,6 @@ function exportSongData() {
 }
 
 function createNewTable() {
-    songListJSON = [];
     exportData = [];
     clearTable();
     addTableHeader();
@@ -241,6 +238,9 @@ function addTableHeader() {
     let typeCol = $("<td></td>")
         .attr("class", "songType")
         .html("<b>Type</b>");
+    let answerCol = $("<td></td>")
+        .attr("class", "selfAnswer")
+        .html("<b>Answer</b>");
     let guessesCol = $("<td></td>")
         .attr("class", "guessesCounter")
         .html("<b>Guesses</b>");
@@ -289,6 +289,13 @@ function addTableHeader() {
         typeCol.hide();
     }
 
+    if ($("#slShowSelfAnswer").prop("checked")) {
+        answerCol.show();
+    }
+    else {
+        answerCol.hide();
+    }
+
     if ($("#slShowGuesses").prop("checked")) {
         guessesCol.show();
     }
@@ -309,6 +316,7 @@ function addTableHeader() {
     header.append(animeEngCol);
     header.append(animeRomajiCol);
     header.append(typeCol);
+    header.append(answerCol);
     header.append(guessesCol);
     header.append(sampleCol);
     listWindowTable.append(header);
@@ -327,12 +335,21 @@ function addTableEntry(newSong) {
     let guesses = newSong.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
     // add a slight green or red tint for correct or incorrect answers
-    if (newSong.correct === true) {
-        newRow.addClass("correctGuess");
+    if (newSong.correct !== undefined) {
+        if (newSong.correct === true) {
+            newRow.addClass("correctGuess");
+        }
+        if (newSong.correct === false) {
+            newRow.addClass("incorrectGuess");
+        }
+        if ($("#slCorrectGuesses").prop("checked")) {
+            newRow.removeClass("guessHidden");
+        }
+        else {
+            newRow.addClass("guessHidden");
+        }
     }
-    if (newSong.correct === false) {
-        newRow.addClass("incorrectGuess");
-    }
+        
     let songNumber = $("<td></td>")
         .attr("class", "songNumber")
         .text(newSong.songNumber);
@@ -351,6 +368,9 @@ function addTableEntry(newSong) {
     let type = $("<td></td>")
         .attr("class", "songType")
         .text(newSong.type);
+    let selfAnswer = $("<td></td>")
+        .attr("class", "selfAnswer")
+        .text(newSong.selfAnswer !== undefined ? newSong.selfAnswer : "...")
     let guessesCounter = $("<td></td>")
         .attr("class", "guessesCounter")
         .text(guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)")
@@ -399,6 +419,13 @@ function addTableEntry(newSong) {
         type.hide();
     }
 
+    if ($("#slShowSelfAnswer").prop("checked")) {
+        selfAnswer.show();
+    }
+    else {
+        selfAnswer.hide();
+    }
+
     if ($("#slShowGuesses").prop("checked")) {
         guessesCounter.show();
     }
@@ -419,6 +446,7 @@ function addTableEntry(newSong) {
     newRow.append(animeEng);
     newRow.append(animeRomaji);
     newRow.append(type);
+    newRow.append(selfAnswer);
     newRow.append(guessesCounter);
     newRow.append(samplePoint);
     listWindowTable.append(newRow);
@@ -721,7 +749,7 @@ function createsettingsWindow() {
         .css("position", "absolute")
         .css("z-index", "1070")
         .css("width", "300px")
-        .css("height", "325px")
+        .css("height", "350px")
         .css("display", "none");
 
     // create settings header
@@ -738,7 +766,7 @@ function createsettingsWindow() {
         .attr("class", "modal-body")
         .attr("id", "settingsWindowBody")
         .addClass("slWindowBody")
-        .css("height", "250px")
+        .css("height", "275px")
         .append($("<div></div>")
             .attr("id", "slListSettings")
             .text("List Settings")
@@ -775,6 +803,36 @@ function createsettingsWindow() {
                     .text("Auto scroll")
                     .popover({
                         content: "Automatically scrolls to the bottom of the list on each new entry added",
+                        placement: "top",
+                        trigger: "hover",
+                        container: "body",
+                        animation: false
+                    })
+                )
+            )
+            .append($("<div></div>")
+                .attr("class", "slCheckbox")
+                .append($("<div></div>")
+                    .attr("class", "customCheckbox")
+                    .append($("<input id='slCorrectGuesses' type='checkbox'>")
+                        .prop("checked", true)
+                        .click(function () {
+                            if ($(this).prop("checked")) {
+                                $(".correctGuess").removeClass("guessHidden");
+                                $(".incorrectGuess").removeClass("guessHidden");
+                            }
+                            else {
+                                $(".correctGuess").addClass("guessHidden");
+                                $(".incorrectGuess").addClass("guessHidden");
+                            }
+                        })
+                    )
+                    .append($("<label for='slCorrectGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label></label>")
+                    .text("Show Correct")
+                    .popover({
+                        content: "Enable or disable the green or red tint for correct or incorrect guesses",
                         placement: "top",
                         trigger: "hover",
                         container: "body",
@@ -945,6 +1003,27 @@ function createsettingsWindow() {
                     .attr("class", "slCheckbox")
                     .append($("<div></div>")
                         .attr("class", "customCheckbox")
+                        .append($("<input id='slShowSelfAnswer' type='checkbox'>")
+                            .prop("checked", false)
+                            .click(function () {
+                                if ($(this).prop("checked")) {
+                                    $(".selfAnswer").show();
+                                }
+                                else {
+                                    $(".selfAnswer").hide();
+                                }
+                            })
+                        )
+                        .append($("<label for='slShowSelfAnswer'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                    )
+                    .append($("<label></label>")
+                        .text("Answer")
+                    )
+                )
+                .append($("<div></div>")
+                    .attr("class", "slCheckbox")
+                    .append($("<div></div>")
+                        .attr("class", "customCheckbox")
                         .append($("<input id='slShowGuesses' type='checkbox'>")
                             .prop("checked", false)
                             .click(function () {
@@ -1067,20 +1146,6 @@ let answerResultsListener = new Listener("answer results", (result) => {
                 return tmpObj;
             })
     };
-    let newSongJSON = {
-        songNumber: newSong.songNumber,
-        animeEnglish: newSong.anime.english,
-        animeRomaji: newSong.anime.romaji,
-        songName: newSong.name,
-        artist: newSong.artist,
-        type: newSong.type,
-        correctCount: newSong.players.filter((tmpPlayer) => tmpPlayer.correct === true).length,
-        activePlayers: newSong.activePlayers,
-        startSample: newSong.startSample,
-        videoLength: newSong.videoLength,
-        linkWebm: getVideoURL(newSong.urls),
-        linkMP3: getMP3URL(newSong.urls)
-    };
     let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
         return tmpPlayer._name === selfName && tmpPlayer.avatarSlot._disabled === false
     });
@@ -1089,43 +1154,12 @@ let answerResultsListener = new Listener("answer results", (result) => {
             return findPlayer.gamePlayerId === tmpPlayer.gamePlayerId
         });
         newSong.correct = result.players[playerIdx].correct;
+        newSong.selfAnswer = quiz.players[findPlayer.gamePlayerId].avatarSlot.$answerContainerText.text();
     }
     addTableEntry(newSong);
     exportData.push(newSong);
-    songListJSON.push(newSongJSON);
 });
 
-
-// Grab the video and mp3 links
-// Host priority: catbox > animethemes > openingsmoe
-// Video resolution priority: 720 (or 1080 if it's the only resolution available) > 480
-let videoHosts = ["catbox", "animethemes", "openingsmoe"];
-let mp3Hosts = ["catbox"];
-let videoResolutions = [720, 480];
-
-function getVideoURL(URLMap) {
-    for (let host of videoHosts) {
-        if (URLMap[host] !== undefined) {
-            for (let resolution of videoResolutions) {
-                if (URLMap[host][resolution] !== undefined) {
-                    return URLMap[host][resolution];
-                }
-            }
-        }
-    }
-    return null;
-}
-
-function getMP3URL(URLMap) {
-    for (let host of mp3Hosts) {
-        if (URLMap[host] !== undefined) {
-            if (URLMap[host][0] !== undefined) {
-                return URLMap[host][0];
-            }
-        }
-    }
-    return null;
-}
 
 // reset songs on returning to lobby
 let quizOverListener = new Listener("quiz over", (roomSettings) => {
@@ -1459,6 +1493,9 @@ GM_addStyle(`
     border: 1px solid black;
     text-align: center;
 }
+.songData.guessHidden {
+    background-color: rgba(0, 0, 0, 0);
+}
 .correctGuess {
     background-color: rgba(0, 200, 0, 0.07);
 }
@@ -1543,16 +1580,13 @@ GM_addStyle(`
 .fromListHidden {
     width: 100%;
 }
-#qpSongListButton {
-    width: 150px;
-    margin: auto;
-    margin-bottom: 10px;
-    margin-top: -5px;
+#qpOptionContainer {
+    z-index: 10;
 }
-#qpSongListButton > h1 {
-    padding: 5px;
-    font-size: 28px;
-    user-select: none;
+#qpSongListButton {
+    width: 30px;
+    height: 100%;
+    margin-right: 5px;
 }
 .slCheckboxContainer {
     width: 130px;
