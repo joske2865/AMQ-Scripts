@@ -91,13 +91,13 @@ function createSpeedrunWindow() {
         .append($("<div></div>")
             .attr("id", "speedrunInfoRight")
             .html(`
-                <p id="srFastestTime">2.052</p>
-                <p id="srSlowestTime">5.235</p>
-                <p id="srGuessRate">90%</p>
-                <p id="srAverageCorrect">4.235</p>
-                <p id="srAverageTotal">6.231</p>
-                <p id="srTotalTime">3:21.225</p>
-                <p id="srPreviousTime">4.231</p>
+                <p id="srFastestTime">0.000</p>
+                <p id="srSlowestTime">0.000</p>
+                <p id="srGuessRate">0%</p>
+                <p id="srAverageCorrect">0.000</p>
+                <p id="srAverageTotal">0.000</p>
+                <p id="srTotalTime">0.000</p>
+                <p id="srPreviousTime">0.000</p>
             `)
         )
 
