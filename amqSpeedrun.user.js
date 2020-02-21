@@ -134,12 +134,8 @@ createSpeedrunWindow();
 // clear times on quiz ready
 let quizReadyListener = new Listener("quiz ready", data => {
     resetTimes();
-    $("#qpAnswerInput").keypress(function (event) {
-        if (event.which === 13) {
-            answerSubmitTime = Date.now();
-            autoSubmitFlag = false;
-        }
-    })
+    $("#qpAnswerInput").off("keypress", answerHandler);
+    $("#qpAnswerInput").on("keypress", answerHandler);
 });
 
 // start timer on song start
@@ -190,6 +186,13 @@ let quizAnswerResultsListener = new Listener("answer results", result => {
         updateInfo(songNumber, times[songNumber]);
     }
 });
+
+answerHandler = function (event) {
+    if (event.which === 13) {
+        answerSubmitTime = Date.now();
+        autoSubmitFlag = false;
+    }
+}
 
 function updateInfo(songNumber, newTime) {
     $("#srFastestTime").text(formatTime(fastestGuess));
