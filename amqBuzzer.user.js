@@ -26,6 +26,9 @@ let quizPlayNextSongListener = new Listener("play next song", data => {
 });
 
 let quizAnswerResultsListener = new Listener("answer results", result => {
+    if (!buzzed) {
+        gameChat.systemMessage("Buzzed in: N/A");
+    }
     volumeController.muted = false;
     volumeController.adjustVolume();
 });
