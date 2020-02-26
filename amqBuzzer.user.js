@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Buzzer
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Mutes the song on the buzzer (Enter key on empty answer field) and displays time you buzzed in
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
