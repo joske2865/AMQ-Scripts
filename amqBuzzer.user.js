@@ -13,28 +13,38 @@ if (!window.setupDocumentDone) return;
 
 let songStartTime = 0;
 let buzzerTime = 0;
+let isPlayer = false;
 let buzzed = false;
 
 let quizReadyListener = new Listener("quiz ready", data => {
+    // reset the event listener
     $("#qpAnswerInput").off("keypress", answerHandler);
     $("#qpAnswerInput").on("keypress", answerHandler);
 });
 
 let quizPlayNextSongListener = new Listener("play next song", data => {
+    // reset the "buzzed" flag and get the start time on song start
     buzzed = false;
     songStartTime = Date.now();
 });
 
 let quizAnswerResultsListener = new Listener("answer results", result => {
-    if (!buzzed) {
+    // show the buzz message only if the player is playing the game (ie. is not spectating)
+    isPlayer = Object.values(quiz.players).some(player => player.isSelf === true);
+    if (!buzzed && isPlayer) {
         showBuzzMessage("N/A");
     }
-    volumeController.muted = false;
-    volumeController.adjustVolume();
+    // unmute only if the player muted the sound by buzzing and not by manually muting the song
+    if (buzzed) {
+        volumeController.muted = false;
+        volumeController.adjustVolume();
+    }
 });
 
 let answerHandler = function (event) {
+    // on enter key
     if (event.which === 13) {
+        // check if the answer field is empty and check if the player has not buzzed before, so to not spam the chat with messages
         if ($(this).val() === "" && buzzed === false) {
             buzzed = true;
             buzzerTime = Date.now();
