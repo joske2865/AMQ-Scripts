@@ -26,6 +26,9 @@ let quizPlayNextSongListener = new Listener("play next song", data => {
 });
 
 let quizAnswerResultsListener = new Listener("answer results", result => {
+    if (!buzzed) {
+        showBuzzMessage("N/A");
+    }
     volumeController.muted = false;
     volumeController.adjustVolume();
 });
@@ -37,9 +40,13 @@ let answerHandler = function (event) {
             buzzerTime = Date.now();
             volumeController.muted = true;
             volumeController.adjustVolume();
-            gameChat.systemMessage("Buzzed in: " + formatTime(buzzerTime - songStartTime));
+            showBuzzMessage(formatTime(buzzerTime - songStartTime));
         }
     }
+}
+
+function showBuzzMessage(buzzTime) {
+    gameChat.systemMessage("Song " + parseInt($("#qpCurrentSongCount").text()) + " buzz: " + buzzTime);
 }
 
 function formatTime(time) {
