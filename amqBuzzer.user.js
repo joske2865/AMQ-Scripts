@@ -46,7 +46,7 @@ let answerHandler = function (event) {
 }
 
 function showBuzzMessage(buzzTime) {
-    gameChat.systemMessage("Buzzed in: " + buzzTime);
+    gameChat.systemMessage("Song " + parseInt($("#qpCurrentSongCount").text()) + " buzz: " + buzzTime);
 }
 
 function formatTime(time) {
