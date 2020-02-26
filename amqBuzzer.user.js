@@ -27,7 +27,7 @@ let quizPlayNextSongListener = new Listener("play next song", data => {
 
 let quizAnswerResultsListener = new Listener("answer results", result => {
     if (!buzzed) {
-        gameChat.systemMessage("Buzzed in: N/A");
+        showBuzzMessage("N/A");
     }
     volumeController.muted = false;
     volumeController.adjustVolume();
@@ -40,9 +40,13 @@ let answerHandler = function (event) {
             buzzerTime = Date.now();
             volumeController.muted = true;
             volumeController.adjustVolume();
-            gameChat.systemMessage("Buzzed in: " + formatTime(buzzerTime - songStartTime));
+            showBuzzMessage(formatTime(buzzerTime - songStartTime));
         }
     }
+}
+
+function showBuzzMessage(buzzTime) {
+    gameChat.systemMessage("Buzzed in: " + buzzTime);
 }
 
 function formatTime(time) {
