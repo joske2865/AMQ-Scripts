@@ -37,6 +37,22 @@ let settingsWindowCloseButton;
 
 let exportData = [];
 
+// default settings
+let savedSettings = {
+    autoClearList: false,
+    autoScroll: true,
+    showCorrect: true,
+    animeTitles: "romaji",
+    songNumber: true,
+    songName: true,
+    artist: true,
+    anime: true,
+    type: true,
+    answers: false,
+    guesses: false,
+    samplePoint: false
+};
+
 function createListWindow() {
     // create list window
     listWindow = $("<div></div>")
@@ -787,6 +803,10 @@ function createsettingsWindow() {
                     .attr("class", "customCheckbox")
                     .append($("<input id='slAutoClear' type='checkbox'>")
                         .prop("checked", false)
+                        .click(function () {
+                            savedSettings.autoClearList = $(this).prop("checked");
+                            saveSettings();
+                        })
                     )
                     .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                 )
@@ -807,6 +827,10 @@ function createsettingsWindow() {
                     .attr("class", "customCheckbox")
                     .append($("<input id='slAutoScroll' type='checkbox'>")
                         .prop("checked", true)
+                        .click(function () {
+                            savedSettings.autoScroll = $(this).prop("checked");
+                            saveSettings();
+                        })
                     )
                     .append($("<label for='slAutoScroll'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                 )
@@ -836,6 +860,8 @@ function createsettingsWindow() {
                                 $(".correctGuess").addClass("guessHidden");
                                 $(".incorrectGuess").addClass("guessHidden");
                             }
+                            savedSettings.showCorrect = $(this).prop("checked");
+                            saveSettings();
                         })
                     )
                     .append($("<label for='slCorrectGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -882,6 +908,8 @@ function createsettingsWindow() {
                         $(".animeNameRomaji").hide();
                         $(".animeNameEnglish").hide();
                     }
+                    savedSettings.animeTitles = $(this).val();
+                    saveSettings();
                 })
             )
         )
@@ -907,6 +935,8 @@ function createsettingsWindow() {
                                 else {
                                     $(".songNumber").hide();
                                 }
+                                savedSettings.songNumber = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowSongNumber'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -928,6 +958,8 @@ function createsettingsWindow() {
                                 else {
                                     $(".songName").hide();
                                 }
+                                savedSettings.songName = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowSongName'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -949,6 +981,8 @@ function createsettingsWindow() {
                                 else {
                                     $(".songArtist").hide();
                                 }
+                                savedSettings.artist = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowArtist'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -978,6 +1012,8 @@ function createsettingsWindow() {
                                     $(".animeNameEnglish").hide();
                                     $(".animeNameRomaji").hide();
                                 }
+                                savedSettings.anime = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowAnime'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -1002,6 +1038,8 @@ function createsettingsWindow() {
                                 else {
                                     $(".songType").hide();
                                 }
+                                savedSettings.type = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowType'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -1023,6 +1061,8 @@ function createsettingsWindow() {
                                 else {
                                     $(".selfAnswer").hide();
                                 }
+                                savedSettings.answer = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowSelfAnswer'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -1044,6 +1084,8 @@ function createsettingsWindow() {
                                 else {
                                     $(".guessesCounter").hide();
                                 }
+                                savedSettings.guesses = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -1065,6 +1107,8 @@ function createsettingsWindow() {
                                 else {
                                     $(".samplePoint").hide();
                                 }
+                                savedSettings.samplePoint = $(this).prop("checked");
+                                saveSettings();
                             })
                         )
                         .append($("<label for='slShowSamplePoint'><i class='fa fa-check' aria-hidden='true'></i></label>"))
@@ -1096,6 +1140,37 @@ function createsettingsWindow() {
     settingsWindowContent.append(settingsWindowBody);
     settingsWindow.append(settingsWindowContent);
     $("#gameContainer").append(settingsWindow);
+}
+
+// save settings to local storage
+function saveSettings() {
+    localStorage.setItem("songListSettings", JSON.stringify(savedSettings));
+}
+
+// load settings from local storage
+function loadSettings() {
+    // load settings, if nothing is loaded, use default settings
+    let loadedSettings = localStorage.getItem("songListSettings");
+    if (loadedSettings !== null) {
+        savedSettings = JSON.parse(loadedSettings);
+    }
+    updateSettings();
+}
+
+// update settings after loading
+function updateSettings() {
+    $("#slAutoClear").prop("checked", savedSettings.autoClearList);
+    $("#slAutoScroll").prop("checked", savedSettings.autoScroll);
+    $("#slCorrectGuesses").prop("checked", savedSettings.showCorrect);
+    $("#slAnimeTitleSelect").val(savedSettings.animeTitles);
+    $("#slShowSongNumber").prop("checked", savedSettings.songNumber);
+    $("#slShowSongName").prop("checked", savedSettings.songName);
+    $("#slShowArtist").prop("checked", savedSettings.artist);
+    $("#slShowAnime").prop("checked", savedSettings.anime);
+    $("#slShowType").prop("checked", savedSettings.type);
+    $("#slShowSelfAnswer").prop("checked", savedSettings.answers);
+    $("#slShowGuesses").prop("checked", savedSettings.guessed);
+    $("#slShowSamplePoint").prop("checked", savedSettings.samplePoint);
 }
 
 // reset song list for the new round
@@ -1192,6 +1267,7 @@ quizOverListener.bindListener();
 quizLeaveListener.bindListener();
 
 createsettingsWindow();
+loadSettings();
 createInfoWindow();
 createListWindow();
 
