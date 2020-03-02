@@ -376,7 +376,7 @@ function addTableEntry(newSong) {
             newRow.addClass("guessHidden");
         }
     }
-        
+
     let songNumber = $("<td></td>")
         .attr("class", "songNumber")
         .text(newSong.songNumber);
@@ -597,8 +597,9 @@ function createInfoWindow() {
         .attr("class", "close")
         .attr("type", "button")
         .html("<span aria-hidden=\"true\">×</span>")
-        .click(() => {
+        .click(function () {
             infoWindow.hide();
+            $(".selected").removeClass("selected");
         })
 
     infoWindowResizer = $("<div></div>")
@@ -768,7 +769,7 @@ function clearInfo() {
     infoWindowBody.children().remove();
 }
 
-function createsettingsWindow() {
+function createSettingsWindow() {
     // create settings window
     settingsWindow = $("<div></div>")
         .attr("id", "settingsWindow")
@@ -776,7 +777,7 @@ function createsettingsWindow() {
         .css("position", "absolute")
         .css("z-index", "1070")
         .css("width", "300px")
-        .css("height", "350px")
+        .css("height", "365px")
         .css("display", "none");
 
     // create settings header
@@ -793,7 +794,7 @@ function createsettingsWindow() {
         .attr("class", "modal-body")
         .attr("id", "settingsWindowBody")
         .addClass("slWindowBody")
-        .css("height", "275px")
+        .css("height", "290px")
         .append($("<div></div>")
             .attr("id", "slListSettings")
             .text("List Settings")
@@ -1169,7 +1170,7 @@ function updateSettings() {
     $("#slShowAnime").prop("checked", savedSettings.anime);
     $("#slShowType").prop("checked", savedSettings.type);
     $("#slShowSelfAnswer").prop("checked", savedSettings.answers);
-    $("#slShowGuesses").prop("checked", savedSettings.guessed);
+    $("#slShowGuesses").prop("checked", savedSettings.guesses);
     $("#slShowSamplePoint").prop("checked", savedSettings.samplePoint);
 }
 
@@ -1266,7 +1267,7 @@ answerResultsListener.bindListener();
 quizOverListener.bindListener();
 quizLeaveListener.bindListener();
 
-createsettingsWindow();
+createSettingsWindow();
 loadSettings();
 createInfoWindow();
 createListWindow();
