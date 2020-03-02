@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -326,11 +326,22 @@ function addTableEntry(newSong) {
     let newRow = $("<tr></tr>")
         .attr("class", "songData clickAble")
         .click(function () {
-            if (!infoWindow.is(":visible")) {
+            if (!$(this).hasClass("selected")) {
+                $(".selected").removeClass("selected");
+                $(this).addClass("selected");
                 infoWindow.show();
+                updateInfo(newSong);
             }
-            updateInfo(newSong);
-        });
+            else {
+                $(".selected").removeClass("selected");
+                infoWindow.hide();
+            }
+        })
+        .hover(function () {
+            $(this).addClass("hover");
+        }, function () {
+            $(this).removeClass("hover");
+        })
 
     let guesses = newSong.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
@@ -1495,6 +1506,12 @@ GM_addStyle(`
 }
 .songData.guessHidden {
     background-color: rgba(0, 0, 0, 0);
+}
+.songData.hover {
+    box-shadow: 0px 0px 10px cyan;
+}
+.songData.selected {
+    box-shadow: 0px 0px 10px lime;
 }
 .correctGuess {
     background-color: rgba(0, 200, 0, 0.07);
