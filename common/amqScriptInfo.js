@@ -16,7 +16,7 @@ function AMQ_createInstalledWindow() {
                         </div>
                         <div class="modal-body" style="overflow-y: auto;max-height: calc(100vh - 150px);">
                             <div id="installedContainer">
-                                You have the following scripts installed (click on each of them to learn more):<br>
+                                You have the following scripts installed (click on each of them to learn more)<br>
                                 This window can also be opened by going to AMQ settings (the gear icon on bottom right) and clicking "Installed Userscripts"
                                 <div id="installedListContainer"></div>
                             </div>
