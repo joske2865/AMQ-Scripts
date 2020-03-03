@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      2.2
+// @version      2.2.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 
 // ==/UserScript==
 
@@ -1495,6 +1496,25 @@ $(document.documentElement).keydown(function (event) {
             autoScrollList();
         }
     }
+});
+
+// Add metadata
+AMQ_addScriptData({
+    name: "Song List UI",
+    author: "TheJoseph98",
+    description: `
+        <p>Creates a window which includes the song list table with song info such as song name, artist and the anime it's from</p>
+        </p>The list can be accessed by clicking the list icon in the top right while in quiz or by pressing the pause/break key on the keyboard</p>
+        <a href="https://i.imgur.com/sBp3vZX.png" target="_blank"><img src="https://i.imgur.com/sBp3vZX.png" /></a>
+        <p>In the table, you can click on individual entries to get more info about the song, including video URLs, who guessed the song and from which lists the song was pulled (including watching status and score)</p>
+        <p>The song list has customisable options which you can change by clicking the "Settings" button in the song list window, these settings are automatically saved</p>
+        <a href="https://i.imgur.com/vjyZekf.png" target="_blank"><img src="https://i.imgur.com/vjyZekf.png" /></a>
+        <a href="https://i.imgur.com/X5RMnV1.png?1" target="_blank"><img src="https://i.imgur.com/X5RMnV1.png?1" /></a>
+        <p>You can also download the list in JSON format by clicking the "Export" button, this file can then be imported to <a href="https://thejoseph98.github.io/AMQ-Song-List-Viewer/" target="_blank">AMQ Song List Viewer</a> which displays the scoreboard status for each song and has individual player search so you can see what each player answered on each individual song
+        <a href="https://i.imgur.com/C7K9iVX.png" target="_blank"><img src="https://i.imgur.com/C7K9iVX.png" /></a>
+        <p>the windows are draggable and resizable so they fit each user's personal experience</p>
+        <a href="https://i.imgur.com/8SoouXV.png" target="_blank"><img src="https://i.imgur.com/8SoouXV.png" /></a>
+    `
 });
 
 // CSS
