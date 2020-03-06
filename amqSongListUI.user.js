@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    http://tampermonkey.net/
-// @version      2.2.1
+// @version      2.3
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -56,57 +56,50 @@ let savedSettings = {
 
 function createListWindow() {
     // create list window
-    listWindow = $("<div></div>")
-        .attr("id", "listWindow")
-        .addClass("slWindow")
-        .css("position", "absolute")
-        .css("z-index", "1060")
-        .css("width", "650px")
-        .css("height", "480px")
-        .css("display", "none");
+    listWindow = $(`<div id="listWindow" class="slWindow" style="position: absolute; z-index: 1060; width: 650px; height: 480px; display: none;"></div>`);
 
     // create list header
-    listWindowHeader = $("<div></div>")
-        .addClass("modal-header")
-        .attr("id", "listWindowHeader")
-        .append($("<h2></h2>")
-            .attr("class", "modal-title")
-            .text("Song List")
-        )
+    listWindowHeader = $(`<div class="modal-header" id="listWindowHeader"><h2 class="modal-title">Song List</h2></div>`);
 
     // create the options tab
-    listWindowOptions = $("<div></div>")
-        .addClass("slWindowOptions")
-        .attr("id", "listWindowOptions")
-        .append($("<button></button>")
-            .attr("id", "slExport")
-            .attr("class", "btn btn-primary songListOptionsButton")
-            .attr("type", "button")
-            .text("Export")
+    listWindowOptions = $(`<div class="slWindowOptions" id="listWindowOptions"></div>`)
+        .append($(`<button id="slExport" class="btn btn-primary songListOptionsButton" type="button"><i aria-hidden="true" class="fa fa-file"></i></button`)
             .click(() => {
                 exportSongData();
             })
-        )
-        .append($("<button></button>")
-            .attr("class", "btn btn-default songListOptionsButton")
-            .attr("type", "button")
-            .text("Clear List")
-            .click(() => {
-                createNewTable();
+            .popover({
+                placement: "bottom",
+                content: "Export",
+                trigger: "hover",
+                container: "body",
+                animation: false
             })
         )
-        .append($("<button></button>")
-            .attr("class", "btn btn-default songListOptionsButton")
-            .attr("type", "button")
-            .text("New Tab")
+        .append($(`<button class="btn btn-default songListOptionsButton" type="button"><i aria-hidden="true" class="fa fa-trash-o"></i></button>`)
+            .dblclick(() => {
+                createNewTable();
+            })
+            .popover({
+                placement: "bottom",
+                content: "Clear List (double click)",
+                trigger: "hover",
+                container: "body",
+                animation: false
+            })
+        )
+        .append($(`<button class="btn btn-default songListOptionsButton" type="button"><i aria-hidden="true" class="fa fa-plus"></i></button>`)
             .click(() => {
                 openInNewTab();
             })
+            .popover({
+                placement: "bottom",
+                content: "Open in New Tab",
+                trigger: "hover",
+                container: "body",
+                animation: false
+            })
         )
-        .append($("<button></button>")
-            .attr("class", "btn btn-default songListOptionsButton")
-            .attr("type", "button")
-            .text("Settings")
+        .append($(`<button class="btn btn-default songListOptionsButton" type="button"><i aria-hidden="true" class="fa fa-gear"></i></button>`)
             .click(() => {
                 if (settingsWindow.is(":visible")) {
                     settingsWindow.hide()
@@ -115,60 +108,69 @@ function createListWindow() {
                     settingsWindow.show();
                 }
             })
+            .popover({
+                placement: "bottom",
+                content: "Settings",
+                trigger: "hover",
+                container: "body",
+                animation: false
+            })
         )
-        .append($("<input>")
-            .attr("id", "slSearch")
-            .attr("type", "text")
-            .attr("placeholder", "Search songs")
+        .append($(`<input id="slSearch" type="text" placeholder="Search songs">`)
             .on("input", function (event) {
-                let searchQuery = $(this).val();
-                let regexQuery = createAnimeSearchRegexQuery(searchQuery);
-                let searchRegex = new RegExp(regexQuery, "i");
-                $("tr.songData").each((index, elem) => {
-                    applyRegex(elem, searchRegex);
-                });
+                applySearchAll();
             })
             .click(() => {
                 quiz.setInputInFocus(false);
             })
         )
 
-    // create list body
-    listWindowBody = $("<div></div>")
-        .attr("class", "modal-body resizableList")
-        .attr("id", "listWindowBody")
-        .addClass("slWindowBody")
-        .css("height", "340px");
+        .append($(`<div class="slCorrectFilter"></div>`)
+            .append($(`<div class="slFilterContainer"></div>`)
+                .append($(`<div class="customCheckbox"></div>`)
+                    .append($(`<input id="slFilterCorrect" type="checkbox">`)
+                        .click(function () {
+                            updateCorrectAll();
+                        })
+                    )
+                    .append(`<label for="slFilterCorrect"><i class="fa fa-check" aria-hidden="true"></i></label>`)
+                )
+                .append(`<div style="margin-left: 25px;">Correct</div>`)
+            )
+            .append($(`<div class="slFilterContainer"></div>`)
+                .append($(`<div class="customCheckbox"></div>`)
+                    .append($(`<input id="slFilterIncorrect" type="checkbox">`)
+                        .click(function () {
+                            updateCorrectAll();
+                        })
+                    )
+                    .append(`<label for="slFilterIncorrect"><i class="fa fa-check" aria-hidden="true"></i></label>`)
+                )
+                .append(`<div style="margin-left: 25px;">Incorrect</div>`)
+            )
+        )
 
-    listWindowContent = $("<div></div>")
-        .attr("id", "listWindowContent")
-        .addClass("slWindowContent");
+    // create list body
+    listWindowBody = $(`<div class="modal-body resizableList slWindowBody" id="listWindowBody" style="height: 340px;"></div>`);
+
+    listWindowContent = $(`<div id="listWindowContent" class="slWindowContent"></div>`);
 
     // create close button
-    listWindowCloseButton = $("<div></div>")
-        .attr("class", "close")
-        .attr("type", "button")
-        .html("<span aria-hidden=\"true\">×</span>")
+    listWindowCloseButton = $(`<div class="close" type="button"><span aria-hidden="true">×</span></div>`)
         .click(() => {
             listWindow.hide();
             infoWindow.hide();
             settingsWindow.hide();
+            $(".rowSelected").removeClass("rowSelected");
         });
 
-    listWindowResizer = $("<div></div>")
-        .attr("class", "listResizers")
-        .append($("<div></div>")
-            .attr("class", "listResizer top-left")
-        )
-        .append($("<div></div>")
-            .attr("class", "listResizer top-right")
-        )
-        .append($("<div></div>")
-            .attr("class", "listResizer bottom-left")
-        )
-        .append($("<div></div>")
-            .attr("class", "listResizer bottom-right")
-        );
+    listWindowResizer = $(
+        `<div class="listResizers">
+            <div class="listResizer top-left"></div>
+            <div class="listResizer top-right"></div>
+            <div class="listResizer bottom-left"></div>
+            <div class="listResizer bottom-right"></div>
+        </div>`);
 
     // link nodes
     listWindowHeader.prepend(listWindowCloseButton);
@@ -180,21 +182,17 @@ function createListWindow() {
     $("#gameContainer").append(listWindow);
 
     // create results table
-    listWindowTable = $("<table></table>")
-        .attr("id", "listWindowTable")
-        .attr("class", "table floatingContainer");
+    listWindowTable = $(`<table id="listWindowTable" class="table floatingContainer"></table>`);
     listWindowBody.append(listWindowTable);
 
     // button to access the song results
-    listWindowOpenButton = $("<div></div>")
-        .attr("id", "qpSongListButton")
-        .attr("class", "clickAble qpOption")
-        .html("<i aria-hidden=\"true\" class=\"fa fa-list-ol qpMenuItem\"></i>")
-        .click(() => {
+    listWindowOpenButton = $(`<div id="qpSongListButton" class="clickAble qpOption"><i aria-hidden="true" class="fa fa-list-ol qpMenuItem"></i></div>`)
+        .click(function () {
             if(listWindow.is(":visible")) {
                 listWindow.hide();
                 infoWindow.hide();
                 settingsWindow.hide();
+                $(".rowSelected").removeClass("rowSelected");
             }
             else {
                 listWindow.show();
@@ -214,11 +212,43 @@ function createListWindow() {
     addTableHeader();
 }
 
+function updateCorrect(elem) {
+    let correctEnabled = $("#slFilterCorrect").prop("checked");
+    let incorrectEnabled = $("#slFilterIncorrect").prop("checked");
+    if (correctEnabled && incorrectEnabled) {
+        $(elem).removeClass("rowFiltered");
+    }
+    else if (!correctEnabled && !incorrectEnabled) {
+        $(elem).removeClass("rowFiltered");
+    }
+    else if (correctEnabled && !incorrectEnabled) {
+        if ($(elem).hasClass("correctGuess")) {
+            $(elem).removeClass("rowFiltered");
+        }
+        else {
+            $(elem).addClass("rowFiltered");
+        }
+    }
+    else {
+        if ($(elem).hasClass("incorrectGuess")) {
+            $(elem).removeClass("rowFiltered");
+        }
+        else {
+            $(elem).addClass("rowFiltered");
+        }
+    }
+    applySearch(elem);
+}
+
+function updateCorrectAll() {
+    $(".songData").each((index, elem) => {
+        updateCorrect(elem);
+    });
+}
+
 function exportSongData() {
     let JSONData = new Blob([JSON.stringify(exportData, null, 4)], {type: "application/json"});
-    let tmpLink = $("<a></a>")
-        .attr("href", URL.createObjectURL(JSONData))
-        .attr("download", "export.json")
+    let tmpLink = $(`<a href=` + URL.createObjectURL(JSONData) + ` download="export.json"></a>`);
     $(document.body).append(tmpLink);
     tmpLink.get(0).click();
     tmpLink.remove();
@@ -235,35 +265,16 @@ function clearTable() {
 }
 
 function addTableHeader() {
-    let header = $("<tr></tr>")
-        .attr("class", "header")
-    let numberCol = $("<td></td>")
-        .attr("class", "songNumber")
-        .html("<b>Number</b>");
-    let nameCol = $("<td></td>")
-        .attr("class", "songName")
-        .html("<b>Song Name</b>");
-    let artistCol = $("<td></td>")
-        .attr("class", "songArtist")
-        .html("<b>Artist</b>");
-    let animeEngCol = $("<td></td>")
-        .attr("class", "animeNameEnglish")
-        .html("<b>Anime</b>")
-    let animeRomajiCol = $("<td></td>")
-        .attr("class", "animeNameRomaji")
-        .html("<b>Anime</b>");
-    let typeCol = $("<td></td>")
-        .attr("class", "songType")
-        .html("<b>Type</b>");
-    let answerCol = $("<td></td>")
-        .attr("class", "selfAnswer")
-        .html("<b>Answer</b>");
-    let guessesCol = $("<td></td>")
-        .attr("class", "guessesCounter")
-        .html("<b>Guesses</b>");
-    let sampleCol = $("<td></td>")
-        .attr("class", "samplePoint")
-        .html("<b>Sample</b>");
+    let header = $(`<tr class="header"></tr>`)
+    let numberCol = $(`<td class="songNumber"><b>Number</b></td>`);
+    let nameCol = $(`<td class="songName"><b>Song Name</b></td>`);
+    let artistCol = $(`<td class="songArtist"><b>Artist</b></td>`);
+    let animeEngCol = $(`<td class="animeNameEnglish"><b>Anime</b></td>`);
+    let animeRomajiCol = $(`<td class="animeNameRomaji"><b>Anime</b></td>`);
+    let typeCol = $(`<td class="songType"><b>Type<b></td>`);
+    let answerCol = $(`<td class="selfAnswer"><b>Answer</b></td>`);
+    let guessesCol = $(`<td class="guessesCounter"><b>Guesses</b></td>`);
+    let sampleCol = $(`<td class="samplePoint"><b>Sample</b></td>`);
 
     if ($("#slShowSongNumber").prop("checked")) {
         numberCol.show();
@@ -340,17 +351,16 @@ function addTableHeader() {
 }
 
 function addTableEntry(newSong) {
-    let newRow = $("<tr></tr>")
-        .attr("class", "songData clickAble")
+    let newRow = $(`<tr class="songData clickAble"></tr>`)
         .click(function () {
-            if (!$(this).hasClass("selected")) {
-                $(".selected").removeClass("selected");
-                $(this).addClass("selected");
+            if (!$(this).hasClass("rowSelected")) {
+                $(".rowSelected").removeClass("rowSelected");
+                $(this).addClass("rowSelected");
                 infoWindow.show();
                 updateInfo(newSong);
             }
             else {
-                $(".selected").removeClass("selected");
+                $(".rowSelected").removeClass("rowSelected");
                 infoWindow.hide();
             }
         })
@@ -378,33 +388,15 @@ function addTableEntry(newSong) {
         }
     }
 
-    let songNumber = $("<td></td>")
-        .attr("class", "songNumber")
-        .text(newSong.songNumber);
-    let songName = $("<td></td>")
-        .attr("class", "songName")
-        .text(newSong.name);
-    let artist = $("<td></td>")
-        .attr("class", "songArtist")
-        .text(newSong.artist);
-    let animeEng = $("<td></td>")
-        .attr("class", "animeNameEnglish")
-        .text(newSong.anime.english)
-    let animeRomaji = $("<td></td>")
-        .attr("class", "animeNameRomaji")
-        .text(newSong.anime.romaji);
-    let type = $("<td></td>")
-        .attr("class", "songType")
-        .text(newSong.type);
-    let selfAnswer = $("<td></td>")
-        .attr("class", "selfAnswer")
-        .text(newSong.selfAnswer !== undefined ? newSong.selfAnswer : "...")
-    let guessesCounter = $("<td></td>")
-        .attr("class", "guessesCounter")
-        .text(guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)")
-    let samplePoint = $("<td></td>")
-        .attr("class", "samplePoint")
-        .text(formatSamplePoint(newSong.startSample, newSong.videoLength));
+    let songNumber = $(`<td class="songNumber">` + newSong.songNumber + `</td>`);
+    let songName = $(`<td class="songName">` + newSong.name + `</td>`);
+    let artist = $(`<td class="songArtist">` + newSong.artist + `</td>`);
+    let animeEng = $(`<td class="animeNameEnglish">` + newSong.anime.english + `</td>`);
+    let animeRomaji = $(`<td class="animeNameRomaji">` + newSong.anime.romaji + `</td>`);
+    let type = $(`<td class="songType">` + newSong.type + `</td>`);
+    let selfAnswer = $(`<td class="selfAnswer">` + (newSong.selfAnswer !== undefined ? newSong.selfAnswer : "...") + `</td>`);
+    let guessesCounter = $(`<td class="guessesCounter">` + guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)" + `</td>`);
+    let samplePoint = $(`<td class="samplePoint">` + formatSamplePoint(newSong.startSample, newSong.videoLength) + `</td>`);
 
     if ($("#slShowSongNumber").prop("checked")) {
         songNumber.show();
@@ -478,7 +470,20 @@ function addTableEntry(newSong) {
     newRow.append(guessesCounter);
     newRow.append(samplePoint);
     listWindowTable.append(newRow);
-    applyRegex(newRow, new RegExp(createAnimeSearchRegexQuery($("#slSearch").val()), "i"));
+    updateCorrect(newRow);
+}
+
+function applySearch(elem) {
+    let searchQuery = $("#slSearch").val();
+    let regexQuery = createAnimeSearchRegexQuery(searchQuery);
+    let searchRegex = new RegExp(regexQuery, "i");
+    applyRegex(elem, searchRegex);
+}
+
+function applySearchAll() {
+    $("tr.songData").each((index, elem) => {
+        applySearch(elem);
+    });
 }
 
 function applyRegex(elem, searchRegex) {
@@ -563,60 +568,31 @@ function openInNewTab() {
 
 function createInfoWindow() {
     // create info window
-    infoWindow = $("<div></div>")
-        .attr("id", "infoWindow")
-        .addClass("slWindow")
-        .css("position", "absolute")
-        .css("z-index", "1065")
-        .css("width", "450px")
-        .css("height", "350px")
-        .css("display", "none");
+    infoWindow = $(`<div id="infoWindow" class="slWindow" style="position: absolute; z-index: 1065; width: 450px; height: 350px; display: none;"></div>`);
 
     // create info header
-    infoWindowHeader = $("<div></div>")
-        .addClass("modal-header")
-        .attr("id", "infoWindowHeader")
-        .append($("<h2></h2>")
-            .attr("class", "modal-title")
-            .text("Song Info")
-        )
+    infoWindowHeader = $(`<div class="modal-header" id="infoWindowHeader"><h2 class="modal-title">Song Info</h2></div>`);
 
     // create info body
-    infoWindowBody = $("<div></div>")
-        .attr("class", "modal-body resizableInfo")
-        .attr("id", "infoWindowBody")
-        .addClass("slWindowBody")
-        .css("height", "275px");
+    infoWindowBody = $(`<div class="modal-body resizableInfo slWindowBody" id="infoWindowBody" style="height: 275px;"></div>`);
 
     // create info content
-    infoWindowContent = $("<div></div>")
-        .attr("id", "infoWindowContent")
-        .addClass("slWindowContent");
+    infoWindowContent = $(`<div id="infoWindowContent" class="slWindowContent"></div>`);
 
     // create info window close button
-    infoWindowCloseButton = $("<button></button>")
-        .attr("class", "close")
-        .attr("type", "button")
-        .html("<span aria-hidden=\"true\">×</span>")
+    infoWindowCloseButton = $(`<button class="close" type="button"><span aria-hidden="true">×</span></button>`)
         .click(function () {
             infoWindow.hide();
-            $(".selected").removeClass("selected");
+            $(".rowSelected").removeClass("rowSelected");
         })
 
-    infoWindowResizer = $("<div></div>")
-        .attr("class", "infoResizers")
-        .append($("<div></div>")
-            .attr("class", "infoResizer top-left")
-        )
-        .append($("<div></div>")
-            .attr("class", "infoResizer top-right")
-        )
-        .append($("<div></div>")
-            .attr("class", "infoResizer bottom-left")
-        )
-        .append($("<div></div>")
-            .attr("class", "infoResizer bottom-right")
-        );
+    infoWindowResizer = $(
+        `<div class="infoResizers">
+            <div class="infoResizer top-left"></div>
+            <div class="infoResizer top-right"></div>
+            <div class="infoResizer bottom-left"></div>
+            <div class="infoResizer bottom-right"></div>
+        </div>`);
 
     // link nodes
     infoWindowHeader.prepend(infoWindowCloseButton);
@@ -629,55 +605,40 @@ function createInfoWindow() {
 
 function updateInfo(song) {
     clearInfo();
-    let infoRow1 = $("<div></div>")
-        .attr("class", "infoRow");
-    let infoRow2 = $("<div></div>")
-        .attr("class", "infoRow");
-    let infoRow3 = $("<div></div>")
-        .attr("class", "infoRow");
-    let infoRow4 = $("<div></div>")
-        .attr("class", "infoRow");
+    let infoRow1 = $(`<div class="infoRow"></div>`);
+    let infoRow2 = $(`<div class="infoRow"></div>`);
+    let infoRow3 = $(`<div class="infoRow"></div>`);
+    let infoRow4 = $(`<div class="infoRow"></div>`);
 
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
-    let songNameContainer = $("<div></div>")
-        .attr("id", "songNameContainer")
-        .html("<h5><b>Song Name</b></h5><p>" + song.name + "</p>");
-    let artistContainer = $("<div></div>")
-        .attr("id", "artistContainer")
-        .html("<h5><b>Artist</b></h5><p>" + song.artist + "</p>");
-    let animeEnglishContainer = $("<div></div>")
-        .attr("id", "animeEnglishContainer")
-        .html("<h5><b>Anime English</b></h5><p>" + song.anime.english + "</p>");
-    let animeRomajiContainer = $("<div></div>")
-        .attr("id", "animeRomajiContainer")
-        .html("<h5><b>Anime Romaji</b></h5><p>" + song.anime.romaji + "</p>");
-    let typeContainer = $("<div></div>")
-        .attr("id", "typeContainer")
-        .html("<h5><b>Type</b></h5><p>" + song.type + "</p>");
-    let sampleContainer = $("<div></div>")
-        .attr("id", "sampleContainer")
+    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Artist</b></h5><p>` + song.name + `</p></div>`)
+    let artistContainer = $(`<div id="artistContainer"><h5><b>Artist</b></h5><p>` + song.artist + `</p></div>`)
+    let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5><b>Anime English</b></h5><p>` + song.anime.english + `</p></div>`);
+    let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5><b>Anime Romaji</b></h5><p>` + song.anime.romaji + `</p></div>`);
+    let typeContainer = $(`<div id="typeContainer"><h5><b>Type</b></h5><p>` + song.type + `</p></div>`);
+    let sampleContainer = $(`<div id="sampleContainer"></div>`)
         .html("<h5><b>Sample Point</b></h5><p>" + formatSamplePoint(song.startSample, song.videoLength) + "</p>");
-    let guessedContainer = $("<div></div>")
-        .attr("id", "guessedContainer")
-        .html("<h5><b>Guessed<br>(" + guesses.length + "/" + song.activePlayers + ", " + parseFloat((guesses.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
-    let fromListContainer = $("<div></div>")
-        .attr("id", "fromListContainer")
-        .html("<h5><b>From Lists<br>(" + song.fromList.length + "/" + song.totalPlayers + ", " + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
-    let urlContainer = $("<div></div>")
-        .attr("id", "urlContainer")
-        .html("<h5><b>URLs</b></h5>");
+    let guessedContainer = $(`<div id="guessedContainer"></div>`)
+        .html("<h5><b>Guessed<br>" + guesses.length + "/" + song.activePlayers + " (" + parseFloat((guesses.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
+    let fromListContainer = $(`<div id="fromListContainer"></div>`)
+        .html("<h5><b>From Lists<br>" + song.fromList.length + "/" + song.totalPlayers + " (" + parseFloat((song.fromList.length/song.totalPlayers*100).toFixed(2)) + "%)</b></h5>");
+    let urlContainer = $(`<div id="urlContainer"><h5><b>URLs</b></h5></div>`);
 
+    // row 1: song name, artist, type
     infoRow1.append(songNameContainer);
     infoRow1.append(artistContainer);
     infoRow1.append(typeContainer);
 
+    // row 2: anime english, romaji, sample point
     infoRow2.append(animeEnglishContainer);
     infoRow2.append(animeRomajiContainer);
     infoRow2.append(sampleContainer);
 
+    // row 3: URLs
     infoRow3.append(urlContainer);
 
+    // row 4: guessed and rig lists
     infoRow4.append(guessedContainer);
     infoRow4.append(fromListContainer);
 
@@ -685,46 +646,34 @@ function updateInfo(song) {
         guessedContainer.css("width", "98%");
         fromListContainer.hide();
         if (guesses.length > 1) {
-            let guessedListLeft = $("<ul></ul>")
-                .attr("id", "guessedListLeft");
-            let guessedListRight = $("<ul></ul>")
-                .attr("id", "guessedListRight");
+            let guessedListLeft = $(`<ul id="guessedListLeft"></ul>`);
+            let guessedListRight = $(`<ul id="guessedListRight"></ul>`);
             let i = 0;
             for (let guessed of guesses) {
                 if (i++ % 2 === 0) {
-                    guessedListLeft.append($("<li></li>")
-                        .text(guessed.name + " (" + guessed.score + ")")
-                    );
+                    guessedListLeft.append($(`<li>` + guessed.name + " (" + guessed.score + ")" + `</li>`));
                 }
                 else {
-                    guessedListRight.append($("<li></li>")
-                        .text(guessed.name + " (" + guessed.score + ")")
-                    );
+                    guessedListRight.append($(`<li>` + guessed.name + " (" + guessed.score + ")" + `</li>`));
                 }
             }
             guessedContainer.append(guessedListLeft);
             guessedContainer.append(guessedListRight);
         }
         else {
-            let listContainer = $("<ul></ul>")
-                .attr("id", "guessedListContainer");
+            $(`<ul id="guessedListContainer"></ul>`);
             for (let guessed of guesses) {
-                listContainer.append($("<li></li>")
-                    .text(guessed.name + " (" + guessed.score + ")")
-                );
+                listContainer.append($(`<li>` + guessed.name + " (" + guessed.score + ")" + `</li>`));
             }
             guessedContainer.append(listContainer);
         }
     }
     else {
         guessedContainer.css("width", "");
-        let listContainer = $("<ul></ul>")
-            .attr("id", "guessedListContainer");
+        let listContainer = $(`<ul id="guessedListContainer"></ul>`);
         fromListContainer.show();
         for (let guessed of guesses) {
-            listContainer.append($("<li></li>")
-                .text(guessed.name + " (" + guessed.score + ")")
-            );
+            listContainer.append($(`<li>` + guessed.name + " (" + guessed.score + ")" + `</li>`));
         }
         guessedContainer.append(listContainer);
     }
@@ -739,9 +688,7 @@ function updateInfo(song) {
 
     listContainer = $("<ul></ul>");
     for (let fromList of song.fromList) {
-        listContainer.append($("<li></li>")
-            .text(fromList.name + " (" + listStatus[fromList.listStatus] + ((fromList.score !== null) ? ", " + fromList.score + ")" : ")"))
-        );
+        listContainer.append($(`<li>` + fromList.name + " (" + listStatus[fromList.listStatus] + ((fromList.score !== null) ? ", " + fromList.score + ")" : ")") + `</li>`));
     }
     fromListContainer.append(listContainer);
 
@@ -753,9 +700,7 @@ function updateInfo(song) {
             innerHTML += (host === "catbox" ? "Catbox " : (host === "animethemes" ? "AnimeThemes " : "OpeningsMoe "));
             innerHTML += (resolution === "0") ? "MP3: " : (resolution === "480") ? "480p: " : "720p: ";
             innerHTML += "<a href=\"" + url + "\" target=\"_blank\">" + url + "</a>";
-            listContainer.append($("<li></li>")
-                .html(innerHTML)
-            );
+            listContainer.append($(`<li>` + innerHTML + `</li>`));
         }
     }
     urlContainer.append(listContainer);
@@ -772,37 +717,17 @@ function clearInfo() {
 
 function createSettingsWindow() {
     // create settings window
-    settingsWindow = $("<div></div>")
-        .attr("id", "settingsWindow")
-        .addClass("slWindow")
-        .css("position", "absolute")
-        .css("z-index", "1070")
-        .css("width", "300px")
-        .css("height", "365px")
-        .css("display", "none");
+    settingsWindow = $(`<div id="settingsWindow" class="slWindow" style="position: absolute; z-index: 1070; width: 300px; height: 365px; display: none;"></div>`);
 
     // create settings header
-    settingsWindowHeader = $("<div></div>")
-        .addClass("modal-header")
-        .attr("id", "settingsWindowHeader")
-        .append($("<h2></h2>")
-            .attr("class", "modal-title")
-            .text("Settings")
-        );
+    settingsWindowHeader = $(`<div class="modal-header" id="settingsWindowHeader"></div>`)
+        .append($(`<h2 class="modal-title">Settings</h2>`));
 
     // create settings body
-    settingsWindowBody = $("<div></div>")
-        .attr("class", "modal-body")
-        .attr("id", "settingsWindowBody")
-        .addClass("slWindowBody")
-        .css("height", "290px")
-        .append($("<div></div>")
-            .attr("id", "slListSettings")
-            .text("List Settings")
-            .append($("<div></div>")
-                .attr("class", "slCheckbox")
-                .append($("<div></div>")
-                    .attr("class", "customCheckbox")
+    settingsWindowBody = $(`<div class="modal-body slWindowBody" id="settingsWindowBody" style="height: 290px"></div>`)
+        .append($(`<div id="slListSettings">List Settings</div>`)
+            .append($(`<div class="slCheckbox"></div>`)
+                .append($(`<div class="customCheckbox"></div>`)
                     .append($("<input id='slAutoClear' type='checkbox'>")
                         .prop("checked", false)
                         .click(function () {
@@ -812,8 +737,7 @@ function createSettingsWindow() {
                     )
                     .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                 )
-                .append($("<label></label>")
-                    .text("Auto clear list")
+                .append($("<label>Auto Clear List</label>")
                     .popover({
                         content: "Automatically clears the list on quiz start, quiz end or when leaving the lobby",
                         placement: "top",
@@ -823,10 +747,8 @@ function createSettingsWindow() {
                     })
                 )
             )
-            .append($("<div></div>")
-                .attr("class", "slCheckbox")
-                .append($("<div></div>")
-                    .attr("class", "customCheckbox")
+            .append($(`<div class="slCheckbox"></div>`)
+                .append($(`<div class="customCheckbox"></div>`)
                     .append($("<input id='slAutoScroll' type='checkbox'>")
                         .prop("checked", true)
                         .click(function () {
@@ -836,8 +758,7 @@ function createSettingsWindow() {
                     )
                     .append($("<label for='slAutoScroll'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                 )
-                .append($("<label></label>")
-                    .text("Auto scroll")
+                .append($("<label>Auto Scroll</label>")
                     .popover({
                         content: "Automatically scrolls to the bottom of the list on each new entry added",
                         placement: "top",
@@ -847,10 +768,8 @@ function createSettingsWindow() {
                     })
                 )
             )
-            .append($("<div></div>")
-                .attr("class", "slCheckbox")
-                .append($("<div></div>")
-                    .attr("class", "customCheckbox")
+            .append($(`<div class="slCheckbox"></div>`)
+                .append($(`<div class="customCheckbox"></div>`)
                     .append($("<input id='slCorrectGuesses' type='checkbox'>")
                         .prop("checked", true)
                         .click(function () {
@@ -868,8 +787,7 @@ function createSettingsWindow() {
                     )
                     .append($("<label for='slCorrectGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                 )
-                .append($("<label></label>")
-                    .text("Show Correct")
+                .append($("<label>Show Correct</label>")
                     .popover({
                         content: "Enable or disable the green or red tint for correct or incorrect guesses",
                         placement: "top",
@@ -881,20 +799,10 @@ function createSettingsWindow() {
             )
         )
 
-        .append($("<div></div>")
-            .attr("id", "slAnimeTitleSettings")
-            .text("Anime Titles")
-            .append($("<select></select>")
-                .attr("id", "slAnimeTitleSelect")
-                .append($("<option></option>")
-                    .text("English")
-                    .attr("value", "english")
-                )
-                .append($("<option></option>")
-                    .text("Romaji")
-                    .attr("value", "romaji")
-                    .attr("selected", "selected")
-                )
+        .append($(`<div id="slAnimeTitleSettings">Anime Titles</div>`)
+            .append($(`<select id="slAnimeTitleSelect"></select>`)
+                .append($(`<option value="english">English</option>`))
+                .append($(`<option value="romaji" selected>Romaji</option>`))
                 .change(function () {
                     if ($("#slShowAnime").prop("checked")) {
                         if ($(this).val() === "romaji") {
@@ -916,18 +824,11 @@ function createSettingsWindow() {
             )
         )
 
-        .append($("<div></div>")
-            .attr("id", "slTableSettings")
-            .append($("<div></div>")
-                .text("Table Display Settings")
-                .css("width", "100%")
-            )
-            .append($("<div></div>")
-                .attr("class", "slTableSettingsContainer")
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+        .append($(`<div id="slTableSettings"></div>`)
+            .append($(`<div style="width: 100%">Table Display Settings</div>`))
+            .append($(`<div class="slTableSettingsContainer"></div>`)
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowSongNumber' type='checkbox'>")
                             .prop("checked", true)
                             .click(function () {
@@ -943,14 +844,10 @@ function createSettingsWindow() {
                         )
                         .append($("<label for='slShowSongNumber'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Song Number")
-                    )
+                    .append($("<label>Song Number</label>"))
                 )
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowSongName' type='checkbox'>")
                             .prop("checked", true)
                             .click(function () {
@@ -966,14 +863,10 @@ function createSettingsWindow() {
                         )
                         .append($("<label for='slShowSongName'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Song Name")
-                    )
+                    .append($("<label>Song Name</label>"))
                 )
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowArtist' type='checkbox'>")
                             .prop("checked", true)
                             .click(function () {
@@ -989,14 +882,10 @@ function createSettingsWindow() {
                         )
                         .append($("<label for='slShowArtist'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Artist")
-                    )
+                    .append($("<label>Artist</label>"))
                 )
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowAnime' type='checkbox'>")
                             .prop("checked", true)
                             .click(function () {
@@ -1020,17 +909,12 @@ function createSettingsWindow() {
                         )
                         .append($("<label for='slShowAnime'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Anime")
-                    )
+                    .append($("<label>Anime</label>"))
                 )
             )
-            .append($("<div></div>")
-                .attr("class", "slTableSettingsContainer")
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+            .append($(`<div class="slTableSettingsContainer"></div>`)
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowType' type='checkbox'>")
                             .prop("checked", true)
                             .click(function () {
@@ -1046,14 +930,10 @@ function createSettingsWindow() {
                         )
                         .append($("<label for='slShowType'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Type")
-                    )
+                    .append($("<label>Type</label>"))
                 )
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowSelfAnswer' type='checkbox'>")
                             .prop("checked", false)
                             .click(function () {
@@ -1063,20 +943,16 @@ function createSettingsWindow() {
                                 else {
                                     $(".selfAnswer").hide();
                                 }
-                                savedSettings.answer = $(this).prop("checked");
+                                savedSettings.answers = $(this).prop("checked");
                                 saveSettings();
                             })
                         )
                         .append($("<label for='slShowSelfAnswer'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Answer")
-                    )
+                    .append($("<label>Answer</label>"))
                 )
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowGuesses' type='checkbox'>")
                             .prop("checked", false)
                             .click(function () {
@@ -1092,14 +968,10 @@ function createSettingsWindow() {
                         )
                         .append($("<label for='slShowGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Guesses")
-                    )
+                    .append($("<label>Guesses</label>"))
                 )
-                .append($("<div></div>")
-                    .attr("class", "slCheckbox")
-                    .append($("<div></div>")
-                        .attr("class", "customCheckbox")
+                .append($(`<div class="slCheckbox"></div>`)
+                    .append($(`<div class="customCheckbox"></div>`)
                         .append($("<input id='slShowSamplePoint' type='checkbox'>")
                             .prop("checked", false)
                             .click(function () {
@@ -1115,23 +987,16 @@ function createSettingsWindow() {
                         )
                         .append($("<label for='slShowSamplePoint'><i class='fa fa-check' aria-hidden='true'></i></label>"))
                     )
-                    .append($("<label></label>")
-                        .text("Sample Point")
-                    )
+                    .append($("<label>Sample Point</label>"))
                 )
-            )
+            )  
         )
 
     // create settings content
-    settingsWindowContent = $("<div></div>")
-        .attr("id", "settingsWindowContent")
-        .addClass("slWindowContent");
+    settingsWindowContent = $(`<div id="settingsWindowContent" class="slWindowContent"></div>`)
 
     // create settings window close button
-    settingsWindowCloseButton = $("<button></button>")
-        .attr("class", "close")
-        .attr("type", "button")
-        .html("<span aria-hidden=\"true\">×</span>")
+    settingsWindowCloseButton = $(`<button class="close" type="button"><span aria-hidden="true">×</span></button>`)
         .click(() => {
             settingsWindow.hide();
         });
@@ -1276,7 +1141,7 @@ createListWindow();
 // Code for resizing the windows, this is horrible, don't look at it, don't touch it, don't question how it works
 let listResizers = $(".listResizers");
 let infoResizers = $(".infoResizers");
-const MIN_LIST_WIDTH = 650;
+const MIN_LIST_WIDTH = 480;
 const MIN_LIST_HEIGHT = 350;
 const MIN_INFO_WIDTH = 375;
 const MIN_INFO_HEIGHT = 300;
@@ -1490,6 +1355,7 @@ $(document.documentElement).keydown(function (event) {
             listWindow.hide();
             infoWindow.hide();
             settingsWindow.hide();
+            $(".rowSelected").removeClass("rowSelected");
         }
         else {
             listWindow.show();
@@ -1505,15 +1371,15 @@ AMQ_addScriptData({
     description: `
         <p>Creates a window which includes the song list table with song info such as song name, artist and the anime it's from</p>
         </p>The list can be accessed by clicking the list icon in the top right while in quiz or by pressing the pause/break key on the keyboard</p>
-        <a href="https://i.imgur.com/sBp3vZX.png" target="_blank"><img src="https://i.imgur.com/sBp3vZX.png" /></a>
+        <a href="https://i.imgur.com/YFEvFh2.png" target="_blank"><img src="https://i.imgur.com/YFEvFh2.png" /></a>
         <p>In the table, you can click on individual entries to get more info about the song, including video URLs, who guessed the song and from which lists the song was pulled (including watching status and score)</p>
         <p>The song list has customisable options which you can change by clicking the "Settings" button in the song list window, these settings are automatically saved</p>
-        <a href="https://i.imgur.com/vjyZekf.png" target="_blank"><img src="https://i.imgur.com/vjyZekf.png" /></a>
+        <a href="https://i.imgur.com/BKWygGP.png" target="_blank"><img src="https://i.imgur.com/BKWygGP.png" /></a>
         <a href="https://i.imgur.com/X5RMnV1.png?1" target="_blank"><img src="https://i.imgur.com/X5RMnV1.png?1" /></a>
         <p>You can also download the list in JSON format by clicking the "Export" button, this file can then be imported to <a href="https://thejoseph98.github.io/AMQ-Song-List-Viewer/" target="_blank">AMQ Song List Viewer</a> which displays the scoreboard status for each song and has individual player search so you can see what each player answered on each individual song
-        <a href="https://i.imgur.com/C7K9iVX.png" target="_blank"><img src="https://i.imgur.com/C7K9iVX.png" /></a>
+        <a href="https://i.imgur.com/2BhNNb4.png" target="_blank"><img src="https://i.imgur.com/2BhNNb4.png" /></a>
         <p>the windows are draggable and resizable so they fit each user's personal experience</p>
-        <a href="https://i.imgur.com/8SoouXV.png" target="_blank"><img src="https://i.imgur.com/8SoouXV.png" /></a>
+        <a href="https://i.imgur.com/hZxRJ5M.png" target="_blank"><img src="https://i.imgur.com/hZxRJ5M.png" /></a>
     `
 });
 
@@ -1582,6 +1448,19 @@ GM_addStyle(`
     border: 0;
     text-overflow: ellipsis;
     padding: 5px;
+    float: left;
+}
+.slCorrectFilter {
+    width: 80px;
+    float: left;
+    margin-top: 4px;
+}
+.slFilterContainer {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+.rowFiltered {
+    display: none !important;
 }
 #slTableSettings {
     float: left;
@@ -1607,7 +1486,7 @@ GM_addStyle(`
 .songData.hover {
     box-shadow: 0px 0px 10px cyan;
 }
-.songData.selected {
+.songData.rowSelected {
     box-shadow: 0px 0px 10px lime;
 }
 .correctGuess {
@@ -1714,6 +1593,9 @@ GM_addStyle(`
 .slCheckbox > label {
     font-weight: normal;
     margin-left: 5px;
+}
+.slFilterContainer > .customCheckbox {
+    float: left;
 }
 #slListSettings {
     width: 50%;
