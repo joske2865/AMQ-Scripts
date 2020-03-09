@@ -6,7 +6,6 @@
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 
 // ==/UserScript==
@@ -1384,7 +1383,7 @@ AMQ_addScriptData({
 });
 
 // CSS
-GM_addStyle(`
+AMQ_addStyle(`
 .slWindow {
     overflow-y: hidden;
     top: 0px;
