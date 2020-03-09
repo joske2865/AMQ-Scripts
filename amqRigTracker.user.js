@@ -345,6 +345,7 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
 // New rooms listener for the room browser, used for detecting when the player leaves a lobby (mid-game or otherwise)
 let newRoomsListener = new Listener("New Rooms", (rooms) => {
     clearPlayerData();
+    clearScoreboard();
 });
 
 // Creates the rig counters on the scoreboard and sets them to 0
