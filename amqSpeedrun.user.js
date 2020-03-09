@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         AMQ Speedrun
-// @namespace    http://tampermonkey.net/
-// @version      1.1
+// @namespace    https://github.com/TheJoseph98
+// @version      1.1.1
 // @description  Tracks guess times for each song, including total and average times
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
@@ -264,7 +264,19 @@ quizReadyListener.bindListener();
 quizAnswerResultsListener.bindListener();
 quizPlayNextSongListener.bindListener();
 
-GM_addStyle(`
+AMQ_addScriptData({
+    name: "Speedrun",
+    author: "TheJoseph98",
+    description: `
+        <p>Adds a new window which can be accessed by clicking the clock icon in the top right while in a quiz which tracks how fast you guessed each song, including total time, average time, fastest time and more</p>
+        <a href="https://i.imgur.com/LOJCzWm.png" target="_blank"><img src="https://i.imgur.com/LOJCzWm.png" /></a>
+        <p>Timer start when the guess phase starts (not when you get sound) and ends on your latest Enter key input</p>
+        <p>An incorrect answer counts as the full guess time for the song, not submitting an answer with the Enter key (ie. using autosubmit) also counts as full guess time</p>
+        <a href="https://i.imgur.com/1uJEh39.png" target="_blank"><img src="https://i.imgur.com/1uJEh39.png" /></a>
+    `
+});
+
+AMQ_addStyle(`
 #qpSpeedrun {
     width: 30px;
     margin-right: 5px;

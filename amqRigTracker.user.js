@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
-// @namespace    http://tampermonkey.net/
-// @version      1.2
+// @namespace    https://github.com/TheJoseph98
+// @version      1.2.1
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
 // @grant        none
-// @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
@@ -535,8 +535,22 @@ quizEndRigTracker.bindListener();
 returnLobbyVoteListener.bindListener();
 newRoomsListener.bindListener();
 
+AMQ_addScriptData({
+    name: "Rig Tracker",
+    author: "TheJoseph98",
+    description: `
+        <p>Rig tracker for AMQ counts how many times a certain player's list has appeared in a quiz, mainly created for AMQ League games to reduce the need for dedicated players who track the rig</p>
+        <p>Rig is only counted if the player has enabled "Share Entries" in their AMQ list settings (noted by the blue ribbon in their answer field during answer reveal)</p>
+        <p>Rig tracker has multiple options available which can be accessed by opening AMQ settings and selecting the "Rig Tracker" tab</p>
+        <a href="https://i.imgur.com/LQE4PGg.png" target="_blank"><img src="https://i.imgur.com/LQE4PGg.png" /></a>
+        <p>Rig tracker also has an option of writing rig to the scoreboard next to players' scores for non-league and more than 2 players games</p>
+        <a href="https://i.imgur.com/4jF8vja.png" target="_blank"><img src="https://i.imgur.com/4jF8vja.png" /></a>
+        <p>If you're looking for a smaller version without these options and which can only write rig to scoreboard, check out <a href="https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js">Rig Tracker Lite</a>
+    `
+});
+
 // CSS stuff
-GM_addStyle(`
+AMQ_addStyle(`
     .qpsPlayerRig {
         padding-right: 5px;
         opacity: 0.3;

@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         AMQ Buzzer
-// @namespace    http://tampermonkey.net/
-// @version      1.1
+// @namespace    https://github.com/TheJoseph98
+// @version      1.1.1
 // @description  Mutes the song on the buzzer (Enter key on empty answer field) and displays time you buzzed in
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
@@ -89,3 +89,13 @@ function formatTime(time) {
 quizReadyListener.bindListener();
 quizAnswerResultsListener.bindListener();
 quizPlayNextSongListener.bindListener();
+
+AMQ_addScriptData({
+    name: "Buzzer",
+    author: "TheJoseph98 & Anopob",
+    description: `
+        <p>Adds a buzzer to AMQ, you activate it by pressing the Enter key in the empty answer field</p>
+        <p>When you buzz, your sound will be muted until the answer reveal and in chat you will receive a message stating how fast you buzzed since the start of the song</p>
+        <p>The timer starts when the guess phase begins (NOT when you get sound)</p>
+    `
+});

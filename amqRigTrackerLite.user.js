@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker Lite
-// @namespace    http://tampermonkey.net/
-// @version      1.0
+// @namespace    https://github.com/TheJoseph98
+// @version      1.0.1
 // @description  Rig tracker for AMQ, writes rig to scoreboard next to players' scores
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -100,6 +100,17 @@ function writeRigToScoreboard() {
 quizReadyRigTracker.bindListener();
 answerResultsRigTracker.bindListener();
 newRoomsListener.bindListener();
+
+AMQ_addScriptData({
+    name: "Rig Tracker Lite",
+    author: "TheJoseph98",
+    description: `
+        <p>Counts how many times a certain player's list has appeared in a quiz and displays it next to each person's score</p>
+        <p>Rig is only counted if the player has enabled "Share Entries" in their AMQ list settings (noted by the blue ribbon in their answer field during answer reveal)</p>
+        <a href="https://i.imgur.com/4jF8vja.png" target="_blank"><img src="https://i.imgur.com/4jF8vja.png" /></a>
+        <p>If you're looking for a version with customisable options including writing to chat for 1v1 games and which can be enabled or disabled at will, check out the original <a href="https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js">Rig Tracker</a>
+    `
+});
 
 AMQ_addStyle(`
     .qpsPlayerRig {

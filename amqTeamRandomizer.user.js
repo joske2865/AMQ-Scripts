@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         AMQ Team Randomizer
-// @namespace    http://tampermonkey.net/
-// @version      1.0
+// @namespace    https://github.com/TheJoseph98
+// @version      1.0.1
 // @description  Team randomizer for tag team custom mode, once all players join the lobby, type "/teams" in chat to randomize teams, the teams will be output to chat
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
@@ -67,3 +68,13 @@ function sendChatMessage(message) {
 }
 
 commandListener.bindListener();
+
+AMQ_addScriptData({
+    name: "Team Randomizer",
+    author: "TheJoseph98",
+    description: `
+        <p>Team randomizer for the Tag Teams custom mode</p>
+        <p>Type "/teams" in chat to randomize the teams</p>
+        <p>Works only while in the lobby (ie. not currently in a quiz)</p>
+    `
+})

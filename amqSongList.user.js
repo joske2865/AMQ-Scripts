@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         AMQ Song List
-// @namespace    http://tampermonkey.net/
-// @version      1.2
+// @namespace    https://github.com/TheJoseph98
+// @version      1.2.1
 // @description  Prints a copyable list to console at the end of each game
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://gist.githubusercontent.com/arantius/3123124/raw/grant-none-shim.js
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
@@ -103,7 +103,19 @@ quizReadyListener.bindListener();
 quizEndListener.bindListener();
 quizLeaveListener.bindListener();
 
-GM_addStyle(`
+AMQ_addScriptData({
+    name: "Song List",
+    author: "TheJoseph98",
+    description: `
+        <p>Tracks the songs that played during the round and outputs them to your browser's console including song name, artist, anime, number of players, video URLs and more</p>
+        <p>Currently stored data can be copied to clipboard by clicking the clipboard icon in the top right while in a quiz</p>
+        <a href="https://i.imgur.com/yGjMle9.png" target="_blank"><img src="https://i.imgur.com/yGjMle9.png" /></a>
+        <p>An example output can be found <a href="https://pastebin.com/1gS9n4xa" target="_blank">here</a></p>
+        <p>The list resets when the quiz ends (returning to back to lobby), when the quiz starts or when you leave the lobby</p>
+    `
+})
+
+AMQ_addStyle(`
 #qpCopyJSON {
     width: 30px;
     height: auto;
