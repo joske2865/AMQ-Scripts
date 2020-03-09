@@ -37,7 +37,7 @@ function AMQ_createInstalledWindow() {
             <li class="clickAble" data-toggle="modal" data-target="#installedModal">Installed Userscripts</li>
         `));
 
-        let css = `
+        AMQ_addStyle(`
             .descriptionContainer {
                 width: 95%;
                 margin: auto;
@@ -46,12 +46,7 @@ function AMQ_createInstalledWindow() {
                 width: 80%;
                 margin: 10px 10%;
             }
-        `;
-        let head = document.head;
-        let style = document.createElement("style");
-        head.appendChild(style);
-        style.type = "text/css";
-        style.appendChild(document.createTextNode(css));
+        `);
     }
 }
 
@@ -92,3 +87,10 @@ function AMQ_addScriptData(metadata) {
     )
 }
 
+function AMQ_addStyle(css) {
+    let head = document.head;
+    let style = document.createElement("style");
+    head.appendChild(style);
+    style.type = "text/css";
+    style.appendChild(document.createTextNode(css));
+}
