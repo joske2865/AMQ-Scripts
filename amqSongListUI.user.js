@@ -612,7 +612,7 @@ function updateInfo(song) {
 
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
-    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Artist</b></h5><p>` + song.name + `</p></div>`)
+    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Song Name</b></h5><p>` + song.name + `</p></div>`)
     let artistContainer = $(`<div id="artistContainer"><h5><b>Artist</b></h5><p>` + song.artist + `</p></div>`)
     let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5><b>Anime English</b></h5><p>` + song.anime.english + `</p></div>`);
     let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5><b>Anime Romaji</b></h5><p>` + song.anime.romaji + `</p></div>`);
