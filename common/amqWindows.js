@@ -10,6 +10,7 @@ class AMQWindow {
         this.position = data.position === undefined ? {x: 0, y: 0} : data.position;
         this.closeHandler = data.closeHandler === undefined ? function () {} : data.closeHandler;
         this.zIndex = data.zIndex === undefined ? 1060 : data.zIndex;
+        this.bodyOffset = data.bodyOffset === undefined ? 75 : data.bodyOffset;
         this.resizers = null;
 
         this.window = $("<div></div>")
@@ -82,7 +83,7 @@ class AMQWindow {
                                 tmp.window.width(newWidth);
                             }
                             if (newHeight > tmp.minHeight) {
-                                tmp.body.height(newHeight-75);
+                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -95,7 +96,7 @@ class AMQWindow {
                                 tmp.window.css("left", newLeft + "px");
                             }
                             if (newHeight > tmp.minHeight) {
-                                tmp.body.height(newHeight-75);
+                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -108,7 +109,7 @@ class AMQWindow {
                             }
                             if (newHeight > tmp.minHeight) {
                                 tmp.window.css("top", newTop + "px");
-                                tmp.body.height(newHeight-75);
+                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -123,7 +124,7 @@ class AMQWindow {
                             }
                             if (newHeight > tmp.minHeight) {
                                 tmp.window.css("top", newTop + "px");
-                                tmp.body.height(newHeight-75);
+                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -145,6 +146,34 @@ class AMQWindow {
 
         this.window.append(this.content);
         $("#gameContainer").append(this.window);
+    }
+
+    set title(newTitle) {
+        this.title = newTitle;
+        this.header.find("modal-title").text(newTitle);
+    }
+    get title() {
+        return this.title;
+    }
+
+    set zIndex(newZIndex) {
+        this.zIndex = newZIndex;
+        this.window.css("z-index", this.zIndex.toString());
+    }
+    get zIndex() {
+        return this.zIndex;
+    }
+
+    set bodyOffset(newBodyOffset) {
+        this.bodyOffset = newBodyOffset;
+        this.body.height(this.height - this.bodyOffset - 33);
+    }
+    get bodyOffset() {
+        return this.bodyOffset;
+    }
+    
+    isVisible() {
+        return this.window.is(":visible");
     }
 
     clear() {
