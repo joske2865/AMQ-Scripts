@@ -1,39 +1,26 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      2.3.2
+// @version      2.3.3
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
 
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
 
 let listWindow;
-let listWindowResizer;
-let listWindowContent;
-let listWindowHeader;
 let listWindowOptions;
-let listWindowBody;
 let listWindowOpenButton;
-let listWindowCloseButton;
 let listWindowTable;
 
 let infoWindow;
-let infoWindowResizer
-let infoWindowContent;
-let infoWindowHeader;
-let infoWindowBody;
-let infoWindowCloseButton;
 
 let settingsWindow;
-let settingsWindowContent;
-let settingsWindowHeader;
-let settingsWindowBody;
-let settingsWindowCloseButton;
 
 let exportData = [];
 
@@ -54,11 +41,23 @@ let savedSettings = {
 };
 
 function createListWindow() {
-    // create list window
-    listWindow = $(`<div id="listWindow" class="slWindow" style="position: absolute; z-index: 1060; width: 650px; height: 480px; display: none;"></div>`);
-
-    // create list header
-    listWindowHeader = $(`<div class="modal-header" id="listWindowHeader"><h2 class="modal-title">Song List</h2></div>`);
+    let listCloseHandler = function () {
+        infoWindow.close();
+        settingsWindow.close();
+        $(".rowSelected").removeClass("rowSelected");
+    }
+    listWindow = new AMQWindow({
+        title: "Song List",
+        width: 650,
+        height: 480,
+        minWidth: 480,
+        minHeight: 350,
+        zIndex: 1060,
+        bodyOffset: 135,
+        closeHandler: listCloseHandler,
+        resizable: true,
+        draggable: true
+    });
 
     // create the options tab
     listWindowOptions = $(`<div class="slWindowOptions" id="listWindowOptions"></div>`)
@@ -100,11 +99,11 @@ function createListWindow() {
         )
         .append($(`<button class="btn btn-default songListOptionsButton" type="button"><i aria-hidden="true" class="fa fa-gear"></i></button>`)
             .click(() => {
-                if (settingsWindow.is(":visible")) {
-                    settingsWindow.hide()
+                if (settingsWindow.isVisible()) {
+                    settingsWindow.close();
                 }
                 else {
-                    settingsWindow.show();
+                    settingsWindow.open();
                 }
             })
             .popover({
@@ -147,54 +146,24 @@ function createListWindow() {
                 )
                 .append(`<div style="margin-left: 25px;">Incorrect</div>`)
             )
-        )
-
-    // create list body
-    listWindowBody = $(`<div class="modal-body resizableList slWindowBody" id="listWindowBody" style="height: 340px;"></div>`);
-
-    listWindowContent = $(`<div id="listWindowContent" class="slWindowContent"></div>`);
-
-    // create close button
-    listWindowCloseButton = $(`<div class="close" type="button"><span aria-hidden="true">×</span></div>`)
-        .click(() => {
-            listWindow.hide();
-            infoWindow.hide();
-            settingsWindow.hide();
-            $(".rowSelected").removeClass("rowSelected");
-        });
-
-    listWindowResizer = $(
-        `<div class="listResizers">
-            <div class="listResizer top-left"></div>
-            <div class="listResizer top-right"></div>
-            <div class="listResizer bottom-left"></div>
-            <div class="listResizer bottom-right"></div>
-        </div>`);
-
-    // link nodes
-    listWindowHeader.prepend(listWindowCloseButton);
-    listWindowContent.append(listWindowHeader);
-    listWindowContent.append(listWindowOptions);
-    listWindowContent.append(listWindowBody);
-    listWindow.append(listWindowContent);
-    listWindow.prepend(listWindowResizer);
-    $("#gameContainer").append(listWindow);
+        );
+    listWindow.content.find(".modal-header").after(listWindowOptions);
 
     // create results table
     listWindowTable = $(`<table id="listWindowTable" class="table floatingContainer"></table>`);
-    listWindowBody.append(listWindowTable);
+    listWindow.body.append(listWindowTable);
 
     // button to access the song results
     listWindowOpenButton = $(`<div id="qpSongListButton" class="clickAble qpOption"><i aria-hidden="true" class="fa fa-list-ol qpMenuItem"></i></div>`)
         .click(function () {
-            if(listWindow.is(":visible")) {
-                listWindow.hide();
-                infoWindow.hide();
-                settingsWindow.hide();
+            if(listWindow.isVisible()) {
                 $(".rowSelected").removeClass("rowSelected");
+                listWindow.close();
+                infoWindow.close();
+                settingsWindow.close();
             }
             else {
-                listWindow.show();
+                listWindow.open();
                 autoScrollList();
             }
         })
@@ -208,6 +177,7 @@ function createListWindow() {
     $("#qpOptionContainer").width(oldWidth + 35);
     $("#qpOptionContainer > div").append(listWindowOpenButton);
 
+    listWindow.body.attr("id", "listWindowBody");
     addTableHeader();
 }
 
@@ -215,7 +185,12 @@ function updateCorrect(elem) {
     let correctEnabled = $("#slFilterCorrect").prop("checked");
     let incorrectEnabled = $("#slFilterIncorrect").prop("checked");
     if (correctEnabled && incorrectEnabled) {
-        $(elem).removeClass("rowFiltered");
+        if ($(elem).hasClass("correctGuess") || $(elem).hasClass("incorrectGuess")) {
+            $(elem).removeClass("rowFiltered");
+        }
+        else {
+            $(elem).addClass("rowFiltered");
+        }
     }
     else if (!correctEnabled && !incorrectEnabled) {
         $(elem).removeClass("rowFiltered");
@@ -355,12 +330,12 @@ function addTableEntry(newSong) {
             if (!$(this).hasClass("rowSelected")) {
                 $(".rowSelected").removeClass("rowSelected");
                 $(this).addClass("rowSelected");
-                infoWindow.show();
+                infoWindow.open();
                 updateInfo(newSong);
             }
             else {
                 $(".rowSelected").removeClass("rowSelected");
-                infoWindow.hide();
+                infoWindow.close();
             }
         })
         .hover(function () {
@@ -566,40 +541,21 @@ function openInNewTab() {
 }
 
 function createInfoWindow() {
+    let closeInfoHandler = function () {
+        $(".rowSelected").removeClass("rowSelected");
+    }
     // create info window
-    infoWindow = $(`<div id="infoWindow" class="slWindow" style="position: absolute; z-index: 1065; width: 450px; height: 350px; display: none;"></div>`);
-
-    // create info header
-    infoWindowHeader = $(`<div class="modal-header" id="infoWindowHeader"><h2 class="modal-title">Song Info</h2></div>`);
-
-    // create info body
-    infoWindowBody = $(`<div class="modal-body resizableInfo slWindowBody" id="infoWindowBody" style="height: 275px;"></div>`);
-
-    // create info content
-    infoWindowContent = $(`<div id="infoWindowContent" class="slWindowContent"></div>`);
-
-    // create info window close button
-    infoWindowCloseButton = $(`<button class="close" type="button"><span aria-hidden="true">×</span></button>`)
-        .click(function () {
-            infoWindow.hide();
-            $(".rowSelected").removeClass("rowSelected");
-        })
-
-    infoWindowResizer = $(
-        `<div class="infoResizers">
-            <div class="infoResizer top-left"></div>
-            <div class="infoResizer top-right"></div>
-            <div class="infoResizer bottom-left"></div>
-            <div class="infoResizer bottom-right"></div>
-        </div>`);
-
-    // link nodes
-    infoWindowHeader.prepend(infoWindowCloseButton);
-    infoWindowContent.append(infoWindowHeader);
-    infoWindowContent.append(infoWindowBody);
-    infoWindow.append(infoWindowContent);
-    infoWindow.prepend(infoWindowResizer);
-    $("#gameContainer").append(infoWindow);
+    infoWindow = new AMQWindow({
+        title: "Song Info",
+        width: 450,
+        height: 350,
+        minWidth: 375,
+        minHeight: 300,
+        draggable: true,
+        resizable: true,
+        closeHandler: closeInfoHandler,
+        zIndex: 1065
+    });
 }
 
 function updateInfo(song) {
@@ -611,11 +567,11 @@ function updateInfo(song) {
 
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
-    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Song Name</b></h5><p>` + song.name + `</p></div>`)
-    let artistContainer = $(`<div id="artistContainer"><h5><b>Artist</b></h5><p>` + song.artist + `</p></div>`)
-    let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5><b>Anime English</b></h5><p>` + song.anime.english + `</p></div>`);
-    let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5><b>Anime Romaji</b></h5><p>` + song.anime.romaji + `</p></div>`);
-    let typeContainer = $(`<div id="typeContainer"><h5><b>Type</b></h5><p>` + song.type + `</p></div>`);
+    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Song Name</b></h5><p>${song.name}</p></div>`)
+    let artistContainer = $(`<div id="artistContainer"><h5><b>Artist</b></h5><p>${song.artist}</p></div>`)
+    let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5><b>Anime English</b></h5><p>${song.anime.english}</p></div>`);
+    let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5><b>Anime Romaji</b></h5><p>${song.anime.romaji}</p></div>`);
+    let typeContainer = $(`<div id="typeContainer"><h5><b>Type</b></h5><p>${song.type}</p></div>`);
     let sampleContainer = $(`<div id="sampleContainer"></div>`)
         .html("<h5><b>Sample Point</b></h5><p>" + formatSamplePoint(song.startSample, song.videoLength) + "</p>");
     let guessedContainer = $(`<div id="guessedContainer"></div>`)
@@ -641,6 +597,8 @@ function updateInfo(song) {
     infoRow4.append(guessedContainer);
     infoRow4.append(fromListContainer);
 
+    let listContainer;
+
     if (song.fromList.length === 0) {
         guessedContainer.css("width", "98%");
         fromListContainer.hide();
@@ -660,7 +618,7 @@ function updateInfo(song) {
             guessedContainer.append(guessedListRight);
         }
         else {
-            $(`<ul id="guessedListContainer"></ul>`);
+            listContainer = $(`<ul id="guessedListContainer"></ul>`);
             for (let guessed of guesses) {
                 listContainer.append($(`<li>` + guessed.name + " (" + guessed.score + ")" + `</li>`));
             }
@@ -669,7 +627,7 @@ function updateInfo(song) {
     }
     else {
         guessedContainer.css("width", "");
-        let listContainer = $(`<ul id="guessedListContainer"></ul>`);
+        listContainer = $(`<ul id="guessedListContainer"></ul>`);
         fromListContainer.show();
         for (let guessed of guesses) {
             listContainer.append($(`<li>` + guessed.name + " (" + guessed.score + ")" + `</li>`));
@@ -704,26 +662,25 @@ function updateInfo(song) {
     }
     urlContainer.append(listContainer);
 
-    infoWindowBody.append(infoRow1);
-    infoWindowBody.append(infoRow2);
-    infoWindowBody.append(infoRow3);
-    infoWindowBody.append(infoRow4);
+    infoWindow.body.append(infoRow1);
+    infoWindow.body.append(infoRow2);
+    infoWindow.body.append(infoRow3);
+    infoWindow.body.append(infoRow4);
 }
 
 function clearInfo() {
-    infoWindowBody.children().remove();
+    infoWindow.clear();
 }
 
 function createSettingsWindow() {
-    // create settings window
-    settingsWindow = $(`<div id="settingsWindow" class="slWindow" style="position: absolute; z-index: 1070; width: 300px; height: 365px; display: none;"></div>`);
-
-    // create settings header
-    settingsWindowHeader = $(`<div class="modal-header" id="settingsWindowHeader"></div>`)
-        .append($(`<h2 class="modal-title">Settings</h2>`));
-
-    // create settings body
-    settingsWindowBody = $(`<div class="modal-body slWindowBody" id="settingsWindowBody" style="height: 290px"></div>`)
+    settingsWindow = new AMQWindow({
+        width: 300,
+        height: 365,
+        title: "Settings",
+        draggable: true,
+        zIndex: 1070
+    });
+    settingsWindow.body
         .append($(`<div id="slListSettings">List Settings</div>`)
             .append($(`<div class="slCheckbox"></div>`)
                 .append($(`<div class="customCheckbox"></div>`)
@@ -797,7 +754,6 @@ function createSettingsWindow() {
                 )
             )
         )
-
         .append($(`<div id="slAnimeTitleSettings">Anime Titles</div>`)
             .append($(`<select id="slAnimeTitleSelect"></select>`)
                 .append($(`<option value="english">English</option>`))
@@ -988,24 +944,8 @@ function createSettingsWindow() {
                     )
                     .append($("<label>Sample Point</label>"))
                 )
-            )  
+            )
         )
-
-    // create settings content
-    settingsWindowContent = $(`<div id="settingsWindowContent" class="slWindowContent"></div>`)
-
-    // create settings window close button
-    settingsWindowCloseButton = $(`<button class="close" type="button"><span aria-hidden="true">×</span></button>`)
-        .click(() => {
-            settingsWindow.hide();
-        });
-
-    // link nodes
-    settingsWindowHeader.prepend(settingsWindowCloseButton);
-    settingsWindowContent.append(settingsWindowHeader);
-    settingsWindowContent.append(settingsWindowBody);
-    settingsWindow.append(settingsWindowContent);
-    $("#gameContainer").append(settingsWindow);
 }
 
 // save settings to local storage
@@ -1112,7 +1052,6 @@ let answerResultsListener = new Listener("answer results", (result) => {
     exportData.push(newSong);
 });
 
-
 // reset songs on returning to lobby
 let quizOverListener = new Listener("quiz over", (roomSettings) => {
     if ($("#slAutoClear").prop("checked")) {
@@ -1137,202 +1076,28 @@ loadSettings();
 createInfoWindow();
 createListWindow();
 
-// Code for resizing the windows, this is horrible, don't look at it, don't touch it, don't question how it works
-let listResizers = $(".listResizers");
-let infoResizers = $(".infoResizers");
-const MIN_LIST_WIDTH = 480;
-const MIN_LIST_HEIGHT = 350;
-const MIN_INFO_WIDTH = 375;
-const MIN_INFO_HEIGHT = 300;
-let startWidth = 0;
-let startHeight = 0;
-let startX = 0;
-let startY = 0;
-let startMouseX = 0;
-let startMouseY = 0;
-
-listResizers.find(".listResizer").each(function (index, resizer) {
-    $(resizer).mousedown(function (event) {
-        listWindow.css("user-select", "none");
-        startWidth = listWindow.width();
-        startHeight = listWindow.height();
-        startX = listWindow.position().left;
-        startY = listWindow.position().top;
-        startMouseX = event.originalEvent.clientX;
-        startMouseY = event.originalEvent.clientY;
-        let curResizer = $(this);
-        $(document.documentElement).mousemove(function (event) {
-            if (curResizer.hasClass("bottom-right")) {
-                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_LIST_WIDTH) {
-                    listWindow.width(newWidth);
-                }
-                if (newHeight > MIN_LIST_HEIGHT) {
-                    listWindowBody.height(newHeight-168);
-                    listWindow.height(newHeight);
-                }
-            }
-            if (curResizer.hasClass("bottom-left")) {
-                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
-                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
-                if (newWidth > MIN_LIST_WIDTH) {
-                    listWindow.width(newWidth);
-                    listWindow.css("left", newLeft + "px");
-                }
-                if (newHeight > MIN_LIST_HEIGHT) {
-                    listWindowBody.height(newHeight-168);
-                    listWindow.height(newHeight);
-                }
-            }
-            if (curResizer.hasClass("top-right")) {
-                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
-                let newTop = startY + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_LIST_WIDTH) {
-                    listWindow.width(newWidth);
-                }
-                if (newHeight > MIN_LIST_HEIGHT) {
-                    listWindow.css("top", newTop + "px");
-                    listWindowBody.height(newHeight-168);
-                    listWindow.height(newHeight);
-                }
-            }
-            if (curResizer.hasClass("top-left")) {
-                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
-                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
-                let newTop = startY + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_LIST_WIDTH) {
-                    listWindow.width(newWidth);
-                    listWindow.css("left", newLeft + "px");
-                }
-                if (newHeight > MIN_LIST_HEIGHT) {
-                    listWindow.css("top", newTop + "px");
-                    listWindowBody.height(newHeight-168);
-                    listWindow.height(newHeight);
-                }
-            }
-        });
-        $(document.documentElement).mouseup(function (event) {
-            $(document.documentElement).off("mousemove");
-            $(document.documentElement).off("mouseup");
-            listWindow.css("user-select", "text");
-        });
-    });
-});
-
-infoResizers.find(".infoResizer").each(function (index, resizer) {
-    $(resizer).mousedown(function (event) {
-        infoWindow.css("user-select", "none");
-        startWidth = infoWindow.width();
-        startHeight = infoWindow.height();
-        startX = infoWindow.position().left;
-        startY = infoWindow.position().top;
-        startMouseX = event.originalEvent.clientX;
-        startMouseY = event.originalEvent.clientY;
-        let curResizer = $(this);
-        $(document.documentElement).mousemove(function (event) {
-            if (curResizer.hasClass("bottom-right")) {
-                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_INFO_WIDTH) {
-                    infoWindow.width(newWidth);
-                }
-                if (newHeight > MIN_INFO_HEIGHT) {
-                    infoWindowBody.height(newHeight-103);
-                    infoWindow.height(newHeight);
-                }
-            }
-            if (curResizer.hasClass("bottom-left")) {
-                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight + (event.originalEvent.clientY - startMouseY);
-                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
-                if (newWidth > MIN_INFO_WIDTH) {
-                    infoWindow.width(newWidth);
-                    infoWindow.css("left", newLeft + "px");
-                }
-                if (newHeight > MIN_INFO_HEIGHT) {
-                    infoWindowBody.height(newHeight-103);
-                    infoWindow.height(newHeight);
-                }
-            }
-            if (curResizer.hasClass("top-right")) {
-                let newWidth = startWidth + (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
-                let newTop = startY + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_INFO_WIDTH) {
-                    infoWindow.width(newWidth);
-                }
-                if (newHeight > MIN_INFO_HEIGHT) {
-                    infoWindow.css("top", newTop + "px");
-                    infoWindowBody.height(newHeight-103);
-                    infoWindow.height(newHeight);
-                }
-            }
-            if (curResizer.hasClass("top-left")) {
-                let newWidth = startWidth - (event.originalEvent.clientX - startMouseX);
-                let newHeight = startHeight - (event.originalEvent.clientY - startMouseY);
-                let newLeft = startX + (event.originalEvent.clientX - startMouseX);
-                let newTop = startY + (event.originalEvent.clientY - startMouseY);
-                if (newWidth > MIN_INFO_WIDTH) {
-                    infoWindow.width(newWidth);
-                    infoWindow.css("left", newLeft + "px");
-                }
-                if (newHeight > MIN_INFO_HEIGHT) {
-                    infoWindow.css("top", newTop + "px");
-                    infoWindowBody.height(newHeight-103);
-                    infoWindow.height(newHeight);
-                }
-            }
-        });
-        $(document.documentElement).mouseup(function (event) {
-            $(document.documentElement).off("mousemove");
-            $(document.documentElement).off("mouseup");
-            infoWindow.css("user-select", "text");
-        });
-    });
-});
-
-// draggable windows
-$("#listWindow").draggable({
-    handle: "#listWindowHeader",
-    containment: "#gameContainer"
-});
-
-$("#infoWindow").draggable({
-    handle: "#infoWindowHeader",
-    containment: "#gameContainer"
-});
-
-$("#settingsWindow").draggable({
-    handle: "#settingsWindowHeader",
-    containment: "#gameContainer"
-});
-
 // lowers the z-index when a modal window is shown so it doesn't overlap
 $(".modal").on("show.bs.modal", () => {
-    listWindow.css("z-index", "1030");
-    infoWindow.css("z-index", "1035");
-    settingsWindow.css("z-index", "1040");
+    listWindow.setZIndex(1030);
+    infoWindow.setZIndex(1035);
+    settingsWindow.setZIndex(1040);
 });
 
 $(".modal").on("hidden.bs.modal", () => {
-    listWindow.css("z-index", "1060");
-    infoWindow.css("z-index", "1065");
-    settingsWindow.css("z-index", "1070");
+    listWindow.setZIndex(1060);
+    infoWindow.setZIndex(1065);
+    settingsWindow.setZIndex(1070);
 });
 
 // lowers the z-index when hovering over a label
 $(".slCheckbox label").hover(() => {
-    listWindow.css("z-index", "1030");
-    infoWindow.css("z-index", "1035");
-    settingsWindow.css("z-index", "1040");
+    listWindow.setZIndex(1030);
+    infoWindow.setZIndex(1035);
+    settingsWindow.setZIndex(1040);
 }, () => {
-    listWindow.css("z-index", "1060");
-    infoWindow.css("z-index", "1065");
-    settingsWindow.css("z-index", "1070");
+    listWindow.setZIndex(1060);
+    infoWindow.setZIndex(1065);
+    settingsWindow.setZIndex(1070);
 });
 
 // Auto scrolls the list on new entry added
@@ -1346,18 +1111,17 @@ function autoScrollList() {
     }
 }
 
-
 // Open the song list with pause/break key
 $(document.documentElement).keydown(function (event) {
     if (event.which === 19) {
-        if (listWindow.is(":visible")) {
-            listWindow.hide();
-            infoWindow.hide();
-            settingsWindow.hide();
+        if (listWindow.isVisible()) {
             $(".rowSelected").removeClass("rowSelected");
+            listWindow.close();
+            infoWindow.close();
+            settingsWindow.close();
         }
         else {
-            listWindow.show();
+            listWindow.open();
             autoScrollList();
         }
     }
@@ -1384,288 +1148,197 @@ AMQ_addScriptData({
 
 // CSS
 AMQ_addStyle(`
-.slWindow {
-    overflow-y: hidden;
-    top: 0px;
-    left: 0px;
-    margin: 0px;
-    background-color: #424242;
-    border: 1px solid rgba(27, 27, 27, 0.2);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    user-select: text;
-}
-.slWindowOptions {
-    width: 100%;
-    height: 65px;
-    border-bottom: 1px solid #6d6d6d;
-}
-.slWindowBody {
-    width: 100%;
-    overflow-y: auto;
-}
-.slWindowContent {
-    width: 100%;
-    position: absolute;
-    top: 0px;
-}
-.slWindow .modal-header {
-    cursor: move;
-}
-#listWindow .close {
-    font-size: 32px;
-}
-#infoWindow .close {
-    font-size: 32px;
-}
-#settingsWindow .close {
-    font-size: 32px;
-}
-#slAnimeTitleSelect {
-    color: black;
-    font-weight: normal;
-    width: 75%;
-    margin-top: 5px;
-    border: 1px;
-    margin-right: 1px;
-}
-.songListOptions {
-    border-bottom: 1px solid #6d6d6d;
-    height: 65px;
-}
-.songListOptionsButton {
-    float: right;
-    margin-top: 15px;
-    margin-right: 10px;
-    padding: 6px 8px;
-}
-#slSearch {
-    width: 200px;
-    color: black;
-    margin: 15px 15px 0px 15px;
-    height: 35px;
-    border-radius: 4px;
-    border: 0;
-    text-overflow: ellipsis;
-    padding: 5px;
-    float: left;
-}
-.slCorrectFilter {
-    width: 80px;
-    float: left;
-    margin-top: 4px;
-}
-.slFilterContainer {
-    padding-top: 4px;
-    padding-bottom: 4px;
-}
-.rowFiltered {
-    display: none !important;
-}
-#slTableSettings {
-    float: left;
-    width: 100%;
-    text-align: center;
-    font-weight: bold;
-}
-.slTableSettingsContainer {
-    float: left;
-    width: 50%;
-}
-.songData {
-    height: 50px;
-}
-.songData > td {
-    vertical-align: middle;
-    border: 1px solid black;
-    text-align: center;
-}
-.songData.guessHidden {
-    background-color: rgba(0, 0, 0, 0);
-}
-.songData.hover {
-    box-shadow: 0px 0px 10px cyan;
-}
-.songData.rowSelected {
-    box-shadow: 0px 0px 10px lime;
-}
-.correctGuess {
-    background-color: rgba(0, 200, 0, 0.07);
-}
-.incorrectGuess {
-    background-color: rgba(255, 0, 0, 0.07);
-}
-.songNumber {
-    min-width: 60px;
-}
-.songName {
-    min-width: 85px;
-}
-.songType {
-    min-width: 80px;
-}
-.guessesCounter {
-    min-width: 80px;
-}
-.samplePoint {
-    min-width: 75px;
-}
-.header {
-    height: 30px;
-}
-.header > td {
-    border: 1px solid black;
-    text-align: center;
-    vertical-align: middle;
-}
-.infoRow {
-    width: 98%;
-    height: auto;
-    text-align: center;
-    clear: both;
-}
-.infoRow > div {
-    margin: 1%;
-    text-align: center;
-    float: left;
-}
-#songNameContainer {
-    width: 38%;
-    overflow-wrap: break-word;
-}
-#artistContainer {
-    width: 38%;
-    overflow-wrap: break-word;
-}
-#typeContainer {
-    width: 18%;
-}
-#animeEnglishContainer {
-    width: 38%;
-    overflow-wrap: break-word;
-}
-#animeRomajiContainer {
-    width: 38%;
-    overflow-wrap: break-word;
-}
-#sampleContainer {
-    width: 18%;
-}
-#urlContainer {
-    width: 100%;
-}
-#guessedListLeft {
-    width: 50%;
-    float: left;
-}
-#guessedListRight {
-    width: 50%;
-    float: right;
-}
-#guessedContainer {
-    width: 48%;
-    float: left;
-}
-#fromListContainer {
-    width: 48%;
-    float: right;
-}
-.fromListHidden {
-    width: 100%;
-}
-#qpOptionContainer {
-    z-index: 10;
-}
-#qpSongListButton {
-    width: 30px;
-    height: 100%;
-    margin-right: 5px;
-}
-.slCheckboxContainer {
-    width: 130px;
-    float: right;
-    user-select: none;
-}
-.slCheckbox {
-    display: flex;
-    margin: 5px;
-}
-.slCheckbox > label {
-    font-weight: normal;
-    margin-left: 5px;
-}
-.slFilterContainer > .customCheckbox {
-    float: left;
-}
-#slListSettings {
-    width: 50%;
-    float: left;
-    text-align: center;
-    font-weight: bold;
-}
-#slAnimeTitleSettings {
-    width: 50%;
-    float: left;
-    text-align: center;
-    font-weight: bold;
-}
-.listResizers {
-    width: 100%;
-    height: 100%;
-}
-.listResizer {
-    width: 10px;
-    height: 10px;
-    position: absolute;
-    z-index: 100;
-}
-.listResizer.top-left {
-    top: 0px;
-    left: 0px;
-    cursor: nwse-resize;
-}
-.listResizer.top-right {
-    top: 0px;
-    right: 0px;
-    cursor: nesw-resize;
-}
-.listResizer.bottom-left {
-    bottom: 0px;
-    left: 0px;
-    cursor: nesw-resize;
-}
-.listResizer.bottom-right {
-    bottom: 0px;
-    right: 0px;
-    cursor: nwse-resize;
-}
-.infoResizers {
-    width: 100%;
-    height: 100%;
-}
-.infoResizer {
-    width: 10px;
-    height: 10px;
-    position: absolute;
-    z-index: 100;
-}
-.infoResizer.top-left {
-    top: 0px;
-    left: 0px;
-    cursor: nwse-resize;
-}
-.infoResizer.top-right {
-    top: 0px;
-    right: 0px;
-    cursor: nesw-resize;
-}
-.infoResizer.bottom-left {
-    bottom: 0px;
-    left: 0px;
-    cursor: nesw-resize;
-}
-.infoResizer.bottom-right {
-    bottom: 0px;
-    right: 0px;
-    cursor: nwse-resize;
-}
+    .slWindowOptions {
+        width: 100%;
+        height: 65px;
+        border-bottom: 1px solid #6d6d6d;
+    }
+    #slAnimeTitleSelect {
+        color: black;
+        font-weight: normal;
+        width: 75%;
+        margin-top: 5px;
+        border: 1px;
+        margin-right: 1px;
+    }
+    .songListOptions {
+        border-bottom: 1px solid #6d6d6d;
+        height: 65px;
+    }
+    .songListOptionsButton {
+        float: right;
+        margin-top: 15px;
+        margin-right: 10px;
+        padding: 6px 8px;
+    }
+    #slSearch {
+        width: 200px;
+        color: black;
+        margin: 15px 15px 0px 15px;
+        height: 35px;
+        border-radius: 4px;
+        border: 0;
+        text-overflow: ellipsis;
+        padding: 5px;
+        float: left;
+    }
+    .slCorrectFilter {
+        width: 80px;
+        float: left;
+        margin-top: 4px;
+    }
+    .slFilterContainer {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+    .rowFiltered {
+        display: none !important;
+    }
+    #slTableSettings {
+        float: left;
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+    }
+    .slTableSettingsContainer {
+        float: left;
+        width: 50%;
+    }
+    .songData {
+        height: 50px;
+    }
+    .songData > td {
+        vertical-align: middle;
+        border: 1px solid black;
+        text-align: center;
+    }
+    .songData.guessHidden {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    .songData.hover {
+        box-shadow: 0px 0px 10px cyan;
+    }
+    .songData.rowSelected {
+        box-shadow: 0px 0px 10px lime;
+    }
+    .correctGuess {
+        background-color: rgba(0, 200, 0, 0.07);
+    }
+    .incorrectGuess {
+        background-color: rgba(255, 0, 0, 0.07);
+    }
+    .songNumber {
+        min-width: 60px;
+    }
+    .songName {
+        min-width: 85px;
+    }
+    .songType {
+        min-width: 80px;
+    }
+    .guessesCounter {
+        min-width: 80px;
+    }
+    .samplePoint {
+        min-width: 75px;
+    }
+    .header {
+        height: 30px;
+    }
+    .header > td {
+        border: 1px solid black;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .infoRow {
+        width: 98%;
+        height: auto;
+        text-align: center;
+        clear: both;
+    }
+    .infoRow > div {
+        margin: 1%;
+        text-align: center;
+        float: left;
+    }
+    #songNameContainer {
+        width: 38%;
+        overflow-wrap: break-word;
+    }
+    #artistContainer {
+        width: 38%;
+        overflow-wrap: break-word;
+    }
+    #typeContainer {
+        width: 18%;
+    }
+    #animeEnglishContainer {
+        width: 38%;
+        overflow-wrap: break-word;
+    }
+    #animeRomajiContainer {
+        width: 38%;
+        overflow-wrap: break-word;
+    }
+    #sampleContainer {
+        width: 18%;
+    }
+    #urlContainer {
+        width: 100%;
+    }
+    #guessedListLeft {
+        width: 50%;
+        float: left;
+    }
+    #guessedListRight {
+        width: 50%;
+        float: right;
+    }
+    #guessedContainer {
+        width: 48%;
+        float: left;
+    }
+    #fromListContainer {
+        width: 48%;
+        float: right;
+    }
+    .fromListHidden {
+        width: 100%;
+    }
+    #qpOptionContainer {
+        z-index: 10;
+    }
+    #qpSongListButton {
+        width: 30px;
+        height: 100%;
+        margin-right: 5px;
+    }
+    .slCheckboxContainer {
+        width: 130px;
+        float: right;
+        user-select: none;
+    }
+    .slCheckbox {
+        display: flex;
+        margin: 5px;
+    }
+    .slCheckbox > label {
+        font-weight: normal;
+        margin-left: 5px;
+    }
+    .slFilterContainer > .customCheckbox {
+        float: left;
+    }
+    #slListSettings {
+        width: 50%;
+        float: left;
+        text-align: center;
+        font-weight: bold;
+    }
+    #slAnimeTitleSettings {
+        width: 50%;
+        float: left;
+        text-align: center;
+        font-weight: bold;
+    }
 `);
