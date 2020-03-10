@@ -148,27 +148,27 @@ class AMQWindow {
         $("#gameContainer").append(this.window);
     }
 
-    set title(newTitle) {
+    setTitle(newTitle) {
         this.title = newTitle;
         this.header.find("modal-title").text(newTitle);
     }
-    get title() {
+    getTitle() {
         return this.title;
     }
 
-    set zIndex(newZIndex) {
+    setZIndex(newZIndex) {
         this.zIndex = newZIndex;
         this.window.css("z-index", this.zIndex.toString());
     }
-    get zIndex() {
+    getZIndex() {
         return this.zIndex;
     }
 
-    set bodyOffset(newBodyOffset) {
+    setBodyOffset(newBodyOffset) {
         this.bodyOffset = newBodyOffset;
         this.body.height(this.height - this.bodyOffset - 33);
     }
-    get bodyOffset() {
+    getBodyOffset() {
         return this.bodyOffset;
     }
     
