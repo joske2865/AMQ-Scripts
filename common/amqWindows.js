@@ -41,7 +41,7 @@ class AMQWindow {
 
         this.body = $(`<div class="modal-body customWindowBody"></div>`)
             .addClass(this.resizable === true ? "resizableWindow" : "")
-            .height(this.height - this.bodyOffset - 33);
+            .height(this.height - this.bodyOffset);
 
         if (this.resizable === true) {
             this.resizers = $(
