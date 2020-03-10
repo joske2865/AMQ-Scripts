@@ -8,6 +8,7 @@ class AMQWindow {
         this.minWidth = data.minWidth === undefined ? 200 : data.minWidth;
         this.minHeight = data.minHeight === undefined ? 300: data.minHeight;
         this.position = data.position === undefined ? {x: 0, y: 0} : data.position;
+        this.closeHandler = data.closeHandler === undefined ? function () {} : data.closeHandler;
         this.resizers = null;
 
         this.window = $("<div></div>")
@@ -28,7 +29,7 @@ class AMQWindow {
             .addClass(this.draggable === true ? "draggableWindow" : "")
             .append($(`<div class="close" type="button"><span aria-hidden="true">×</span></div>`)
                 .click(() => {
-                    this.close();
+                    this.close(this.closeHandler);
                 })
             )
             .append($("<h2></h2>")
@@ -145,12 +146,26 @@ class AMQWindow {
         $("#gameContainer").append(this.window);
     }
 
+    clear() {
+        this.body.children().remove();
+    }
+
     open() {
         this.window.show();
     }
 
+    open(handler) {
+        this.window.show();
+        handler();
+    }
+
     close() {
         this.window.hide();
+    }
+
+    close(handler) {
+        this.window.hide();
+        handler();
     }
 }
 
