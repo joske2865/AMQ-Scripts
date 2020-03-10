@@ -9,12 +9,13 @@ class AMQWindow {
         this.minHeight = data.minHeight === undefined ? 300: data.minHeight;
         this.position = data.position === undefined ? {x: 0, y: 0} : data.position;
         this.closeHandler = data.closeHandler === undefined ? function () {} : data.closeHandler;
+        this.zIndex = data.zIndex === undefined ? 1060 : data.zIndex;
         this.resizers = null;
 
         this.window = $("<div></div>")
             .addClass("customWindow")
             .css("position", "absolute")
-            .css("z-index", "1060")
+            .css("z-index", this.zIndex.toString())
             .offset({
                 top: this.position.y !== undefined ? this.position.y : 0,
                 left: this.position.x !== undefined ? this.position.x : 0
@@ -156,7 +157,9 @@ class AMQWindow {
 
     open(handler) {
         this.window.show();
-        handler();
+        if (handler !== undefined) {
+            handler();
+        }
     }
 
     close() {
@@ -165,7 +168,9 @@ class AMQWindow {
 
     close(handler) {
         this.window.hide();
-        handler();
+        if (handler !== undefined) {
+            handler();
+        }
     }
 }
 
