@@ -10,7 +10,7 @@ class AMQWindow {
         this.position = data.position === undefined ? {x: 0, y: 0} : data.position;
         this.closeHandler = data.closeHandler === undefined ? function () {} : data.closeHandler;
         this.zIndex = data.zIndex === undefined ? 1060 : data.zIndex;
-        this.bodyOffset = data.bodyOffset === undefined ? 75 : data.bodyOffset;
+        this.bodyOffset = data.bodyOffset === undefined ? 70 : data.bodyOffset;
         this.resizers = null;
 
         this.window = $("<div></div>")
