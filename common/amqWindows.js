@@ -1,5 +1,6 @@
 class AMQWindow {
     constructor(data) {
+        this.id = data.id === undefined ? "" : data.id;
         this.title = data.title === undefined ? "Window" : data.title;
         this.resizable = data.resizable === undefined ? false : data.resizable;
         this.draggable = data.draggable === undefined ? false : data.draggable;
@@ -10,11 +11,13 @@ class AMQWindow {
         this.position = data.position === undefined ? {x: 0, y: 0} : data.position;
         this.closeHandler = data.closeHandler === undefined ? function () {} : data.closeHandler;
         this.zIndex = data.zIndex === undefined ? 1060 : data.zIndex;
-        this.bodyOffset = data.bodyOffset === undefined ? 70 : data.bodyOffset;
         this.resizers = null;
+        this.panels = [];
 
         this.window = $("<div></div>")
             .addClass("customWindow")
+            .addClass(data.class === undefined ? "" : data.class)
+            .attr("id", this.id)
             .css("position", "absolute")
             .css("z-index", this.zIndex.toString())
             .offset({
@@ -41,7 +44,7 @@ class AMQWindow {
 
         this.body = $(`<div class="modal-body customWindowBody"></div>`)
             .addClass(this.resizable === true ? "resizableWindow" : "")
-            .height(this.height - this.bodyOffset - 5);
+            .height(this.height - 75);
 
         if (this.resizable === true) {
             this.resizers = $(
@@ -83,7 +86,7 @@ class AMQWindow {
                                 tmp.window.width(newWidth);
                             }
                             if (newHeight > tmp.minHeight) {
-                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
+                                tmp.body.height(newHeight - 103);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -96,7 +99,7 @@ class AMQWindow {
                                 tmp.window.css("left", newLeft + "px");
                             }
                             if (newHeight > tmp.minHeight) {
-                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
+                                tmp.body.height(newHeight - 103);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -109,7 +112,7 @@ class AMQWindow {
                             }
                             if (newHeight > tmp.minHeight) {
                                 tmp.window.css("top", newTop + "px");
-                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
+                                tmp.body.height(newHeight - 103);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -124,7 +127,7 @@ class AMQWindow {
                             }
                             if (newHeight > tmp.minHeight) {
                                 tmp.window.css("top", newTop + "px");
-                                tmp.body.height(newHeight - tmp.bodyOffset - 33);
+                                tmp.body.height(newHeight - 103);
                                 tmp.window.height(newHeight);
                             }
                         }
@@ -148,30 +151,34 @@ class AMQWindow {
         $("#gameContainer").append(this.window);
     }
 
+    setId(newId) {
+        this.id = newId;
+        this.window.attr("id", this.id);
+    }
+
+    addClass(newClass) {
+        this.window.addClass(newClass);
+    }
+
+    removeClass(removedClass) {
+        this.window.removeClass(removedClass);
+    }
+
+    setWidth(newWidth) {
+        this.width = newWidth;
+        this.window.width(this.width);
+    }
+
     setTitle(newTitle) {
         this.title = newTitle;
         this.header.find("modal-title").text(newTitle);
-    }
-    getTitle() {
-        return this.title;
     }
 
     setZIndex(newZIndex) {
         this.zIndex = newZIndex;
         this.window.css("z-index", this.zIndex.toString());
     }
-    getZIndex() {
-        return this.zIndex;
-    }
 
-    setBodyOffset(newBodyOffset) {
-        this.bodyOffset = newBodyOffset;
-        this.body.height(this.height - this.bodyOffset - 33);
-    }
-    getBodyOffset() {
-        return this.bodyOffset;
-    }
-    
     isVisible() {
         return this.window.is(":visible");
     }
@@ -200,6 +207,157 @@ class AMQWindow {
         if (handler !== undefined) {
             handler();
         }
+    }
+
+    addPanel(data) {
+        let newPanel = new AMQWindowPanel(data);
+        this.panels.push(newPanel);
+        this.body.append(newPanel.panel);
+    }
+}
+
+class AMQWindowPanel {
+    constructor(data) {
+        this.id = data.id === undefined ? "" : data.id;
+        this.width = data.width === undefined ? 200 : data.width;
+        this.height = data.height === undefined ? 300 : data.height;
+        this.position = data.position === undefined ? {x: 0, y: 0} : data.position;
+        this.scrollable = data.scrollable === undefined ? {x: false, y: false} : data.scrollable;
+        this.panels = [];
+
+        this.panel = $("<div></div>")
+            .addClass(data.class === undefined ? "" : data.class)
+            .attr("id", this.id)
+            .css("position", "absolute")
+            
+        this.updateWidth();
+        this.updateHeight();
+        this.updatePosition();
+        this.updateScrollable();
+    }
+
+    setId(newId) {
+        this.id = newId;
+        this.panel.attr("id", this.id);
+    }
+
+    addClass(newClass) {
+        this.panel.addClass(newClass);
+    }
+
+    removeClass(removedClass) {
+        this.panel.removeClass(removedClass);
+    }
+
+    setWidth(newWidth) {
+        this.width = newWidth;
+        this.updateWidth();
+    }
+
+    setHeight(newHeight) {
+        this.height = newHeight;
+        this.updateHeight();
+    }
+
+    updateWidth() {
+        if (typeof this.width === "string") {
+            this.panel.css("width", this.width);
+        }
+        else if (parseFloat(this.width) >= 0.0 && parseFloat(this.width) <= 1.0) {
+            this.panel.css("width", (parseFloat(this.width) * 100) + "%");
+        }
+        else {
+            this.panel.width(parseInt(this.width));
+        }
+    }
+
+    updateHeight() {
+        if (typeof this.height === "string") {
+            this.panel.css("height", this.height);
+        }
+        else if (parseFloat(this.height) >= 0.0 && parseFloat(this.height) <= 1.0) {
+            this.panel.css("height", (parseFloat(this.height) * 100) + "%");
+        }
+        else {
+            this.panel.height(parseInt(this.height));
+        }
+    }
+
+    setPositionX(newPositionX) {
+        this.position.x = newPositionX;
+        this.updatePosition();
+    }
+
+    setPositionY(newPositionY) {
+        this.position.y = newPositiony;
+        this.updatePosition();
+    }
+
+    setPosition(newPosition) {
+        this.position.y = newPosition.x;
+        this.position.y = newPosition.y;
+        this.updatePosition();
+    }
+
+    updatePosition() {
+        if (typeof this.position.x === "string") {
+            this.panel.css("left", this.position.x);
+        }
+        else if (parseFloat(this.position.x) >= 0.0 && parseFloat(this.position.x) <= 1.0) {
+            this.panel.css("left", (parseFloat(this.position.x) * 100) + "%");
+        }
+        else {
+            this.panel.css("left", parseInt(this.position.x) + "px");
+        }
+
+        if (typeof this.position.y === "string") {
+            this.panel.css("top", this.position.y);
+        }
+        else if (parseFloat(this.position.y) >= 0.0 && parseFloat(this.position.y) <= 1.0) {
+            this.panel.css("top", (parseFloat(this.position.y) * 100) + "%");
+        }
+        else {
+            this.panel.css("top", parseInt(this.position.y) + "px");
+        }
+    }
+
+    setScrollableX(newScrollableX) {
+        this.scrollable.x = newScrollableX;
+        this.updateScrollable();
+    }
+
+    setScrollableY(newScrollableY) {
+        this.scrollable.y = newScrollableY;
+        this.updateScrollable();
+    }
+
+    updateScrollable() {
+        this.panel.css("overflow-x", this.scrollable.x === true ? "auto" : "hidden")
+        this.panel.css("overflow-y", this.scrollable.y === true ? "auto" : "hidden")
+    }
+
+    show() {
+        this.panel.show();
+    }
+
+    show(handler) {
+        this.show();
+        handler();
+    }
+
+    hide() {
+        this.panel.hide();
+    }
+
+    hide(handler) {
+        this.hide();
+        handler();
+    }
+
+    addPanel(data) {
+        let newPanel = new AMQWindowPanel(data);
+        this.panels.push(newPanel);
+        this.panel.append(newPanel.panel);
     }
 }
 
@@ -274,3 +432,62 @@ if (window.setupDocumentDone) {
         `);
     } 
 }
+
+let tmp1 = new AMQWindow({
+    id: "some-window",
+    class: ""
+    title: "Song List",
+    width: 300,
+    height: 600,
+    position: {
+        x: 500,
+        y: 100
+    },
+    draggable: true,
+    resizable: true,
+    minWidth: 300,
+    minHeight: 400
+});
+
+tmp1.addPanel({
+    id: "panel1",
+    height: 65,
+    width: 1.0,
+    position: {
+        x: 0,
+        y: 0
+    },
+    scrollable: {
+        x: false,
+        y: false
+    }
+});
+
+tmp1.addPanel({
+    id: "panel2",
+    class: "panel-class"
+    height: "calc(100% - 65px)",
+    width: 0.5,
+    position: {
+        x: 0,
+        y: 65
+    },
+    scrollable: {
+        x: true,
+        y: true
+    }
+});
+
+tmp1.panels[1].addPanel({
+    id: "panel-in-panel",
+    height: 50,
+    width: 0.5,
+    position: {
+        x: 0,
+        y: 65
+    },
+    scrollable: {
+        x: true,
+        y: true
+    }
+});
