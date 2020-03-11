@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      2.3.3
+// @version      2.3.4
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -14,7 +14,6 @@
 if (!window.setupDocumentDone) return;
 
 let listWindow;
-let listWindowOptions;
 let listWindowOpenButton;
 let listWindowTable;
 
@@ -53,14 +52,33 @@ function createListWindow() {
         minWidth: 480,
         minHeight: 350,
         zIndex: 1060,
-        bodyOffset: 135,
         closeHandler: listCloseHandler,
         resizable: true,
         draggable: true
     });
 
+    listWindow.addPanel({
+        id: "listWindowOptions",
+        width: 1.0,
+        height: 65
+    });
+
+    listWindow.addPanel({
+        id: "listWindowTableContainer",
+        width: 1.0,
+        height: "calc(100% - 65px)",
+        position: {
+            x: 0,
+            y: 65
+        },
+        scrollable: {
+            x: true,
+            y: true
+        }
+    });
+
     // create the options tab
-    listWindowOptions = $(`<div class="slWindowOptions" id="listWindowOptions"></div>`)
+    listWindow.panels[0].panel
         .append($(`<button id="slExport" class="btn btn-primary songListOptionsButton" type="button"><i aria-hidden="true" class="fa fa-file"></i></button`)
             .click(() => {
                 exportSongData();
@@ -147,11 +165,10 @@ function createListWindow() {
                 .append(`<div style="margin-left: 25px;">Incorrect</div>`)
             )
         );
-    listWindow.content.find(".modal-header").after(listWindowOptions);
 
     // create results table
     listWindowTable = $(`<table id="listWindowTable" class="table floatingContainer"></table>`);
-    listWindow.body.append(listWindowTable);
+    listWindow.panels[1].panel.append(listWindowTable);
 
     // button to access the song results
     listWindowOpenButton = $(`<div id="qpSongListButton" class="clickAble qpOption"><i aria-hidden="true" class="fa fa-list-ol qpMenuItem"></i></div>`)
@@ -535,7 +552,7 @@ function openInNewTab() {
             </style>
         </head>
         <body>
-            <div id="slContainer">` + $("#listWindowBody").html() + `</div>
+            <div id="slContainer">` + $("#listWindowTableContainer").html() + `</div>
         </body>
     </html>`);
 }
@@ -675,85 +692,129 @@ function clearInfo() {
 function createSettingsWindow() {
     settingsWindow = new AMQWindow({
         width: 300,
-        height: 365,
+        height: 355,
         title: "Settings",
         draggable: true,
         zIndex: 1070
     });
-    settingsWindow.body
-        .append($(`<div id="slListSettings">List Settings</div>`)
-            .append($(`<div class="slCheckbox"></div>`)
-                .append($(`<div class="customCheckbox"></div>`)
-                    .append($("<input id='slAutoClear' type='checkbox'>")
-                        .prop("checked", false)
-                        .click(function () {
-                            savedSettings.autoClearList = $(this).prop("checked");
-                            saveSettings();
-                        })
-                    )
-                    .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                )
-                .append($("<label>Auto Clear List</label>")
-                    .popover({
-                        content: "Automatically clears the list on quiz start, quiz end or when leaving the lobby",
-                        placement: "top",
-                        trigger: "hover",
-                        container: "body",
-                        animation: false
+    settingsWindow.addPanel({
+        width: "calc(50% - 10px)",
+        height: 115,
+        position: {
+            x: 10,
+            y: 10
+        },
+        id: "slListSettings"
+    });
+    settingsWindow.addPanel({
+        width: 0.5,
+        height: 115,
+        position: {
+            x: 0.5,
+            y: 10
+        },
+        id: "slAnimeTitleSettings"
+    });
+    settingsWindow.addPanel({
+        width: 1.0,
+        height: 145,
+        position: {
+            x: 0,
+            y: 125
+        },
+        id: "slTableSettings"
+    });
+    settingsWindow.panels[2].addPanel({
+        width: "calc(50% - 10px)",
+        height: 125,
+        position: {
+            x: 10,
+            y: 20
+        }
+    });
+    settingsWindow.panels[2].addPanel({
+        width: "calc(50% - 10px)",
+        height: 125,
+        position: {
+            x: "calc(50% + 10px)",
+            y: 20
+        }
+    });
+
+    settingsWindow.panels[0].panel
+        .append($(`<span style="text-align: center;width: 100%;display: block;"><b>List Settings</b></span>`))
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slAutoClear' type='checkbox'>")
+                    .prop("checked", false)
+                    .click(function () {
+                        savedSettings.autoClearList = $(this).prop("checked");
+                        saveSettings();
                     })
                 )
+                .append($("<label for='slAutoClear'><i class='fa fa-check' aria-hidden='true'></i></label>"))
             )
-            .append($(`<div class="slCheckbox"></div>`)
-                .append($(`<div class="customCheckbox"></div>`)
-                    .append($("<input id='slAutoScroll' type='checkbox'>")
-                        .prop("checked", true)
-                        .click(function () {
-                            savedSettings.autoScroll = $(this).prop("checked");
-                            saveSettings();
-                        })
-                    )
-                    .append($("<label for='slAutoScroll'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                )
-                .append($("<label>Auto Scroll</label>")
-                    .popover({
-                        content: "Automatically scrolls to the bottom of the list on each new entry added",
-                        placement: "top",
-                        trigger: "hover",
-                        container: "body",
-                        animation: false
-                    })
-                )
-            )
-            .append($(`<div class="slCheckbox"></div>`)
-                .append($(`<div class="customCheckbox"></div>`)
-                    .append($("<input id='slCorrectGuesses' type='checkbox'>")
-                        .prop("checked", true)
-                        .click(function () {
-                            if ($(this).prop("checked")) {
-                                $(".correctGuess").removeClass("guessHidden");
-                                $(".incorrectGuess").removeClass("guessHidden");
-                            }
-                            else {
-                                $(".correctGuess").addClass("guessHidden");
-                                $(".incorrectGuess").addClass("guessHidden");
-                            }
-                            savedSettings.showCorrect = $(this).prop("checked");
-                            saveSettings();
-                        })
-                    )
-                    .append($("<label for='slCorrectGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                )
-                .append($("<label>Show Correct</label>")
-                    .popover({
-                        content: "Enable or disable the green or red tint for correct or incorrect guesses",
-                        placement: "top",
-                        trigger: "hover",
-                        container: "body",
-                        animation: false
-                    })
-                )
+            .append($("<label>Auto Clear List</label>")
+                .popover({
+                    content: "Automatically clears the list on quiz start, quiz end or when leaving the lobby",
+                    placement: "top",
+                    trigger: "hover",
+                    container: "body",
+                    animation: false
+                })
             )
         )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slAutoScroll' type='checkbox'>")
+                    .prop("checked", true)
+                    .click(function () {
+                        savedSettings.autoScroll = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slAutoScroll'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Auto Scroll</label>")
+                .popover({
+                    content: "Automatically scrolls to the bottom of the list on each new entry added",
+                    placement: "top",
+                    trigger: "hover",
+                    container: "body",
+                    animation: false
+                })
+            )
+        )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slCorrectGuesses' type='checkbox'>")
+                    .prop("checked", true)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".correctGuess").removeClass("guessHidden");
+                            $(".incorrectGuess").removeClass("guessHidden");
+                        }
+                        else {
+                            $(".correctGuess").addClass("guessHidden");
+                            $(".incorrectGuess").addClass("guessHidden");
+                        }
+                        savedSettings.showCorrect = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slCorrectGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Show Correct</label>")
+                .popover({
+                    content: "Enable or disable the green or red tint for correct or incorrect guesses",
+                    placement: "top",
+                    trigger: "hover",
+                    container: "body",
+                    animation: false
+                })
+            )
+        );
+    settingsWindow.panels[1].panel
         .append($(`<div id="slAnimeTitleSettings">Anime Titles</div>`)
             .append($(`<select id="slAnimeTitleSelect"></select>`)
                 .append($(`<option value="english">English</option>`))
@@ -779,172 +840,169 @@ function createSettingsWindow() {
             )
         )
 
-        .append($(`<div id="slTableSettings"></div>`)
-            .append($(`<div style="width: 100%">Table Display Settings</div>`))
-            .append($(`<div class="slTableSettingsContainer"></div>`)
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowSongNumber' type='checkbox'>")
-                            .prop("checked", true)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    $(".songNumber").show();
-                                }
-                                else {
-                                    $(".songNumber").hide();
-                                }
-                                savedSettings.songNumber = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowSongNumber'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Song Number</label>"))
+    settingsWindow.panels[2].panel
+        .append($(`<span style="width: 100%;text-align: center;display: block;"><b>Table Display Settings</b></span>`))
+    settingsWindow.panels[2].panels[0].panel
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowSongNumber' type='checkbox'>")
+                    .prop("checked", true)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".songNumber").show();
+                        }
+                        else {
+                            $(".songNumber").hide();
+                        }
+                        savedSettings.songNumber = $(this).prop("checked");
+                        saveSettings();
+                    })
                 )
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowSongName' type='checkbox'>")
-                            .prop("checked", true)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    $(".songName").show();
-                                }
-                                else {
-                                    $(".songName").hide();
-                                }
-                                savedSettings.songName = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowSongName'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Song Name</label>"))
-                )
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowArtist' type='checkbox'>")
-                            .prop("checked", true)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    $(".songArtist").show();
-                                }
-                                else {
-                                    $(".songArtist").hide();
-                                }
-                                savedSettings.artist = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowArtist'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Artist</label>"))
-                )
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowAnime' type='checkbox'>")
-                            .prop("checked", true)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    if ($("#slAnimeTitleSelect").val() === "romaji") {
-                                        $(".animeNameEnglish").hide();
-                                        $(".animeNameRomaji").show();
-                                    }
-                                    if ($("#slAnimeTitleSelect").val() === "english") {
-                                        $(".animeNameEnglish").show();
-                                        $(".animeNameRomaji").hide();
-                                    }
-                                }
-                                else {
-                                    $(".animeNameEnglish").hide();
-                                    $(".animeNameRomaji").hide();
-                                }
-                                savedSettings.anime = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowAnime'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Anime</label>"))
-                )
+                .append($("<label for='slShowSongNumber'><i class='fa fa-check' aria-hidden='true'></i></label>"))
             )
-            .append($(`<div class="slTableSettingsContainer"></div>`)
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowType' type='checkbox'>")
-                            .prop("checked", true)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    $(".songType").show();
-                                }
-                                else {
-                                    $(".songType").hide();
-                                }
-                                savedSettings.type = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowType'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Type</label>"))
+            .append($("<label>Song Number</label>"))
+        )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowSongName' type='checkbox'>")
+                    .prop("checked", true)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".songName").show();
+                        }
+                        else {
+                            $(".songName").hide();
+                        }
+                        savedSettings.songName = $(this).prop("checked");
+                        saveSettings();
+                    })
                 )
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowSelfAnswer' type='checkbox'>")
-                            .prop("checked", false)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    $(".selfAnswer").show();
-                                }
-                                else {
-                                    $(".selfAnswer").hide();
-                                }
-                                savedSettings.answers = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowSelfAnswer'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Answer</label>"))
-                )
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowGuesses' type='checkbox'>")
-                            .prop("checked", false)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    $(".guessesCounter").show();
-                                }
-                                else {
-                                    $(".guessesCounter").hide();
-                                }
-                                savedSettings.guesses = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Guesses</label>"))
-                )
-                .append($(`<div class="slCheckbox"></div>`)
-                    .append($(`<div class="customCheckbox"></div>`)
-                        .append($("<input id='slShowSamplePoint' type='checkbox'>")
-                            .prop("checked", false)
-                            .click(function () {
-                                if ($(this).prop("checked")) {
-                                    $(".samplePoint").show();
-                                }
-                                else {
-                                    $(".samplePoint").hide();
-                                }
-                                savedSettings.samplePoint = $(this).prop("checked");
-                                saveSettings();
-                            })
-                        )
-                        .append($("<label for='slShowSamplePoint'><i class='fa fa-check' aria-hidden='true'></i></label>"))
-                    )
-                    .append($("<label>Sample Point</label>"))
-                )
+                .append($("<label for='slShowSongName'><i class='fa fa-check' aria-hidden='true'></i></label>"))
             )
+            .append($("<label>Song Name</label>"))
+        )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowArtist' type='checkbox'>")
+                    .prop("checked", true)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".songArtist").show();
+                        }
+                        else {
+                            $(".songArtist").hide();
+                        }
+                        savedSettings.artist = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slShowArtist'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Artist</label>"))
+        )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowAnime' type='checkbox'>")
+                    .prop("checked", true)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            if ($("#slAnimeTitleSelect").val() === "romaji") {
+                                $(".animeNameEnglish").hide();
+                                $(".animeNameRomaji").show();
+                            }
+                            if ($("#slAnimeTitleSelect").val() === "english") {
+                                $(".animeNameEnglish").show();
+                                $(".animeNameRomaji").hide();
+                            }
+                        }
+                        else {
+                            $(".animeNameEnglish").hide();
+                            $(".animeNameRomaji").hide();
+                        }
+                        savedSettings.anime = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slShowAnime'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Anime</label>"))
+        )
+    settingsWindow.panels[2].panels[1].panel
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowType' type='checkbox'>")
+                    .prop("checked", true)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".songType").show();
+                        }
+                        else {
+                            $(".songType").hide();
+                        }
+                        savedSettings.type = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slShowType'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Type</label>"))
+        )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowSelfAnswer' type='checkbox'>")
+                    .prop("checked", false)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".selfAnswer").show();
+                        }
+                        else {
+                            $(".selfAnswer").hide();
+                        }
+                        savedSettings.answers = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slShowSelfAnswer'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Answer</label>"))
+        )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowGuesses' type='checkbox'>")
+                    .prop("checked", false)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".guessesCounter").show();
+                        }
+                        else {
+                            $(".guessesCounter").hide();
+                        }
+                        savedSettings.guesses = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slShowGuesses'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Guesses</label>"))
+        )
+        .append($(`<div class="slCheckbox"></div>`)
+            .append($(`<div class="customCheckbox"></div>`)
+                .append($("<input id='slShowSamplePoint' type='checkbox'>")
+                    .prop("checked", false)
+                    .click(function () {
+                        if ($(this).prop("checked")) {
+                            $(".samplePoint").show();
+                        }
+                        else {
+                            $(".samplePoint").hide();
+                        }
+                        savedSettings.samplePoint = $(this).prop("checked");
+                        saveSettings();
+                    })
+                )
+                .append($("<label for='slShowSamplePoint'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+            )
+            .append($("<label>Sample Point</label>"))
         )
 }
 
@@ -1107,7 +1165,7 @@ document.getElementById("listWindowTable").addEventListener("DOMNodeInserted", f
 
 function autoScrollList() {
     if ($("#slAutoScroll").prop("checked")) {
-        $("#listWindowBody").scrollTop($("#listWindowBody").get(0).scrollHeight);
+        $("#listWindowTableContainer").scrollTop($("#listWindowTableContainer").get(0).scrollHeight);
     }
 }
 
@@ -1148,10 +1206,8 @@ AMQ_addScriptData({
 
 // CSS
 AMQ_addStyle(`
-    .slWindowOptions {
-        width: 100%;
-        height: 65px;
-        border-bottom: 1px solid #6d6d6d;
+    #listWindowTableContainer {
+        padding: 15px;
     }
     #slAnimeTitleSelect {
         color: black;
@@ -1161,9 +1217,8 @@ AMQ_addStyle(`
         border: 1px;
         margin-right: 1px;
     }
-    .songListOptions {
+    #listWindowOptions {
         border-bottom: 1px solid #6d6d6d;
-        height: 65px;
     }
     .songListOptionsButton {
         float: right;
@@ -1193,16 +1248,6 @@ AMQ_addStyle(`
     }
     .rowFiltered {
         display: none !important;
-    }
-    #slTableSettings {
-        float: left;
-        width: 100%;
-        text-align: center;
-        font-weight: bold;
-    }
-    .slTableSettingsContainer {
-        float: left;
-        width: 50%;
     }
     .songData {
         height: 50px;
@@ -1329,14 +1374,7 @@ AMQ_addStyle(`
     .slFilterContainer > .customCheckbox {
         float: left;
     }
-    #slListSettings {
-        width: 50%;
-        float: left;
-        text-align: center;
-        font-weight: bold;
-    }
     #slAnimeTitleSettings {
-        width: 50%;
         float: left;
         text-align: center;
         font-weight: bold;
