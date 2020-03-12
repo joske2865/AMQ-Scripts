@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      2.3.4
+// @version      2.3.5
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -573,6 +573,15 @@ function createInfoWindow() {
         closeHandler: closeInfoHandler,
         zIndex: 1065
     });
+
+    infoWindow.addPanel({
+        height: 1.0,
+        width: 1.0,
+        scrollable: {
+            x: false,
+            y: true
+        }
+    });
 }
 
 function updateInfo(song) {
@@ -679,14 +688,14 @@ function updateInfo(song) {
     }
     urlContainer.append(listContainer);
 
-    infoWindow.body.append(infoRow1);
-    infoWindow.body.append(infoRow2);
-    infoWindow.body.append(infoRow3);
-    infoWindow.body.append(infoRow4);
+    infoWindow.panels[0].panel.append(infoRow1);
+    infoWindow.panels[0].panel.append(infoRow2);
+    infoWindow.panels[0].panel.append(infoRow3);
+    infoWindow.panels[0].panel.append(infoRow4);
 }
 
 function clearInfo() {
-    infoWindow.clear();
+    infoWindow.panels[0].clear();
 }
 
 function createSettingsWindow() {
