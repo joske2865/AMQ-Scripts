@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name         AMQ Speedrun
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.1
+// @version      1.1.2
 // @description  Tracks guess times for each song, including total and average times
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
 
-let fastestGuess = 9999999999;
+let fastestGuess = 999999;
 let slowestGuess = 0;
 let totalTime = 0;
 let averageCorrect = 0;
@@ -34,16 +35,13 @@ let speedrunWindowCloseButton;
 
 let oldWidth = $("#qpOptionContainer").width();
 $("#qpOptionContainer").width(oldWidth + 35);
-$("#qpOptionContainer > div").append($("<div></div>")
-    .attr("id", "qpSpeedrun")
-    .attr("class", "clickAble qpOption")
-    .html("<i aria-hidden=\"true\" class=\"fa fa-clock-o qpMenuItem\"></i>")
+$("#qpOptionContainer > div").append($(`<div id="qpSpeedrun" class="clickAble qpOption"><i aria-hidden="true" class="fa fa-clock-o qpMenuItem"></i></div>`)
     .click(() => {
-        if (speedrunWindow.is(":visible")) {
-            speedrunWindow.hide();
+        if (speedrunWindow.isVisible()) {
+            speedrunWindow.close();
         }
         else {
-            speedrunWindow.show();
+            speedrunWindow.open();
         }
     })
     .popover({
@@ -54,79 +52,97 @@ $("#qpOptionContainer > div").append($("<div></div>")
 );
 
 function createSpeedrunWindow() {
-    speedrunWindow = $("<div></div>")
-        .attr("id", "speedrunWindow")
-        .css("position", "absolute")
-        .css("top", "0px")
-        .css("left", "0px")
-        .css("z-index", "1055");
+    speedrunWindow = new AMQWindow({
+        title: "Speedrun",
+        width: 250,
+        height: 400,
+        minWidth: 250,
+        minHeight: 330,
+        zIndex: 1055,
+        draggable: true,
+        resizable: true,
+    });
 
-    speedrunWindowHeader = $("<div></div>")
-        .addClass("modal-header")
-        .attr("id", "speedrunWindowHeader")
-        .append($("<h2></h2>")
-            .attr("class", "modal-title")
-            .text("Speedrun")
-        );
+    speedrunWindow.addPanel({
+        width: 1.0,
+        height: 145,
+        id: "speedrunWindowUpper"
+    });
 
-    speedrunWindowContent = $("<div></div>")
-        .attr("id", "speedrunWindowContent");
+    speedrunWindow.panels[0].addPanel({
+        width: "calc(65% - 5px)",
+        height: 1.0,
+        position: {
+            x: 5,
+            y: 0
+        },
+        id: "speedrunInfoLeft"
+    });
 
-    speedrunWindowBodyUpper = $("<div></div>")
-        .attr("id", "speedrunWindowBodyUpper")
-        .addClass("modal-body")
-        .css("height", "150px")
-        .append($("<div></div>")
-            .attr("id", "speedrunInfoLeft")
-            .html(`
-                <p>Fastest correct guess:</p>
-                <p>Slowest correct guess:</p>
-                <p>Guess rate:</p>
-                <p>Average time (correct):</p>
-                <p>Average time (total):</p>
-                <p>Total time:</p>
-                <p>Previous guess time:</p>
-            `)
-        )
-        .append($("<div></div>")
-            .attr("id", "speedrunInfoRight")
-            .html(`
-                <p id="srFastestTime">0.000</p>
-                <p id="srSlowestTime">0.000</p>
-                <p id="srGuessRate">0%</p>
-                <p id="srAverageCorrect">0.000</p>
-                <p id="srAverageTotal">0.000</p>
-                <p id="srTotalTime">0.000</p>
-                <p id="srPreviousTime">0.000</p>
-            `)
-        )
+    speedrunWindow.panels[0].addPanel({
+        width: "calc(35% - 5px)",
+        height: 1.0,
+        position: {
+            x: 0.65,
+            y: 0
+        },
+        id: "speedrunInfoRight"
+    });
 
-    speedrunWindowBodyLower = $("<div></div>")
-        .attr("id", "speedrunWindowBodyLower")
-        .addClass("modal-body")
-        .css("height", "175px")
-        .css("overflow-y", "auto")
-        .append($("<div></div>")
-            .attr("id", "speedrunTimesLeft")
-        )
-        .append($("<div></div>")
-            .attr("id", "speedrunTimesRight")
-        )
+    speedrunWindow.addPanel({
+        width: 1.0,
+        height: "calc(100% - 145px)",
+        position: {
+            x: 0,
+            y: 145
+        },
+        scrollable: {
+            x: false,
+            y: true
+        }
+    });
 
-    speedrunWindowCloseButton = $("<div></div>")
-        .attr("class", "close")
-        .attr("type", "button")
-        .html("<span aria-hidden=\"true\">×</span>")
-        .click(() => {
-            speedrunWindow.hide();
-        });
+    speedrunWindow.panels[1].addPanel({
+        width: "calc(50% - 5px)",
+        height: "auto",
+        position: {
+            x: 5,
+            y: 0
+        },
+        id: "speedrunTimesLeft"
+    });
 
-    speedrunWindowContent.append(speedrunWindowBodyUpper);
-    speedrunWindowContent.append(speedrunWindowBodyLower);
-    speedrunWindowHeader.prepend(speedrunWindowCloseButton);
-    speedrunWindow.append(speedrunWindowHeader);
-    speedrunWindow.append(speedrunWindowContent);
-    $("#gameContainer").append(speedrunWindow);
+    speedrunWindow.panels[1].addPanel({
+        width: "calc(50% - 5px)",
+        height: "auto",
+        position: {
+            x: 0.5,
+            y: 0
+        },
+        id: "speedrunTimesRight"
+    });
+
+    speedrunWindow.panels[0].panels[0].panel
+        .html(`
+            <p>Fastest correct guess:</p>
+            <p>Slowest correct guess:</p>
+            <p>Guess rate:</p>
+            <p>Average time (correct):</p>
+            <p>Average time (total):</p>
+            <p>Total time:</p>
+            <p>Previous guess time:</p>
+        `);
+
+    speedrunWindow.panels[0].panels[1].panel
+        .html(`
+            <p id="srFastestTime">0.000</p>
+            <p id="srSlowestTime">0.000</p>
+            <p id="srGuessRate">0%</p>
+            <p id="srAverageCorrect">0.000</p>
+            <p id="srAverageTotal">0.000</p>
+            <p id="srTotalTime">0.000</p>
+            <p id="srPreviousTime">0.000</p>
+        `);
 }
 
 createSpeedrunWindow();
@@ -161,6 +177,9 @@ let quizAnswerResultsListener = new Listener("answer results", result => {
         if (tmpCorrect === false) {
             tmpGuessTime = (quizVideoController.getCurrentPlayer().bufferLength - 13) * 1000;
             guessRate = (guessRate*(songNumber-1) + 0) / songNumber;
+            if (tmpGuessTime < fastestGuess) {
+                fastestGuess = tmpGuessTime;
+            }
         }
         else {
             correctCount++;
@@ -187,7 +206,7 @@ let quizAnswerResultsListener = new Listener("answer results", result => {
     }
 });
 
-answerHandler = function (event) {
+let answerHandler = function (event) {
     if (event.which === 13) {
         answerSubmitTime = Date.now();
         autoSubmitFlag = false;
@@ -202,9 +221,9 @@ function updateInfo(songNumber, newTime) {
     $("#srAverageTotal").text(formatTime(averageTotal));
     $("#srTotalTime").text(formatTime(totalTime));
     $("#srPreviousTime").text(formatTime(previousGuess));
-    $("#speedrunTimesLeft").append($("<p></p>").text("Song " + songNumber));
-    $("#speedrunTimesRight").append($("<p></p>").text(formatTime(newTime.time)));
-    $("#speedrunWindowBodyLower").scrollTop($("#speedrunWindowBodyLower").get(0).scrollHeight);
+    speedrunWindow.panels[1].panels[0].panel.append($("<p></p>").text("Song " + songNumber));
+    speedrunWindow.panels[1].panels[1].panel.append($("<p></p>").text(formatTime(newTime.time)));
+    speedrunWindow.panels[1].panel.scrollTop(speedrunWindow.panels[1].panel.get(0).scrollHeight);
 }
 
 function formatTime(time) {
@@ -244,7 +263,7 @@ function resetTimes() {
     $("#srAverageTotal").text("0.000");
     $("#srTotalTime").text("0.000");
     $("#srPreviousTime").text("0.000");
-    fastestGuess = 9999999999;
+    fastestGuess = 999999;
     slowestGuess = 0;
     totalTime = 0;
     averageCorrect = 0;
@@ -254,11 +273,6 @@ function resetTimes() {
     previousGuess = 0;
     times = {};
 }
-
-$("#speedrunWindow").draggable({
-    handle: "#speedrunWindowHeader",
-    containment: "#gameContainer"
-});
 
 quizReadyListener.bindListener();
 quizAnswerResultsListener.bindListener();
@@ -277,63 +291,29 @@ AMQ_addScriptData({
 });
 
 AMQ_addStyle(`
-#qpSpeedrun {
-    width: 30px;
-    margin-right: 5px;
-}
-#speedrunWindow {
-    width: 250px;
-    height: 400px;
-    background-color: #424242;
-    border: 1px solid rgba(27, 27, 27, 0.2);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    display: none;
-}
-#speedrunWindowBodyUpper {
-    border-bottom: 1px solid #6d6d6d;
-    padding: 5px;
-}
-#speedrunWindowBodyLower {
-    padding: 5px;
-}
-#speedrunWindow .close {
-    font-size: 32px;
-}
-#speedrunWindowHeader {
-    cursor: move;
-}
-#speedrunInfoLeft {
-    width: 65%;
-    float: left;
-}
-#speedrunInfoRight {
-    width: 35%;
-    float: right;
-}
-#speedrunTimesLeft {
-    width: 50%;
-    float: left;
-}
-#speedrunTimesRight {
-    width: 50%;
-    float: right;
-}
-#speedrunInfoLeft > p {
-    font-size: 14px;
-    margin-bottom: 0px;
-}
-#speedrunInfoRight > p {
-    font-size: 14px;
-    margin-bottom: 0px;
-    text-align: right;
-}
-#speedrunTimesLeft > p {
-    font-size: 18px;
-    margin-bottom: 0px;
-}
-#speedrunTimesRight > p {
-    font-size: 18px;
-    margin-bottom: 0px;
-    text-align: right;
-}
+    #qpSpeedrun {
+        width: 30px;
+        margin-right: 5px;
+    }
+    #speedrunWindowUpper {
+        border-bottom: 1px solid #6d6d6d;
+    }
+    #speedrunInfoLeft > p {
+        font-size: 14px;
+        margin-bottom: 0px;
+    }
+    #speedrunInfoRight > p {
+        font-size: 14px;
+        margin-bottom: 0px;
+        text-align: right;
+    }
+    #speedrunTimesLeft > p {
+        font-size: 18px;
+        margin-bottom: 0px;
+    }
+    #speedrunTimesRight > p {
+        font-size: 18px;
+        margin-bottom: 0px;
+        text-align: right;
+    }
 `);
