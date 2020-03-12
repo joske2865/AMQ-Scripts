@@ -30,7 +30,7 @@ class AMQWindow {
         this.content = $(`<div class="customWindowContent"></div>`);
 
         this.header = $("<div></div>")
-            .addClass("modal-header")
+            .addClass("modal-header customWindowHeader")
             .addClass(this.draggable === true ? "draggableWindow" : "")
             .append($(`<div class="close" type="button"><span aria-hidden="true">×</span></div>`)
                 .click(() => {
@@ -226,6 +226,7 @@ class AMQWindowPanel {
         this.panels = [];
 
         this.panel = $("<div></div>")
+            .addClass("customWindowPanel")
             .addClass(data.class === undefined ? "" : data.class)
             .attr("id", this.id)
             .css("position", "absolute")
@@ -358,6 +359,10 @@ class AMQWindowPanel {
         let newPanel = new AMQWindowPanel(data);
         this.panels.push(newPanel);
         this.panel.append(newPanel.panel);
+    }
+
+    clear() {
+        this.panel.children().remove();
     }
 }
 
