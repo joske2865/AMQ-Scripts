@@ -27,11 +27,6 @@ let answerSubmitTime = 0;
 let autoSubmitFlag = true;
 
 let speedrunWindow;
-let speedrunWindowHeader;
-let speedrunWindowContent;
-let speedrunWindowBodyUpper;
-let speedrunWindowBodyLower;
-let speedrunWindowCloseButton;
 
 let oldWidth = $("#qpOptionContainer").width();
 $("#qpOptionContainer").width(oldWidth + 35);
