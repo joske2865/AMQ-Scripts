@@ -273,6 +273,20 @@ quizReadyListener.bindListener();
 quizAnswerResultsListener.bindListener();
 quizPlayNextSongListener.bindListener();
 
+$(".modal").on("show.bs.modal", () => {
+    speedrunWindow.setZIndex(1025);
+});
+
+$(".modal").on("hidden.bs.modal", () => {
+    speedrunWindow.setZIndex(1055);
+});
+
+$(".slCheckbox label").hover(() => {
+    speedrunWindow.setZIndex(1025);
+}, () => {
+    speedrunWindow.setZIndex(1055);
+});
+
 AMQ_addScriptData({
     name: "Speedrun",
     author: "TheJoseph98",
