@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Dice Roller UI
 // @namespace    https://github.com/TheJoseph98
-// @version      1.0
+// @version      1.1
 // @description  Adds a window where you can roll dice
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -14,30 +14,10 @@
 // Don't load the script unless the user is logged in
 if (!window.setupDocumentDone) return;
 
-// set your rolls here, a user interface which will allow you do this more visually coming soon™
-let diceRolls = {
-    "Symphogear": [
-        "s1",
-        "G",
-        "GX",
-        "AXZ",
-        "XV"
-    ],
-    "Initial D": [
-        "First Stage",
-        "Second Stage",
-        "Third Stage",
-        "Fourth Stage",
-        "Fifth Stage",
-        "Final Stage",
-        "Battle Stage",
-        "Battle Stage 2",
-        "Extra Stage",
-        "Extra Stage 2"
-    ]
-};
+let diceRolls = {};
 
 let diceWindow;
+let diceManagerWindow;
 
 function createDiceWindow() {
     diceWindow = new AMQWindow({
@@ -80,11 +60,22 @@ function createDiceWindow() {
         $("#diceSelect").append(`<option value='` + key + `'>${key}</option>`);
     }
 
-    diceWindow.panels[1].panel.append($(`<button class="btn btn-primary" type="button">Roll</button>`)
-        .click(function () {
-            rollDice($("#diceSelect").val());
-        })
-    );
+    diceWindow.panels[1].panel
+        .append($(`<button class="btn btn-primary" type="button">Roll</button>`)
+            .click(function () {
+                rollDice($("#diceSelect").val());
+            })
+        )
+        .append($(`<button class="btn btn-default" type="button">Manage</button>`)
+            .click(function () {
+                if (diceManagerWindow.isVisible()) {
+                    diceManagerWindow.close();
+                }
+                else {
+                    diceManagerWindow.open();
+                }
+            })
+        )
 
     diceWindow.panels[2].panel.append($(`<span id="diceChoice"></span>`));
 
@@ -107,26 +98,177 @@ function createDiceWindow() {
     );
 }
 
+function createDiceManagerWindow() {
+    diceManagerWindow = new AMQWindow({
+        id: "diceManagerWindow",
+        title: "Dice Manager",
+        width: 500,
+        height: 350,
+        minWidth: 500,
+        minHeight: 350,
+        draggable: true,
+        resizable: true,
+        zIndex: 1052
+    });
+
+    diceManagerWindow.addPanel({
+        width: 200,
+        height: 1.0,
+        id: "diceKeysManager"
+    });
+
+    diceManagerWindow.addPanel({
+        width: "calc(100% - 200px)",
+        height: 50,
+        position: {
+            x: 200,
+            y: 0
+        },
+        id: "diceValuesManager"
+    });
+
+    diceManagerWindow.addPanel({
+        width: "calc(100% - 200px)",
+        height: "calc(100% - 50px)",
+        position: {
+            x: 200,
+            y: 50
+        },
+        scrollable: {
+            x: false,
+            y: true
+        }
+    });
+
+    diceManagerWindow.panels[0].panel
+        .append($(`<div class="diceManagerInputContainer"></div>`)
+            .append($(`<select id="diceManagerSelect"></select>`)
+                .change(function () {
+                    displayValues($(this).val());
+                })
+            )
+            .append($(`<button class="btn btn-default" type="button">Remove</button>`)
+                .click(function () {
+                    let selectedKey = $("#diceManagerSelect").val();
+                    delete diceRolls[selectedKey];
+                    $("#diceManagerSelect > option[value='" + selectedKey + "']").remove();
+                    $("#diceSelect > option[value='" + selectedKey + "']").remove();
+                    displayValues($("#diceManagerSelect").val());
+                    saveDice();
+                })
+            )
+        )
+        .append($(`<div class="diceManagerInputContainer"></div>`)
+            .append($(`<input id="diceManagerKeyInput" type="text">`))
+            .append($(`<button type="button" class="btn btn-primary">Add</button>`)
+                .click(function () {
+                    let newKey = $("#diceManagerKeyInput").val();
+                    diceRolls[newKey] = [];
+                    $("#diceSelect").append(`<option value='` + newKey + `'>${newKey}</option>`);
+                    $("#diceManagerSelect").append(`<option value='` + newKey + `'>${newKey}</option>`);
+                    $("#diceManagerSelect").val(newKey);
+                    displayValues(newKey);
+                    saveDice();
+                })
+            )
+        )
+
+    for (let key in diceRolls) {
+        $("#diceManagerSelect").append(`<option value='` + key + `'>${key}</option>`);
+    }
+
+    diceManagerWindow.panels[1].panel
+        .append($(`<div id="diceValueInputContainer"></div>`)
+            .append($(`<input id="diceManagerValueInput" type="text">`))
+            .append($(`<button type="button" class="btn btn-primary">Add</button>`)
+                .click(function () {
+                    let newValue = $("#diceManagerValueInput").val();
+                    let selectedKey = $("#diceManagerSelect").val();
+                    if (selectedKey !== null) {
+                        diceRolls[selectedKey].push(newValue);
+                        displayValue(newValue);
+                        saveDice();
+                    }
+                })
+            )
+        )
+
+    displayValues($("#diceManagerSelect").val());
+}
+
 function rollDice(key) {
+    if (key === null) {
+        $("#diceChoice").text("");
+        return;
+    }
     let randomIdx = Math.floor(Math.random() * diceRolls[key].length);
     let randomChoice = diceRolls[key][randomIdx];
     $("#diceChoice").text(randomChoice);
 }
 
+function clearValues() {
+    diceManagerWindow.panels[2].panel.children().remove();
+}
+
+function displayValues(key) {
+    clearValues();
+    if (key === null) {
+        return;
+    }
+    for (let value of diceRolls[key]) {
+        displayValue(value);
+    }
+}
+
+function displayValue(newValue) {
+    diceManagerWindow.panels[2].panel
+        .append($(`<div class="diceManagerValueContainer"></div>`)
+            .append($(`<span></span>`)
+                .text(newValue)
+            )
+            .append($(`<button type="button" class="btn btn-default">Remove</button>`)
+                .click(function () {
+                    let selectedKey = $("#diceManagerSelect").val();
+                    let index = diceRolls[selectedKey].indexOf(newValue);
+                    if (index !== -1) diceRolls[selectedKey].splice(index, 1);
+                    $(this).parent().remove();
+                    saveDice();
+                })
+            )
+        )
+}
+
+function saveDice() {
+    localStorage.setItem("amqDice", JSON.stringify(diceRolls));
+}
+
+function loadDice() {
+    let savedDice = localStorage.getItem("amqDice");
+    if (savedDice !== null) {
+        diceRolls = JSON.parse(savedDice);
+    }
+}
+
+loadDice();
+createDiceManagerWindow();
 createDiceWindow();
 
 $(".modal").on("show.bs.modal", () => {
     diceWindow.setZIndex(1025);
+    diceManagerWindow.setZIndex(1022);
 });
 
 $(".modal").on("hidden.bs.modal", () => {
     diceWindow.setZIndex(1055);
+    diceManagerWindow.setZIndex(1052);
 });
 
 $(".slCheckbox label").hover(() => {
     diceWindow.setZIndex(1025);
+    diceManagerWindow.setZIndex(1022);
 }, () => {
     diceWindow.setZIndex(1055);
+    diceManagerWindow.setZIndex(1052);
 });
 
 AMQ_addScriptData({
@@ -159,6 +301,9 @@ AMQ_addStyle(`
         line-height: 50px;
         text-align: center;
     }
+    #diceRollButtonContainer > button {
+        margin: 0px 5px;
+    }
     #diceChoiceContainer {
         display: table;
         text-align: center;
@@ -166,5 +311,50 @@ AMQ_addStyle(`
     #diceChoice {
         display: table-cell;
         vertical-align: middle;
+        font-size: 16px;
+    }
+    #diceKeysManager {
+        border-right: 1px solid #6d6d6d;
+    }
+    #diceValuesManager {
+        border-bottom: 1px solid #6d6d6d;
+    }
+    .diceManagerInputContainer {
+        margin-top: 20px;
+    }
+    .diceManagerInputContainer > button {
+        width: 66px;
+        padding: 6px;
+    }
+    #diceManagerSelect {
+        color: black;
+        width: 115px;
+        margin: 5px;
+    }
+    #diceManagerKeyInput {
+        color: black;
+        width: 115px;
+        margin: 5px;
+    }
+    #diceValueInputContainer {
+        text-align: center;
+        padding: 8px;
+    }
+    #diceManagerValueInput {
+        color: black;
+    }
+    #diceValueInputContainer > * {
+        margin: 0px 6px;
+    }
+    .diceManagerValueContainer {
+        height: 31px;
+        margin: 10px 10px 0px 10px;
+    }
+    .diceManagerValueContainer > span {
+        font-size: 22px;
+    }
+    .diceManagerValueContainer > button {
+        float: right;
+        padding: 6px;
     }
 `);
