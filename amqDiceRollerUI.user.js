@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Dice Roller UI
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1
+// @version      1.1.1
 // @description  Adds a window where you can roll dice
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -66,7 +66,7 @@ function createDiceWindow() {
                 rollDice($("#diceSelect").val());
             })
         )
-        .append($(`<button class="btn btn-default" type="button">Manage</button>`)
+        .append($(`<button class="btn btn-default" type="button">Edit</button>`)
             .click(function () {
                 if (diceManagerWindow.isVisible()) {
                     diceManagerWindow.close();
@@ -101,7 +101,7 @@ function createDiceWindow() {
 function createDiceManagerWindow() {
     diceManagerWindow = new AMQWindow({
         id: "diceManagerWindow",
-        title: "Dice Manager",
+        title: "Dice Editor",
         width: 500,
         height: 350,
         minWidth: 500,
@@ -171,6 +171,21 @@ function createDiceManagerWindow() {
                     saveDice();
                 })
             )
+            .append($(`<button type="button" class="btn btn-default">Rename</button>`)
+                .click(function () {
+                    let oldKey = $("#diceManagerSelect").val();
+                    let newKey = $("#diceManagerKeyInput").val();
+                    if (oldKey === newKey) {
+                        return;
+                    }
+                    diceRolls[newKey] = diceRolls[oldKey];
+                    delete diceRolls[oldKey];
+                    $("#diceManagerSelect > option[value='" + oldKey + "']").attr("value", newKey).text(newKey);
+                    $("#diceSelect > option[value='" + oldKey + "']").attr("value", newKey).text(newKey);
+                    displayValues(newKey);
+                    saveDice();
+                })
+            )
         )
 
     for (let key in diceRolls) {
@@ -198,6 +213,10 @@ function createDiceManagerWindow() {
 
 function rollDice(key) {
     if (key === null) {
+        $("#diceChoice").text("");
+        return;
+    }
+    if (diceRolls[key].length === 0) {
         $("#diceChoice").text("");
         return;
     }
@@ -320,20 +339,22 @@ AMQ_addStyle(`
         border-bottom: 1px solid #6d6d6d;
     }
     .diceManagerInputContainer {
-        margin-top: 20px;
+        margin: 10px 0px 20px 0px;
+        text-align: center;
     }
     .diceManagerInputContainer > button {
         width: 66px;
         padding: 6px;
+        margin: 5px 5px;
     }
     #diceManagerSelect {
         color: black;
-        width: 115px;
-        margin: 5px;
+        width: 170px;
+        margin: 5px 0px;
     }
     #diceManagerKeyInput {
         color: black;
-        width: 115px;
+        width: 170px;
         margin: 5px;
     }
     #diceValueInputContainer {
