@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      2.3.6
+// @version      2.3.7
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -238,7 +238,7 @@ function updateCorrectAll() {
 }
 
 function exportSongData() {
-    let JSONData = new Blob([JSON.stringify(exportData, null, 4)], {type: "application/json"});
+    let JSONData = new Blob([JSON.stringify(exportData)], {type: "application/json"});
     let tmpLink = $(`<a href=` + URL.createObjectURL(JSONData) + ` download="export.json"></a>`);
     $(document.body).append(tmpLink);
     tmpLink.get(0).click();
