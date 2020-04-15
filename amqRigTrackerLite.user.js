@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker Lite
 // @namespace    https://github.com/TheJoseph98
-// @version      1.0.1
+// @version      1.0.2
 // @description  Rig tracker for AMQ, writes rig to scoreboard next to players' scores
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -18,8 +18,6 @@ let playerData = {};
 
 // Initial setup on quiz start
 let quizReadyRigTracker = new Listener("quiz ready", (data) => {
-    returningToLobby = false;
-    clearPlayerData();
     initialiseScoreboard();
     initialisePlayerData();
 });
@@ -47,14 +45,21 @@ let answerResultsRigTracker = new Listener("answer results", (result) => {
     }
 });
 
-// reset rig when leaving lobby
-let newRoomsListener = new Listener("New Rooms", (rooms) => {
+// Reset data when joining a lobby
+let joinLobbyListener = new Listener("Join Game", (payload) => {
+    clearPlayerData();
+    clearScoreboard();
+});
+
+// Reset data when spectating a lobby
+let spectateLobbyListener = new Listener("Spectate Game", (payload) => {
     clearPlayerData();
     clearScoreboard();
 });
 
 // initialize scoreboard, set rig of all players to 0
 function initialiseScoreboard() {
+    clearScoreboard();
     for (let entryId in quiz.scoreboard.playerEntries) {
         let tmp = quiz.scoreboard.playerEntries[entryId];
         let rig = $(`<span class="qpsPlayerRig">0</span>`);
@@ -65,7 +70,8 @@ function initialiseScoreboard() {
 
 // initialize player data, set rig of all players to 0
 function initialisePlayerData() {
-    for (let entryId in quiz.scoreboard.playerEntries) {
+    clearPlayerData();
+    for (let entryId in quiz.players) {
          playerData[entryId] = {
              rig: 0
          };
@@ -99,7 +105,8 @@ function writeRigToScoreboard() {
 // bind listeners
 quizReadyRigTracker.bindListener();
 answerResultsRigTracker.bindListener();
-newRoomsListener.bindListener();
+joinLobbyListener.bindListener();
+spectateLobbyListener.bindListener();
 
 AMQ_addScriptData({
     name: "Rig Tracker Lite",
