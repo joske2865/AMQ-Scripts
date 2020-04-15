@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2.1
+// @version      1.2.2
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -342,14 +342,21 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
     }
 });
 
-// New rooms listener for the room browser, used for detecting when the player leaves a lobby (mid-game or otherwise)
-let newRoomsListener = new Listener("New Rooms", (rooms) => {
+// Reset data when joining a lobby
+let joinLobbyListener = new Listener("Join Game", (payload) => {
+    clearPlayerData();
+    clearScoreboard();
+});
+
+// Reset data when spectating a lobby
+let spectateLobbyListener = new Listener("Spectate Game", (payload) => {
     clearPlayerData();
     clearScoreboard();
 });
 
 // Creates the rig counters on the scoreboard and sets them to 0
 function initialiseScoreboard() {
+    clearScoreboard();
     for (let entryId in quiz.scoreboard.playerEntries) {
         let tmp = quiz.scoreboard.playerEntries[entryId];
         let rig = $("<span></span>");
@@ -362,7 +369,8 @@ function initialiseScoreboard() {
 
 // Creates the player data for counting rig (and score)
 function initialisePlayerData() {
-    for (let entryId in quiz.scoreboard.playerEntries) {
+    clearPlayerData();
+    for (let entryId in quiz.players) {
          playerData[entryId] = {
              rig: 0,
              score: 0,
@@ -533,7 +541,8 @@ quizReadyRigTracker.bindListener();
 answerResultsRigTracker.bindListener();
 quizEndRigTracker.bindListener();
 returnLobbyVoteListener.bindListener();
-newRoomsListener.bindListener();
+joinLobbyListener.bindListener();
+spectateLobbyListener.bindListener();
 
 AMQ_addScriptData({
     name: "Rig Tracker",
