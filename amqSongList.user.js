@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2.1
+// @version      1.2.2
 // @description  Prints a copyable list to console at the end of each game
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -54,7 +54,7 @@ let resultListener = new Listener("answer results", result => {
         linkWebm: getVideoURL(result.songInfo.urlMap),
         linkMP3: getMP3URL(result.songInfo.urlMap)
     };
-    console.log(newSong);
+    //console.log(newSong);
     songs.push(newSong);
 });
 
@@ -68,9 +68,18 @@ let quizOverListener = new Listener("quiz over", roomSettings => {
     songs = [];
 });
 
-// clear list on leaving lobby
-let quizLeaveListener = new Listener("New Rooms", rooms => {
-    songs = [];
+// clear list on joining lobby
+let quizJoinListener = new Listener("Join Game", payload => {
+    if (!payload.error) {
+        songs = [];
+    }
+});
+
+// clear list on spectating lobby
+let quizSpectateListener = new Listener("Spectate Game", payload => {
+    if (!payload.error) {
+        songs = [];
+    }
 });
 
 function getVideoURL(URLMap) {
@@ -100,8 +109,9 @@ function getMP3URL(URLMap) {
 resultListener.bindListener();
 quizEndListener.bindListener();
 quizReadyListener.bindListener();
-quizEndListener.bindListener();
-quizLeaveListener.bindListener();
+quizOverListener.bindListener();
+quizJoinListener.bindListener();
+quizSpectateListener.bindListener();
 
 AMQ_addScriptData({
     name: "Song List",
