@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Dice Roller UI
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.1
+// @version      1.1.2
 // @description  Adds a window where you can roll dice
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -57,7 +57,7 @@ function createDiceWindow() {
 
     diceWindow.panels[0].panel.append($(`<select id="diceSelect"></select>`));
     for (let key in diceRolls) {
-        $("#diceSelect").append(`<option value='` + key + `'>${key}</option>`);
+        $("#diceSelect").append($(`<option>${key}</option>`).attr("value", key));
     }
 
     diceWindow.panels[1].panel
@@ -151,8 +151,8 @@ function createDiceManagerWindow() {
                 .click(function () {
                     let selectedKey = $("#diceManagerSelect").val();
                     delete diceRolls[selectedKey];
-                    $("#diceManagerSelect > option[value='" + selectedKey + "']").remove();
-                    $("#diceSelect > option[value='" + selectedKey + "']").remove();
+                    $(`#diceManagerSelect > option`).filter((index, elem) => $(elem).attr("value") === selectedKey).remove();
+                    $(`#diceSelect > option`).filter((index, elem) => $(elem).attr("value") === selectedKey).remove();
                     displayValues($("#diceManagerSelect").val());
                     saveDice();
                 })
@@ -164,8 +164,8 @@ function createDiceManagerWindow() {
                 .click(function () {
                     let newKey = $("#diceManagerKeyInput").val();
                     diceRolls[newKey] = [];
-                    $("#diceSelect").append(`<option value='` + newKey + `'>${newKey}</option>`);
-                    $("#diceManagerSelect").append(`<option value='` + newKey + `'>${newKey}</option>`);
+                    $("#diceSelect").append($(`<option>${newKey}</option>`).attr("value", newKey));
+                    $("#diceManagerSelect").append($(`<option>${newKey}</option>`).attr("value", newKey));
                     $("#diceManagerSelect").val(newKey);
                     displayValues(newKey);
                     saveDice();
@@ -180,8 +180,8 @@ function createDiceManagerWindow() {
                     }
                     diceRolls[newKey] = diceRolls[oldKey];
                     delete diceRolls[oldKey];
-                    $("#diceManagerSelect > option[value='" + oldKey + "']").attr("value", newKey).text(newKey);
-                    $("#diceSelect > option[value='" + oldKey + "']").attr("value", newKey).text(newKey);
+                    $(`#diceManagerSelect > option`).filter((index, elem) => $(elem).attr("value") === oldKey).attr("value", newKey).text(newKey);
+                    $(`#diceSelect > option`).filter((index, elem) => $(elem).attr("value") === oldKey).attr("value", newKey).text(newKey);
                     displayValues(newKey);
                     saveDice();
                 })
@@ -189,7 +189,7 @@ function createDiceManagerWindow() {
         )
 
     for (let key in diceRolls) {
-        $("#diceManagerSelect").append(`<option value='` + key + `'>${key}</option>`);
+        $("#diceManagerSelect").append($(`<option>${key}</option>`).attr("value", key));
     }
 
     diceManagerWindow.panels[1].panel
