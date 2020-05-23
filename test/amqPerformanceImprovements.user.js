@@ -28,6 +28,8 @@ function setup() {
     `);
 
     $("#xpBarInner").addClass("notransition");*/
+
+    quiz._playerAnswerListener.unbindListener();
 }
 
 // load the default pose
