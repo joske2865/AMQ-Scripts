@@ -49,3 +49,23 @@ Features:
 
 - Known bugs:
   - None as of yet
+
+### amqSongList.user.js
+
+Adds a button which copies the current song info in JSON format to the user's clipboard, this button can be found at the top right of the quiz
+
+Features:
+- Outputs each individual song info object to the browser's console
+- Outputs the entire song list to the browser's console at the end of the game
+- Copy JSON to clipboard button: copies the list in JSON format to the user's clipboard, which contains info such as:
+  - The number of the song
+  - Name of the song
+  - Artist of the song
+  - English and Romaji anime titles
+  - Song type
+  - Number of players who guessed the song
+  - Number of total (active) players
+  - Start sample of the song
+  - Total length of the song
+  - URLs for both the webm and mp3 (Host priority: catbox > animethemes > openings.moe, resolution priority for webm: 720p > 480p)
+- Example of the JSON output: https://pastebin.com/LmD7k1pW (Note: this data can *not* be used with the [AMQ Song List Viewer](https://thejoseph98.github.io/AMQ-Song-List-Viewer/))
