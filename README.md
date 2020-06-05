@@ -47,8 +47,8 @@ Features:
 
 - The windows can be dragged and resized (resizing only works at the corners of the windows, you can't resize by clicking and dragging on the edges)
 
-- Known bugs:
-  - None as of yet
+Known bugs:
+- None
 
 ### amqSongList.user.js
 
@@ -69,3 +69,50 @@ Features:
   - Total length of the song
   - URLs for both the webm and mp3 (Host priority: catbox > animethemes > openings.moe, resolution priority for webm: 720p > 480p)
 - Example of the JSON output: https://pastebin.com/LmD7k1pW (Note: this data can *not* be used with the [AMQ Song List Viewer](https://thejoseph98.github.io/AMQ-Song-List-Viewer/))
+
+Known bugs:
+- None
+
+### amqRigTracker.user.js
+
+Counts how many times each person's list has appeared during a quiz (Note: only counts if the player has "Share Entries" enabled in their AMQ list settings)
+
+Terminology:
+- Rig: the number of times a certain player's list has appeared in game
+
+Features:
+- Display each player's rig on the scoreboard next to each player's score
+- Send rig data to chat if there are exactly 2 players in the format `playerName1 x-y playerName2` this is commonly used for 1v1 tournament-style matches where in addition to keeping track player's scores, you might want to keep track of how many times certain lists have appeared
+- Customizable options which can be accessed by going to your AMQ settings and selecting "Rig Tracker" tab:
+  - Rig Tracker: enable or disable the rig tracker (Default: Enabled)
+    - Write Rig to Chat: Posts rig to chat in the format `playerName1 x-y playerName2` for 1v1 games (Default: Disabled)
+      - Anime Name: include the name of the anime which played, you can select the English or Romaji title (Default: Enabled, Romaji)
+      - Player Names: include the names of the players (Default: Enabled)
+      - Score: include the player's scores in addition to their rig (default: Disabled)
+      - Final Results: posts the final rig and score data when the quiz ends (default: Enabled)
+    - Write Rig to Scoreboard: Writes each individual player's rig to the scoreboard to the right of their score (or to the right of their correct guesses for Quickdraw, LMS and BR modes)
+    - Final Results Options: options for the final results when you have enabled "Final Results" in "Write Rig to Chat" option
+      - On Quiz End: posts the results when the quiz ends normally
+        - Player names: include the player's names when posting results
+        - Score: include the player's scores when posting results
+        - Rig: include the player's rig when posting results
+      - On Returning to Lobby: posts the results when the quiz "ends" as a result of returning to lobby vote
+        - Player names: include the player's names when posting results
+        - Score: include the player's scores when posting results
+        - Rig: include the player's rig when posting results
+
+Known bugs:
+- None
+
+### amqRigTrackerLite.user.js
+
+A less customizable version of amqRigTracker.user.js with only one feature.
+
+Terminology:
+- Rig: the number of times a certain player's list has appeared in game
+
+Features:
+- Displays each player's individual rig to the right of their score (or correct guesses in Quickdraw, LMS and BR modes) on the scoreboard, resets after each quiz (Note: rig is only counted if the player has "Share Entries" enabled in their AMQ list settings)
+
+Known bugs:
+- None
