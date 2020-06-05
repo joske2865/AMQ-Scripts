@@ -13,7 +13,7 @@ Requires Tampermonkey browser extension (Greasemonkey doesn't work).
 
 Scripts in the "test" folder are not complete and might be full of bugs, use at your own risk
 
-### amqSongList.user.js
+### amqSongListUI.user.js
 
 Adds a window which lists all of the songs that play during a quiz in real time (during answer reveal phase). This window can be opened by pressing the "Song List" icon at the top right of the quiz screen (the same place where you change video resolution, volume and open the room settings) or by pressing the Pause/Break key on the keyboard
 
