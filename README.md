@@ -116,3 +116,66 @@ Features:
 
 Known bugs:
 - None
+
+### amqTeamRandomizer.user.js
+
+Randomizes all players into teams of 2 and posts each team in chat. to use, type "/teams" in AMQ chat. Only works while in lobby (before the start of the quiz). Only randomizes the players (not spectators).
+
+Known bugs:
+- None
+
+### amqDiceRoller.user.js
+
+Rolls a random number between 1 and a max value (inclusive). To use, type "/roll" and add a max value, for example "/roll 10". This will roll a random number between 1 and 10. Default max value is 100.
+
+Known bugs:
+- You can add a negative number as the argument (example: "/roll -5"), but it doesn't work
+
+### amqDiceRollerUI.user.js
+
+Adds a user interface window that allows you to roll and edit custom dice rolls. To open this window, click the box icon (supposed to represent a dice) in the top right corner while in a quiz.
+
+Features:
+- Main dice window where you select a dice and roll a random value associated with that dice or edit that particular dice
+- Dice editor window where you can add new dice and manage values for each dice
+  - The left side of the editor are your dice, you can add, remove or rename your dice
+  - The right side of the editor are the values for your dice (they're like numbers 1-6 on a regular dice) and you can add or remove values (if you want certain values to have a higher chance of appearing, you can add the same value multiple times, for example, say you had a dice with 4 values: "Season 1", "Season 2", "Season 2", "Season 2", in this example, you will be 3 times more likely to roll "Season 2" as opposed to "Season 1")
+
+Known bugs:
+- None
+
+### amqSpeedrun.user.js
+
+Adds a user interface window that shows information about fast you answer songs. To open this window, click the clock icon in the top right corner while in a quiz.
+
+Features:
+- Information on the speed of your guesses including:
+  - Fastest guess
+  - Slowest (but still correct) guess
+  - Average time counting all answers
+  - Average time counting only correct guesses
+  - Total time
+  - Correct guess ratio
+  - Last song guess time
+  - Individual song guess time breakdown
+- Time measured is your latest Enter key input, so if you want fast times, try not to spam enter key too much
+- Guessing a song incorrectly counts as full guess time for that song
+- Using the auto submit to submit the answer counts as full guess time for that song (but counts as a correct guess for the purposes of the slowest guess time)
+- All data is reset on the start of a new quiz
+
+Known bugs:
+- None
+
+### amqChatTimestamps.user.js
+
+Adds timestamps to messages (and system messages) in chat in HH:MM format, based on user's local system time
+
+Known bugs:
+- None
+
+### amqBuzzer.user.js
+
+Adds a buzzer to AMQ, which mutes the current song and posts the time you buzzed in in the chat. To use, press the Enter key on an empty answer field (doesn't work if you already have something typed in)
+
+Known bugs:
+- None
