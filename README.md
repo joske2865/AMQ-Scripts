@@ -184,7 +184,7 @@ Known bugs:
 
 ### amqSongDifficultyCounter.user.js
 
-A counting tool which counts how many songs there are on any given difficulty. Can be customized to count any difficulty range and any song type. To use, open a solo lobby and click the "Counter" button, next to the "Room settings" button. Usage of guest account strongly recommended so you don't inflate your "Songs played" as the tool simulates games and you need to hear at least 1 song before you can return to lobby.
+A counting tool which counts how many songs there are on any given difficulty. Can be customized to count any difficulty range and any song type. To use, open a solo lobby and click the "Counter" button, next to the "Room settings" button. Usage of guest account strongly recommended so you don't inflate your Songs Played and Guess Rate as the tool simulates games and you need to hear at least 1 song before you can return to lobby.
 
 Terminology:
 - Difficulty: refers to the 1% song difficulty range between it and 1% less than it, for example: Difficulty 52 refers to 51-52% song difficulty, 30% is 29-30%, etc.
