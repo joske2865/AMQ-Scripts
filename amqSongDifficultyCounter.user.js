@@ -220,12 +220,13 @@ function setup() {
         description: `
             <p>Adds a counting tool that automatically counts the number of songs on each difficulty</p>
             <p>Can be customized to count only certain difficulty ranges and certain song types and has an option to automatically split by years if you get 100 songs or more to get a more accurate result</p>
-            <p>With a provided username, you can share your song breakdown by difficulty to a public 
-            <a href="https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing">Spreadsheet</a>. 
-            The tool will automatically create a data sheet and a graph sheet with all of the data you collect and add your list to the Index page</p>
-            <p>You can update your data by inputting the same username as it is on the spreadsheet (NOTE: username is case-sensitive. For example "thejoseph98" and "TheJoseph98" are NOT the same)</p>
-            <p>To use the tool, simply click "Counter" button while in lobby, next to the "Room settings" button. You must be in a solo lobby to use this tool.
+            <p>With a provided username, you can share your song breakdown by difficulty to a
+            <a href="https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing">public Spreadsheet</a>. 
+            The tool will automatically create a data sheet and a graph sheet with all of the data you collect and add it to the Index page</p>
+            <p>You can update your data by inputting the same username as it is on the spreadsheet (NOTE: username is case-sensitive. For example "thejoseph98" and "THEJOSEPH98" are NOT the same)</p>
+            <p>To use the tool, simply click "Counter" button while in lobby, next to the "Room settings" button. You must be in a solo lobby to use this tool. Usage of guest accounts is strongly recommended to not inflate your Songs Played and guess rate due to the nature of this tool. 
             Simply select your preferred settings and click "Start", the tool will automatically set all other settings for you (100 songs, 5 seconds guess time, only watched/random depending on your tool settings and more)</p>
+            <p>To stop counting, simply either wait for the tool to finish or you can click "Stop Counter" which can be found at the top right of your screen in the shape of the "ban" icon</p>
         `
     });
 }
