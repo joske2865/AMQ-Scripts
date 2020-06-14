@@ -252,7 +252,7 @@ function createSongCounterModal() {
                             <h5>Count All</h5>
                         </div>
                         <div id="scYearsTab" class="scTab tab leftRightButtonTop clickAble">
-                            <h5>Count by Years</h5>
+                            <h5>Count Single</h5>
                         </div>
                     </div>
                     <div class="modal-body" style="overflow-y: auto;max-height: calc(100vh - 150px);">
