@@ -49,7 +49,7 @@ function setup(){
 
 function ASSR_START(OPs=true, EDs=true, INS=true){
     if(!(lobby.inLobby && lobby.soloMode)){
-        displayMessage("Error", "You must be in a solo lobby.<br />It is recommended that you use a guest account for the impact on your personal stats.");
+        displayMessage("Error", "You must be in a solo lobby.\nIt is recommended that you use a guest account for the impact on your personal stats.");
         return;
     }
     // Set to 20 songs to prevent AFK timeout, 5s per song, advanced difficulties: 10-100
@@ -89,14 +89,14 @@ quizOver = new Listener("quiz over", payload => {
         playMore ? startGame() : null;
     }
     else {
-        displayMessage("Error", "You must be in a solo lobby.<br />It is recommended that you use a guest account for the impact on your personal stats.");
+        displayMessage("Error", "You must be in a solo lobby.\nIt is recommended that you use a guest account for the impact on your personal stats.");
         stopCounting();
     }
 });
 quizOver.bindListener();
 
 let quizNoSongs = new Listener("Quiz no songs", () => {
-    displayMessage("Sasuga", "You must be a true boolli!<br />Mo remaining songs left in 10% - 100%.");
+    displayMessage("Sasuga", "You must be a true boolli!\nNo remaining songs left in 10% - 100%.");
 });
 quizNoSongs.bindListener();
 oldQuizOver.unbindListener();
