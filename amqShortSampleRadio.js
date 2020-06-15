@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Short Sample Radio
 // @namespace    https://github.com/FokjeM
-// @version      0.1
+// @version      1.0
 // @description  Loops through your entire list to not answer songs. Pushes difficulty for them down as fast as possible.
 // @author       Riven Skaye // FokjeM
 // @author       TheJoseph98
@@ -93,7 +93,11 @@ quizOver = new Listener("quiz over", payload => {
         stopCounting();
     }
 });
+quizOver.bindListener();
 
-let quizNoSongsListener = new Listener("Quiz no songs", payload => {
-    displayMessage("Sasuga", "You must be a true bulli!<br />Mo remaining songs left in 10% - 100%.");
+let quizNoSongs = new Listener("Quiz no songs", () => {
+    displayMessage("Sasuga", "You must be a true boolli!<br />Mo remaining songs left in 10% - 100%.");
 });
+quizNoSongs.bindListener();
+oldQuizOver.unbindListener();
+noSongs.unbindListener();
