@@ -209,4 +209,4 @@ Features:
 - Warns you if no songs are left on your list
 
 Known bugs:
-- None
+- Shitty name, please propose something better
