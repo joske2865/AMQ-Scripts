@@ -4,8 +4,8 @@
 
 Requires Tampermonkey browser extension (Greasemonkey doesn't work).
 
-- Step 1) Select a script you want to install  
-- Step 2) Click "raw"   
+- Step 1) Select a script you want to install
+- Step 2) Click "raw"
 - Step 3) The browser extension should automatically prompt you to install the script, if it doesn't, just create a new script and copy-paste the code
 
 
@@ -197,3 +197,16 @@ Features:
 
 Known bugs:
 - None
+
+### amqShortSampleRadio.user.js
+
+A simple script to help push your entire list down to 0-10% difficulty. Actually to 9% - 10% exactly as it only plays 10% - 100%. To use, click the nice button marked ASSR it adds. Only works with solo lobbies, errors out in public/multiplayer rooms.
+
+Features:
+- Repeatedly play 5s samples of all of your list matching the 10% - 100% difficulty setting
+- Stops only if the game ends unnaturally (disconnect, manual lobby vote, reload page, etc.)
+- Plays in batches of 20 songs to prevent AFK timeout
+- Warns you if no songs are left on your list
+
+Known bugs:
+- Shitty name, please propose something better
