@@ -194,7 +194,6 @@ Features:
 - Option to send song difficulty data to a [public Spreadsheet](https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing), which will automatically create the data table and graphs.
 - Option to update existing sheets, by inputting the same username as on the spreadsheet (NOTE: this is case-sensitive, for example: "thejoseph98" and "THEJOSEPH98" are NOT the same)
 - Option to automatically divide the difficulty into years if you find more than 100 songs
-- Option to count by a single difficulty, without counting through all other difficulties
 
 Known bugs:
 - None
