@@ -42,7 +42,7 @@ let playMore = false;
 
 function setup(){
     if(document.getElementById('startPage')) {
-        return
+        return;
     }
 }
 
@@ -83,11 +83,11 @@ function ASSR_START(OPs=true, EDs=true, INS=true){
     hostModal.playLengthSliderCombo.setValue(5);
     hostModal.songDiffAdvancedSwitch.setOn(true);
     hostModal.songDiffRangeSliderCombo.setValue([10,100]);
-    hostModal.songSelectionAdvancedController.setOn(false)
+    hostModal.songSelectionAdvancedController.setOn(false);
     hostModal.$songPool.slider("setValue", 3);
     $("#mhDuplicateShows").prop("checked", true);
     // Turn on Auto Skip for the replay phase. Leave the guess phase because we're not entering anything
-    options.$AUTO_VOTE_REPLAY.prop("checked", true)
+    options.$AUTO_VOTE_REPLAY.prop("checked", true);
     options.updateAutoVoteSkipReplay();
     //Collect the song types and their status
     let openings = hostModal.$songTypeOpening;
@@ -102,7 +102,7 @@ function ASSR_START(OPs=true, EDs=true, INS=true){
     playMore = true;
     startGame();
     // Add event to return to lobby button to stop
-    $("#qpReturnToLobbyButton").on('click', (() => {ASSR_STOP(); quiz.startReturnLobbyVote();}))
+    $("#qpReturnToLobbyButton").on('click', (() => {ASSR_STOP(); quiz.startReturnLobbyVote();}));
 }
 
 function startGame(){
