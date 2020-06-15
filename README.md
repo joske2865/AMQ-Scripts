@@ -4,8 +4,8 @@
 
 Requires Tampermonkey browser extension (Greasemonkey doesn't work).
 
-- Step 1) Select a script you want to install  
-- Step 2) Click "raw"   
+- Step 1) Select a script you want to install
+- Step 2) Click "raw"
 - Step 3) The browser extension should automatically prompt you to install the script, if it doesn't, just create a new script and copy-paste the code
 
 
@@ -194,6 +194,19 @@ Features:
 - Option to send song difficulty data to a [public Spreadsheet](https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing), which will automatically create the data table and graphs.
 - Option to update existing sheets, by inputting the same username as on the spreadsheet (NOTE: this is case-sensitive, for example: "thejoseph98" and "THEJOSEPH98" are NOT the same)
 - Option to automatically divide the difficulty into years if you find more than 100 songs
+
+Known bugs:
+- None
+
+### amqShortSampleRadio.user.js
+
+A simple script to help push your entire list down to 0-10% difficulty. Actually to 9% - 10% exactly as it only plays 10% - 100%. To use, click the nice button marked ASSR it adds. Only works with solo lobbies, errors out in public/multiplayer rooms.
+
+Features:
+- Repeatedly play 5s samples of all of your list matching the 10% - 100% difficulty setting
+- Stops only if the game ends unnaturally (disconnect, manual lobby vote, reload page, etc.)
+- Plays in batches of 20 songs to prevent AFK timeout
+- Warns you if no songs are left on your list
 
 Known bugs:
 - None
