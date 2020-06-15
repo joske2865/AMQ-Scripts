@@ -26,6 +26,13 @@ ASSRButton.innerHTML = "<h1>ASSR</h1>"
 $(ASSRButton).addClass("clickAble topMenuButton topMenuBigButton");
 $(ASSRButton).css("right", "70.5%");
 $("#lnSettingsButton").parent().append(ASSRButton);
+$(ASSRButton).click(() => {
+    if(!playMore){
+        playMore = true;
+        ASSR_START();
+    } else {
+        playMore = false;
+    }});
 
 let quizOver;
 let oldQuizOver;
@@ -49,7 +56,7 @@ function ASSR_START(OPs=true, EDs=true, INS=true){
     hostModal.numberOfSongsSliderCombo.setValue(20);
     hostModal.playLengthSliderCombo.setValue(5);
     hostModal.songDiffAdvancedSwitch.setOn(true);
-    hostModal.songDiffRangeSliderCombo([10,100]);
+    hostModal.songDiffRangeSliderCombo.setValue([10,100]);
     // Turn on Auto Skip for the replay phase. Leave the guess phase because we're not entering anything
     options.$AUTO_VOTE_REPLAY.prop("checked", true)
     options.updateAutoVoteSkipReplay();
@@ -79,7 +86,7 @@ quizOver = new Listener("quiz over", payload => {
         keepChatOpen: true
     });
     if (lobby.inLobby && lobby.soloMode) {
-        startGame();
+        playMore ? startGame() : null;
     }
     else {
         displayMessage("Error", "You must be in a solo lobby.<br />It is recommended that you use a guest account for the impact on your personal stats.");
