@@ -1,0 +1,4 @@
+##IDE / Dev env files##
+###Komodo IDE/Edit###
+*.komodoproject
+.komodotools
