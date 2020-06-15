@@ -12,8 +12,8 @@
 // ==/UserScript==
 
 let counting = false; // counting currently active
-let countingYears = false; // counting currently active by years
-let autoCountYears = false; // auto counting by years for 100+ songs active
+let countingAdvanced = false; // counting currently active by years
+let autoCountAdvanced = false; // auto counting by years for 100+ songs active
 
 // object containing counted songs, this gets sent to the spreadsheet
 let count = {
@@ -33,7 +33,6 @@ let types = []; // types ("opening", "ending" and "insert")
 let yearRanges = []; // year ranges array for counting by years
 let yearIndex = 0; // current index of the year ranges array
 let curYearRange = [1950, 2020]; // default year range
-let countingYearsDone = false; // counting by years done flag
 
 // difficulty sliders
 let openingsDiffSlider;
@@ -100,9 +99,6 @@ function setup() {
             padding: 15px;
             float: left;
         }
-        .scTab {
-            width: 175px !important;
-        }
         .scTypeContainer {
             height: 45px;
             width: 400px;
@@ -130,11 +126,11 @@ function setup() {
         #scSpreadsheetContainer {
             display: table;
         }
-        #scAutoCountYearsContainer {
+        #scAdvancedCountContainer {
             margin-top: 15px;
             display: table;
         }
-        #scAutoCountYearsContainer span {
+        #scAdvancedCountLabel {
             vertical-align: top;
         }
         #scSpreadsheetContainer span {
@@ -149,64 +145,6 @@ function setup() {
             color: black;
         }
         #scWatchingType {
-            color: black;
-            border-radius: 4px;
-            width: 100%;
-            margin-top: 15px;
-        }
-        #scYearsTabDescription {
-            width: 100%;
-            display: block;
-            border-bottom: 1px solid #6d6d6d;
-            padding: 10px;
-            text-align: center;
-        }
-        #scYearsOptionsContainer {
-            text-align: center;
-            width: 400px;
-            float: left;
-            padding: 15px;
-            border-right: 1px solid #6d6d6d;
-            height: 150px;
-        }
-        .scYearsOptionsInputContainer {
-            width: 60%;
-            margin: 0px 20%;
-            padding: 10px;
-            display: table;
-        }
-        .scYearsOptionsInputContainer * {
-            vertical-align: middle;
-        }
-        #scYearsExtraOptionsContainer {
-            width: 240px;
-            float: left;
-            padding: 15px;
-        }
-        #scYearsCounterDifficulty {
-            width: 120px;
-            border-radius: 4px;
-            color: black;
-            float: right;
-        }
-        #scYearsCounterType {
-            width: 120px;
-            border-radius: 4px;
-            color: black;
-            float: right;
-        }
-        #scYearsSpreadsheetContainer span {
-            vertical-align: top;
-        }
-        #scYearsUsernameContainer {
-            margin-top: 10px;
-        }
-        #scYearsUsername {
-            width: 100%;
-            border-radius: 4px;
-            color: black;
-        }
-        #scYearsWatchingType {
             color: black;
             border-radius: 4px;
             width: 100%;
@@ -247,117 +185,73 @@ function createSongCounterModal() {
                         </button>
                         <h2 class="modal-title">Song Counter</h2>
                     </div>
-                    <div class="tabContainer">
-                        <div id="scAllTab" class="scTab tab leftRightButtonTop clickAble selected">
-                            <h5>Count All</h5>
-                        </div>
-                        <div id="scYearsTab" class="scTab tab leftRightButtonTop clickAble">
-                            <h5>Count Single</h5>
-                        </div>
-                    </div>
                     <div class="modal-body" style="overflow-y: auto;max-height: calc(100vh - 150px);">
-                        <div id="scAllTabContent">
-                            <div id="scDifficultySliderContainer">
-                                <div class="scTypeContainer">
-                                    <div class="scTypeCheckboxContainer">
-                                        <div class="customCheckbox">
-                                            <input id="scTypeOpenings" type="checkbox" checked="">
-                                            <label for="scTypeOpenings"><i class="fa fa-check" aria-hidden="true"></i></label>
-                                        </div>
-                                        <span>Openings</span>
+                        <div id="scDifficultySliderContainer">
+                            <div class="scTypeContainer">
+                                <div class="scTypeCheckboxContainer">
+                                    <div class="customCheckbox">
+                                        <input id="scTypeOpenings" type="checkbox" checked="">
+                                        <label for="scTypeOpenings"><i class="fa fa-check" aria-hidden="true"></i></label>
                                     </div>
-                                    <div class="scTypeDifficultySlider">
-                                        <input id="scOpeningsDiffMin" type="text" value="1" class="minWell text-center mhRangeSliderTextBox">
-                                        <input class="sliderInput" id="scOpeningsDiffRange" data-slider-class="scDifficultySlider" data-slider-id="scOpeningsDifficultySlider" type="text" style="display: none;" data-value="1" value="1">
-                                        <input id="scOpeningsDiffMax" type="text" value="100" class="minWell text-center mhRangeSliderTextBox">
-                                    </div>
+                                    <span>Openings</span>
                                 </div>
-                                <div class="scTypeContainer">
-                                    <div class="scTypeCheckboxContainer">
-                                        <div class="customCheckbox">
-                                            <input id="scTypeEndings" type="checkbox" checked="">
-                                            <label for="scTypeEndings"><i class="fa fa-check" aria-hidden="true"></i></label>
-                                        </div>
-                                        <span>Endings</span>
-                                    </div>
-                                    <div class="scTypeDifficultySlider">
-                                        <input id="scEndingsDiffMin" type="text" value="1" class="minWell text-center mhRangeSliderTextBox">
-                                        <input class="sliderInput" id="scEndingsDiffRange" data-slider-class="scDifficultySlider" data-slider-id="scEndingsDifficultySlider" type="text" style="display: none;" data-value="1" value="1">
-                                        <input id="scEndingsDiffMax" type="text" value="100" class="minWell text-center mhRangeSliderTextBox">
-                                    </div>
-                                </div>
-                                <div class="scTypeContainer">
-                                    <div class="scTypeCheckboxContainer">
-                                        <div class="customCheckbox">
-                                            <input id="scTypeInserts" type="checkbox" checked="">
-                                            <label for="scTypeInserts"><i class="fa fa-check" aria-hidden="true"></i></label>
-                                        </div>
-                                        <span>Inserts</span>
-                                    </div>
-                                    <div class="scTypeDifficultySlider">
-                                        <input id="scInsertsDiffMin" type="text" value="1" class="minWell text-center mhRangeSliderTextBox">
-                                        <input class="sliderInput" id="scInsertsDiffRange" data-slider-class="scDifficultySlider" data-slider-id="scInsertsDifficultySlider" type="text" style="display: none;" data-value="1" value="1">
-                                        <input id="scInsertsDiffMax" type="text" value="100" class="minWell text-center mhRangeSliderTextBox">
-                                    </div>
+                                <div class="scTypeDifficultySlider">
+                                    <input id="scOpeningsDiffMin" type="text" value="1" class="minWell text-center mhRangeSliderTextBox">
+                                    <input class="sliderInput" id="scOpeningsDiffRange" data-slider-class="scDifficultySlider" data-slider-id="scOpeningsDifficultySlider" type="text" style="display: none;" data-value="1" value="1">
+                                    <input id="scOpeningsDiffMax" type="text" value="100" class="minWell text-center mhRangeSliderTextBox">
                                 </div>
                             </div>
-                            <div id="scExtraOptionsContainer">
-                                <div id="scSpreadsheetContainer">
+                            <div class="scTypeContainer">
+                                <div class="scTypeCheckboxContainer">
                                     <div class="customCheckbox">
-                                        <input id="scSendToSpreadsheet" type="checkbox" checked="">
-                                        <label for="scSendToSpreadsheet"><i class="fa fa-check" aria-hidden="true"></i></label>
+                                        <input id="scTypeEndings" type="checkbox" checked="">
+                                        <label for="scTypeEndings"><i class="fa fa-check" aria-hidden="true"></i></label>
                                     </div>
-                                    <span id="scSpreadsheetLabel">Send to spreadsheet</span>                     
+                                    <span>Endings</span>
                                 </div>
-                                <div id="scUsernameContainer" class="disabled">
-                                    <span>Username (required)</span>
-                                    <input id="scUsername" type="text" style="width: 100%;">
+                                <div class="scTypeDifficultySlider">
+                                    <input id="scEndingsDiffMin" type="text" value="1" class="minWell text-center mhRangeSliderTextBox">
+                                    <input class="sliderInput" id="scEndingsDiffRange" data-slider-class="scDifficultySlider" data-slider-id="scEndingsDifficultySlider" type="text" style="display: none;" data-value="1" value="1">
+                                    <input id="scEndingsDiffMax" type="text" value="100" class="minWell text-center mhRangeSliderTextBox">
                                 </div>
-                                <select id="scWatchingType">
-                                    <option value="watched">Only Watched</option>
-                                    <option value="random">Random</option>
-                                </select>
-                                <div id="scAutoCountYearsContainer">
+                            </div>
+                            <div class="scTypeContainer">
+                                <div class="scTypeCheckboxContainer">
                                     <div class="customCheckbox">
-                                        <input type="checkbox" checked="" id="scAutoCountYears">
-                                        <label for="scAutoCountYears"><i class="fa fa-check" aria-hidden="true"></i></label>
+                                        <input id="scTypeInserts" type="checkbox" checked="">
+                                        <label for="scTypeInserts"><i class="fa fa-check" aria-hidden="true"></i></label>
                                     </div>
-                                    <span id="scAutoCountLabel">Auto Count by Years</span>
+                                    <span>Inserts</span>
+                                </div>
+                                <div class="scTypeDifficultySlider">
+                                    <input id="scInsertsDiffMin" type="text" value="1" class="minWell text-center mhRangeSliderTextBox">
+                                    <input class="sliderInput" id="scInsertsDiffRange" data-slider-class="scDifficultySlider" data-slider-id="scInsertsDifficultySlider" type="text" style="display: none;" data-value="1" value="1">
+                                    <input id="scInsertsDiffMax" type="text" value="100" class="minWell text-center mhRangeSliderTextBox">
                                 </div>
                             </div>
                         </div>
-                        <div id="scYearsTabContent" style="display: none;">
-                            <span id="scYearsTabDescription">Count all songs in a difficulty seperated by years, useful when a certain difficulty and type has more than 100 songs</span>
-                            <div id="scYearsOptionsContainer">
-                                <div class="scYearsOptionsInputContainer">
-                                    <span>Difficulty:</span>
-                                    <input id="scYearsCounterDifficulty" type="number" value="1">
+                        <div id="scExtraOptionsContainer">
+                            <div id="scSpreadsheetContainer">
+                                <div class="customCheckbox">
+                                    <input id="scSendToSpreadsheet" type="checkbox" checked="">
+                                    <label for="scSendToSpreadsheet"><i class="fa fa-check" aria-hidden="true"></i></label>
                                 </div>
-                                <div class="scYearsOptionsInputContainer">
-                                    <span>Song Type:</span>
-                                    <select id="scYearsCounterType">
-                                        <option value="opening">Openings</option>
-                                        <option value="ending">Endings</option>
-                                        <option value="insert">Inserts</option>
-                                    </select>
-                                </div>
+                                <span id="scSpreadsheetLabel">Send to spreadsheet</span>                     
                             </div>
-                            <div id="scYearsExtraOptionsContainer">
-                                <div id="scYearsSpreadsheetContainer">
-                                    <div class="customCheckbox">
-                                        <input type="checkbox" checked="" id="scYearsSendToSpreadsheet">
-                                        <label for="scYearsSendToSpreadsheet"><i class="fa fa-check" aria-hidden="true"></i></label>
-                                    </div>
-                                    <span id="scYearsSpreadsheetLabel">Send to spreadsheet</span>
+                            <div id="scUsernameContainer" class="disabled">
+                                <span>Username (required)</span>
+                                <input id="scUsername" type="text" style="width: 100%;">
+                            </div>
+                            <select id="scWatchingType">
+                                <option value="watched">Only Watched</option>
+                                <option value="random">Random</option>
+                            </select>
+                            <div id="scAdvancedCountContainer">
+                                <div class="customCheckbox">
+                                    <input type="checkbox" checked="" id="scAdvancedCount">
+                                    <label for="scAdvancedCount"><i class="fa fa-check" aria-hidden="true"></i></label>
                                 </div>
-                                <div class="disabled" id="scYearsUsernameContainer">
-                                    <span>Username (required)</span>
-                                    <input type="text" id="scYearsUsername">
-                                </div>
-                                <select id="scYearsWatchingType">
-                                    <option value="watched">Only Watched</option>
-                                    <option value="random">Random</option>
-                                </select>
+                                <span id="scAdvancedCountLabel">Advanced counting</span>
                             </div>
                         </div>
                     </div>
@@ -439,15 +333,8 @@ function createSongCounterModal() {
         container: "body"
     });
 
-    $("#scAutoCountLabel").popover({
+    $("#scAdvancedCountLabel").popover({
         content: "Automatically splits difficulty by years if it finds more than 100 songs",
-        trigger: "hover",
-        placement: "top",
-        container: "body"
-    });
-
-    $("#scYearsSpreadsheetLabel").popover({
-        content: "Send data to a public spreadsheet",
         trigger: "hover",
         placement: "top",
         container: "body"
@@ -455,49 +342,14 @@ function createSongCounterModal() {
 
     // enable/disable username input and sync between tabs
     $("#scSendToSpreadsheet").click(function () {
-        $("#scYearsSendToSpreadsheet").prop("checked", $(this).prop("checked"));
         if ($(this).prop("checked")) {
             $("#scUsernameContainer").removeClass("disabled");
-            $("#scYearsUsernameContainer").removeClass("disabled");
             sendToSpreadsheet = true;
         }
         else {
             $("#scUsernameContainer").addClass("disabled");
-            $("#scYearsUsernameContainer").addClass("disabled");
             sendToSpreadsheet = false;
         }
-    });
-
-    // enable/disable username input and sync between tabs
-    $("#scYearsSendToSpreadsheet").click(function () {
-        $("#scSendToSpreadsheet").prop("checked", $(this).prop("checked"));
-        if ($(this).prop("checked")) {
-            $("#scUsernameContainer").removeClass("disabled");
-            $("#scYearsUsernameContainer").removeClass("disabled");
-            sendToSpreadsheet = true;
-        }
-        else {
-            $("#scUsernameContainer").addClass("disabled");
-            $("#scYearsUsernameContainer").addClass("disabled");
-            sendToSpreadsheet = false;
-        }
-    });
-
-    // sync username and watching type inputs between tabs
-    $("#scUsername").on("input", function () {
-        $("#scYearsUsername").val($(this).val());
-    });
-
-    $("#scYearsUsername").on("input", function () {
-        $("#scUsername").val($(this).val());
-    });
-
-    $("#scWatchingType").on("change", function () {
-        $("#scYearsWatchingType").val($(this).val());
-    });
-
-    $("#scYearsWatchingType").on("change", function () {
-        $("#scWatchingType").val($(this).val());
     });
 
     // start counter
@@ -508,11 +360,8 @@ function createSongCounterModal() {
                 return;
             }
             else {
-                count.username = $("#scYearsUsername").val().trim();
+                count.username = $("#scUsername").val().trim();
             }
-        }
-        if ($("#scYearsTab").hasClass("selected")) {
-            countingYears = true;
         }
         initializeRanges();
         $("#songCounterModal").modal("hide");
@@ -520,32 +369,15 @@ function createSongCounterModal() {
     });
 
     // default auto count by years unchecked
-    $("#scAutoCountYears").prop("checked", false);
+    $("#scAdvancedCount").prop("checked", false);
 
     // change auto count by years on click
-    $("#scAutoCountYears").click(function () {
-        autoCountYears = $(this).prop("checked");
+    $("#scAdvancedCount").click(function () {
+        autoCountAdvanced = $(this).prop("checked");
     });
 
     // default send to spreadsheet unchecked
     $("#scSendToSpreadsheet").prop("checked", false);
-    $("#scYearsSendToSpreadsheet").prop("checked", false);
-
-    // count all tab
-    $("#scAllTab").click(function () {
-        $("#scAllTab").addClass("selected");
-        $("#scYearsTab").removeClass("selected");
-        $("#scAllTabContent").show();
-        $("#scYearsTabContent").hide();
-    });
-
-    // count by years tab
-    $("#scYearsTab").click(function () {
-        $("#scAllTab").removeClass("selected");
-        $("#scYearsTab").addClass("selected");
-        $("#scAllTabContent").hide();
-        $("#scYearsTabContent").show();
-    });
 }
 
 // initialize difficulty ranges per type
@@ -553,39 +385,32 @@ function initializeRanges() {
     typeRanges = [];
     types = [];
 
-    // only put 1 difficulty range and 1 type if counting a single difficulty by splitting into years
-    if (countingYears) {
-        let diff = parseInt($("#scYearsCounterDifficulty").val());
-        types.push($("#scYearsCounterType").val());
-        typeRanges.push([diff, diff]);
+    if ($("#scTypeOpenings").prop("checked")) {
+        types.push("opening");
+        typeRanges.push(openingsDiffSlider.getValue());
     }
-    else {
-        if ($("#scTypeOpenings").prop("checked")) {
-            types.push("opening");
-            typeRanges.push(openingsDiffSlider.getValue());
-        }
-        if ($("#scTypeEndings").prop("checked")) {
-            types.push("ending");
-            typeRanges.push(endingsDiffSlider.getValue());
-        }
-        if ($("#scTypeInserts").prop("checked")) {
-            types.push("insert");
-            typeRanges.push(insertsDiffSlider.getValue());
-        }
-        if (typeRanges.length === 0) {
-            displayMessage("Error", "Must select at least one song type");
-            return;
-        }
+    if ($("#scTypeEndings").prop("checked")) {
+        types.push("ending");
+        typeRanges.push(endingsDiffSlider.getValue());
     }
+    if ($("#scTypeInserts").prop("checked")) {
+        types.push("insert");
+        typeRanges.push(insertsDiffSlider.getValue());
+    }
+    if (typeRanges.length === 0) {
+        displayMessage("Error", "Must select at least one song type");
+        return;
+    }
+
     curDiffRange[0] = typeRanges[0][0] - 1;
     curDiffRange[1] = typeRanges[0][0];
     curType = 0;
-        
 }
+
 // listen for if the quiz returns no songs
 let quizNoSongsListener = new Listener("Quiz no songs", payload => {
     // check if counting years flag is active and increment yearIndex by 1
-    if (countingYears) {
+    if (countingAdvanced) {
         yearIndex += 1;
     }
     else {
@@ -596,8 +421,8 @@ let quizNoSongsListener = new Listener("Quiz no songs", payload => {
 
 // listen for if the quiz starts normally
 let quizReadyListener = new Listener("quiz ready", payload => {
-    // check if the user is counting by years (for more than 100 songs)
-    if (countingYears) {
+    // check if the user has advanced counting enabled
+    if (countingAdvanced) {
         // first, check if there are less than 100 songs (there are more than 0 guaranteed if "quiz ready" listener fires) and increment yearIndex by 1;
         if (payload.numberOfSongs < 100) {
             yearIndex += 1;
@@ -605,27 +430,22 @@ let quizReadyListener = new Listener("quiz ready", payload => {
         }
         // else, check if there are 100 songs and check that the year range can be split into halves then split years into halves
         else if (payload.numberOfSongs === 100 && curYearRange[0] !== curYearRange[1]) {
-            gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]}, splitting years`);
+            gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]} in ${curDiffRange[0]}-${curDiffRange[1]}%, splitting years`);
             splitYears();
         }
-        // else, check if the year range is 1 year and hasn't reached 2020 and increment yearIndex by 1
-        else if (payload.numberOfSongs === 100 && curYearRange[0] === curYearRange[1] && curYearRange[0] !== 2020) {
-            yearIndex += 1;
-            addSongCounter(curDiffRange, types[curType], payload.numberOfSongs);
-        }
-        // else, give up
+        // else, check if the year range is 1 year, then increment yearIndex by 1
         else {
-            countingYearsDone = true;
-            addSongCounter(curDiffRange, types[curType], payload.numberOfSongs);
+            yearIndex += 1;
+            addSongCounter(currDiffRane, types[curType], payload.numberOfSongs);
         }
     }
     else {
-        // if the user has "Auto count by years" option enabled and is counting all, split the years and count again
-        if (payload.numberOfSongs === 100 && autoCountYears) {
+        // if the user has "Advanced counting" option enabled and there are 100 songs, split the years and count again
+        if (payload.numberOfSongs === 100 && autoCountAdvanced) {
             resetYears();
-            countingYears = true;
             splitYears();
-            gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]}, splitting years`);
+            countingAdvanced = true;
+            gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]} in ${curDiffRange[0]}-${curDiffRange[1]}%, splitting years`);
         }
         // else just add the number of songs to that difficulty range
         else {
@@ -652,26 +472,15 @@ let quizOverListener = new Listener("quiz over", payload => {
         keepChatOpen: true
     });
     if (lobby.inLobby && lobby.soloMode) {
-        // check that the user is counting, but not counting by years then update song difficulty
-        if (counting && !countingYears) {
-            updateSongDifficulty();
-            startGame();
-        }
-        // else if the user IS counting by years, but the counting hasn't finished yet, update the year range
-        else if (counting && countingYears && !countingYearsDone) {
+        // if advanced counting is active, increment the year
+        if (countingAdvanced) {
             updateYearRange();
             startGame();
         }
+        // otherwise, increment difficulty
         else {
-            // if the user is counting all and has "Auto count by years" enabled, update song difficulty
-            if (autoCountYears) {
-                updateSongDifficulty();
-                startGame();
-            }
-            // else, stop
-            else {
-                stopCounting();
-            }
+            updateSongDifficulty();
+            startGame();
         }
     }
     else {
@@ -719,7 +528,7 @@ function openCounterModal() {
 
 // add an amount of songs to a difficulty
 function addSongCounter(diffRange, type, amount) {
-    if (countingYears) {
+    if (countingAdvanced) {
         if (type === "opening") {
             count.openings[diffRange[1]] = !count.openings[diffRange[1]] ? amount : count.openings[diffRange[1]] + amount;
             gameChat.systemMessage(`Openings in ${diffRange[0]}-${diffRange[1]}% in ${curYearRange[0]}-${curYearRange[1]}: ${amount}`);
@@ -827,7 +636,6 @@ function startCounting(startDiffRange, startType) {
     if (lobby.soloMode && lobby.inLobby) {
         resetYears();
         counting = true;
-        countingYears = $("#scYearsTab").hasClass("selected"); // set counting years if the start button was pressed on the 
 
         // unbind and remove old listeners (that spam the chat with "no songs found" and "game settings have been changed")
         lobby._settingListener.unbindListener();
@@ -937,19 +745,10 @@ function updateYearRange() {
     if (curYearRange !== undefined) {
         setYears(curYearRange);
     }
-    // if yearIndex is out of range, the counting by years has concluded
+    // if yearIndex is out of range, then counting by years has concluded
     else {
         displayTotal(curDiffRange, types[curType]); // display total number of songs in the difficulty
-
-        // check if user is automatically counting all songs by years, if yes, then increment difficulty
-        if (autoCountYears) {
-            updateSongDifficulty();
-        }
-
-        // otherwise, the user must've selected a single counting by years option and stop counting
-        else {
-            stopCounting();
-        }
+        updateSongDifficulty();
     }
 }
 
@@ -982,7 +781,7 @@ function resetYears() {
     yearRanges = [[1950, 2020]];
     yearIndex = 0;
     curYearRange = [1950, 2020];
-    countingYears = false;
+    countingAdvanced = false;
 }
 
 // send data to a public spreadsheet
