@@ -210,3 +210,18 @@ Features:
 
 Known bugs:
 - Shitty name, please propose something better
+
+### amqSoloChatBlock.user.js
+
+A script that replaces the chat in Solo rooms with an image. It's completely useless anyways.
+
+Features:
+- Replace the chat in Solo rooms with an image
+- Customization options
+- Saves settings so changes remain over sessions
+
+Planned features:
+- Making customization accessible from outside of the console
+- Previews of edits before finalizing them
+- Using the image as a background instead when not in a solo room
+- Configuration of multiple loadouts
