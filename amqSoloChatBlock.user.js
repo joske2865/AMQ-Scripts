@@ -61,13 +61,14 @@ function changeChat(){
  * Until the script is finalized, call changeChat() to apply them.
  */
 function updateSettings(bg, repeat, attachment, bgpos, size, transform, opacity){
-    gcC_css["background-image"] = `url(${bg})`;
-    gcC_css["background-repeat"] = repeat;
-    gcC_css["background-attachment"] = attachment;
-    gcC_css["background-position"] = bgpos;
-    gcC_css["background-size"] = size;
-    gcC_css["transform"] = `scale(${transform ? -1 : 1})`;
-    gcC_css["opacity"] = opacity;
+
+    gcC_css["background-image"] = bg ? `url(${bg})` :  gcC_css["background-image"];
+    gcC_css["background-repeat"] = repeat ? repeat : gcC_css["background-repeat"];
+    gcC_css["background-attachment"] = attachment ? attachment :  gcC_css["background-attachment"];
+    gcC_css["background-position"] = bgpos ? bgpos :  gcC_css["background-position"];
+    gcC_css["background-size"] = size ? size :  gcC_css["background-attachment"];
+    gcC_css["transform"] = transform != null ? `scale(${transform ? -1 : 1})` :  gcC_css["transform"];
+    gcC_css["opacity"] = opacity != null ? opacity :  gcC_css["opacity"];
     // Save the settings to localStorage
     localStorage.setItem("SoloChatBlock", JSON.stringify(gcC_css_default);
 }
