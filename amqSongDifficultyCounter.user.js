@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1
+// @version      1.2
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
@@ -44,7 +44,6 @@ let oldSettingsChangeListener;
 let oldQuizNoSongsListener;
 let oldQuizOverListener;
 
-
 function setup() {
     if (document.getElementById('startPage')) {
         return
@@ -63,7 +62,7 @@ function setup() {
     $("#qpOptionContainer > div").append($("<div></div>")
         .attr("id", "qpStopCounter")
         .attr("class", "clickAble qpOption")
-        .html("<i aria-hidden=\"true\" class=\"fa fa-ban qpMenuItem\"></i>")
+        .html(`<i aria-hidden="true" class="fa fa-ban qpMenuItem"></i>`)
         .click(() => {
             if (counting) {
                 stopCounting();
@@ -150,6 +149,14 @@ function setup() {
             width: 100%;
             margin-top: 15px;
         }
+        #scCountinueCounter {
+            float: left;
+        }
+        #scSpreadsheetLink {
+            float: left;
+            margin-top: 5px;
+            margin-left: 15px;
+        }
     `)
 
     AMQ_addScriptData({
@@ -159,10 +166,10 @@ function setup() {
             <p>Adds a counting tool that automatically counts the number of songs on each difficulty</p>
             <p>Can be customized to count only certain difficulty ranges and certain song types and has an option to automatically split by years if you get 100 songs or more to get a more accurate result</p>
             <p>With a provided username, you can share your song breakdown by difficulty to a
-            <a href="https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing">public Spreadsheet</a>. 
+            <a href="https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing">public Spreadsheet</a>.
             The tool will automatically create a data sheet and a graph sheet with all of the data you collect and add it to the Index page</p>
             <p>You can update your data by inputting the same username as it is on the spreadsheet (NOTE: username is case-sensitive. For example "thejoseph98" and "THEJOSEPH98" are NOT the same)</p>
-            <p>To use the tool, simply click "Counter" button while in lobby, next to the "Room settings" button. You must be in a solo lobby to use this tool. Usage of guest accounts is strongly recommended to not inflate your Songs Played and guess rate due to the nature of this tool. 
+            <p>To use the tool, simply click "Counter" button while in lobby, next to the "Room settings" button. You must be in a solo lobby to use this tool. Usage of guest accounts is strongly recommended to not inflate your Songs Played and guess rate due to the nature of this tool.
             Simply select your preferred settings and click "Start", the tool will automatically set all other settings for you (100 songs, 5 seconds guess time, only watched/random depending on your tool settings and more)</p>
             <p>To stop counting, simply either wait for the tool to finish or you can click "Stop Counter" which can be found at the top right of your screen in the shape of the "ban" icon</p>
         `
@@ -236,7 +243,7 @@ function createSongCounterModal() {
                                     <input id="scSendToSpreadsheet" type="checkbox" checked="">
                                     <label for="scSendToSpreadsheet"><i class="fa fa-check" aria-hidden="true"></i></label>
                                 </div>
-                                <span id="scSpreadsheetLabel">Send to spreadsheet</span>                     
+                                <span id="scSpreadsheetLabel">Send to spreadsheet</span>
                             </div>
                             <div id="scUsernameContainer" class="disabled">
                                 <span>Username (required)</span>
@@ -256,6 +263,8 @@ function createSongCounterModal() {
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="scCountinueCounter">Continue</button>
+                        <a target="_blank" href="https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing" id="scSpreadsheetLink">Spreadsheet</a>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Exit</button>
                         <button type="button" class="btn btn-primary" id="scStartCounter">Start</button>
                     </div>
@@ -303,7 +312,7 @@ function createSongCounterModal() {
             $(this).parent().parent().next().removeClass("disabled");
         }
         else {
-            $(this).parent().parent().next().addClass("disabled") 
+            $(this).parent().parent().next().addClass("disabled")
         }
     });
 
@@ -312,7 +321,7 @@ function createSongCounterModal() {
             $(this).parent().parent().next().removeClass("disabled");
         }
         else {
-            $(this).parent().parent().next().addClass("disabled") 
+            $(this).parent().parent().next().addClass("disabled")
         }
     });
 
@@ -321,7 +330,7 @@ function createSongCounterModal() {
             $(this).parent().parent().next().removeClass("disabled");
         }
         else {
-            $(this).parent().parent().next().addClass("disabled") 
+            $(this).parent().parent().next().addClass("disabled")
         }
     });
 
@@ -360,12 +369,53 @@ function createSongCounterModal() {
                 return;
             }
             else {
+                clearCountData();
                 count.username = $("#scUsername").val().trim();
             }
+        }
+        else {
+            clearCountData();
         }
         initializeRanges();
         $("#songCounterModal").modal("hide");
         startCounting(curDiffRange, curType);
+    });
+
+    // continue counter
+    $("#scCountinueCounter").click(function () {
+        if (!loadCounterData()) {
+            displayMessage("Continue", "No saved data found");
+        }
+        else {
+            let message = `Saved data found<br /><br />`;
+            if (sendToSpreadsheet) {
+                message += `Send to spreadsheet: Enabled<br />Username: ${count.username}<br />`;
+            }
+            else {
+                message += `Send to spreadsheet: Disabled<br />`;
+            }
+            message += `Advanced counting: ${autoCountAdvanced ? "Enabled" : "Disabled"}<br />`;
+            message += `Song Selection: ${$("#scWatchingType").val() === "watched" ? "Only Watched" : "Random"}<br /><br />`;
+            message += `Current Difficulty range: ${curDiffRange[0]}-${curDiffRange[1]}%<br />`;
+            message += `Current Type: ${types[curType] === "opening" ? "Openings" : types[curType] === "ending" ? "Endings" : "Inserts"}<br /><br />`;
+            message += `Selected types:<br />`;
+            for (let i = 0; i < types.length; i++) {
+                if (types[i] === "opening") {
+                    message += `Openings: ${typeRanges[i][0]}-${typeRanges[i][1]}%<br />`;
+                }
+                if (types[i] === "ending") {
+                    message += `Endings: ${typeRanges[i][0]}-${typeRanges[i][1]}%<br />`;
+                }
+                if (types[i] === "insert") {
+                    message += `Inserts: ${typeRanges[i][0]}-${typeRanges[i][1]}%<br />`;
+                }
+            }
+            message += `<br />Would you like to continue?`;
+            displayHtmlOption("Continue", message, "Yes", "No", () => {
+                startCounting(curDiffRange, curType);
+                $("#songCounterModal").modal("hide");
+            }, () => {});
+        }
     });
 
     // default auto count by years unchecked
@@ -417,6 +467,7 @@ let quizNoSongsListener = new Listener("Quiz no songs", payload => {
         // set that song difficulty to 0 songs
         addSongCounter(curDiffRange, types[curType], 0);
     }
+    saveCounterData();
 });
 
 // listen for if the quiz starts normally
@@ -454,6 +505,7 @@ let quizReadyListener = new Listener("quiz ready", payload => {
     }
     // return to lobby vote
     quiz.startReturnLobbyVote();
+    saveCounterData();
 });
 
 // skip song when playing next song
@@ -689,12 +741,19 @@ function stopCounting() {
     gameChat.systemMessage("Counter stopped");
     sendDataToSpreadsheet();
     console.log(count);
+    clearCountData();
+}
+
+// reset counting data
+function clearCountData() {
     count = {
         username: null,
         openings: {},
         endings: {},
         inserts: {}
     };
+
+    localStorage.removeItem("countData");
 }
 
 // set default game settings
@@ -772,7 +831,7 @@ function splitYears() {
     else {
         let average = Math.floor((curYearRange[0] + curYearRange[1])/2);
         yearRanges.splice(yearIndex, 1, [curYearRange[0], average]);
-        yearRanges.splice(yearIndex + 1, 0, [average + 1, curYearRange[1]]);   
+        yearRanges.splice(yearIndex + 1, 0, [average + 1, curYearRange[1]]);
     }
 }
 
@@ -782,6 +841,38 @@ function resetYears() {
     yearIndex = 0;
     curYearRange = [1950, 2020];
     countingAdvanced = false;
+}
+
+// save data to the localStorage
+function saveCounterData() {
+    let saveData = {
+        countData: count,
+        diffRangeData: curDiffRange,
+        typeData: curType,
+        typesData: types,
+        typeRangesData: typeRanges,
+        autoCountAdvancedEnabled: autoCountAdvanced,
+        sendToSpreadsheetData: sendToSpreadsheet,
+        watchingTypeData: $("#scWatchingType").val()
+    };
+    localStorage.setItem("countData", JSON.stringify(saveData));
+}
+
+// load data from localStorage
+function loadCounterData() {
+    let loadData = JSON.parse(localStorage.getItem("countData"));
+    if (loadData !== null) {
+        count = loadData.countData;
+        curDiffRange = loadData.diffRangeData;
+        curType = loadData.typeData;
+        types = loadData.typesData;
+        typeRanges = loadData.typeRangesData;
+        autoCountAdvanced = loadData.autoCountAdvancedEnabled;
+        sendToSpreadsheet = loadData.sendToSpreadsheetData;
+        $("#scWatchingType").val(loadData.watchingTypeData);
+        return true;
+    }
+    return false;
 }
 
 // send data to a public spreadsheet
@@ -808,6 +899,32 @@ function sendDataToSpreadsheet() {
     else {
         gameChat.systemMessage("Skipped sending data to spreadsheet");
         gameChat.systemMessage("Done!");
+    }
+}
+
+// modified displayOption to support HTML
+function displayHtmlOption(title, msg, acceptMsg, declineMsg, callback, callbackCancel) {
+    if (!callback) {
+        callback = () => {};
+    }
+    if (!callbackCancel) {
+        callbackCancel = () => {};
+    }
+    if (SWAL_ACTIVE) {
+        return swal({
+            title: title,
+            html: msg,
+            showCancelButton: true,
+            confirmButtonColor: "#204d74",
+            confirmButtonText: acceptMsg,
+            cancelButtonText: declineMsg,
+        }).then((result) => {
+            if (result.dismiss) {
+                callbackCancel();
+            } else {
+                callback(result.value);
+            }
+        });
     }
 }
 
