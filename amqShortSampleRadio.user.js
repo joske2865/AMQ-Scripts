@@ -25,7 +25,6 @@ ASSRButton.id = "ASSR";
 ASSRButton.innerHTML = "<h1>ASSR</h1>"
 $(ASSRButton).addClass("clickAble topMenuButton topMenuBigButton");
 $(ASSRButton).css("right", "70.5%");
-$("#lnSettingsButton").parent().append(ASSRButton);
 $(ASSRButton).click(() => {
     if(!playMore){
         playMore = true;
@@ -33,6 +32,19 @@ $(ASSRButton).click(() => {
     } else {
         ASSR_STOP();
     }});
+
+/*
+ * Callback function for the MutationObserver on the lobby. Should make sure the script only runs when a lobby is entered.
+ */
+function lobbyOpen(mutations, observer){
+    mutations.forEach((mutation) => {
+        mutation.oldValue == "text-center hidden" ? lobby.soloMode ? $("#lnSettingsButton").parent().append(ASSRButton) : null : $(ASSRButton).remove();
+    });
+}
+// Create the observer for opening a lobby
+let lobbyObserver = new MutationObserver(lobbyOpen);
+// create and start the observer
+lobbyObserver.observe($("#lobbyPage")[0], {attributes: true, attributeOldValue: true, characterDataOldValue: true, attributeFilter: ["class"]});
 
 let quizOver;
 let oldQuizOver;
