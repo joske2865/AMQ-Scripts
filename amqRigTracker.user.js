@@ -27,7 +27,7 @@ let settingsData = [
             {
                 label: "Track Rig",
                 id: "smRigTracker",
-                popover: "Enables or disabled the rig tracker",
+                popover: "Enables or disables the rig tracker",
                 enables: ["smRigTrackerChat", "smRigTrackerScoreboard"],
                 offset: 0,
                 default: true
@@ -35,7 +35,7 @@ let settingsData = [
             {
                 label: "Write rig to chat",
                 id: "smRigTrackerChat",
-                popover: "Writes the rig to chat. Used for AMQ League games, requires 2 players, automatically disabled if the requirement is not met",
+                popover: "Writes the rig to chat. Used for AMQ League games, requires exactly 2 players. Automatically disables if the requirement is not met",
                 enables: ["smRigTrackerAnime", "smRigTrackerPlayerNames", "smRigTrackerScore", "smRigTrackerFinalResult"],
                 offset: 1,
                 default: false
@@ -102,7 +102,7 @@ let settingsData = [
             {
                 label: "On quiz end",
                 id: "smRigTrackerQuizEnd",
-                popover: "Write the final results at the end of the quiz",
+                popover: "Write the final results to chat at the end of the quiz",
                 enables: ["smRigTrackerQuizEndNames", "smRigTrackerQuizEndScore", "smRigTrackerQuizEndRig"],
                 offset: 0,
                 default: true
@@ -131,7 +131,7 @@ let settingsData = [
             {
                 label: "On returning to lobby",
                 id: "smRigTrackerLobby",
-                popover: "Write the final results when returning to lobby",
+                popover: "Write the final results to chat when returning to lobby",
                 enables: ["smRigTrackerLobbyNames", "smRigTrackerLobbyScore", "smRigTrackerLobbyRig"],
                 offset: 0,
                 default: false
