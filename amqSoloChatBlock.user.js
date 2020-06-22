@@ -61,7 +61,6 @@ const gcC_css_default = {
 let gcC_css;
 let old_gcC_css;
 let settings;
-let inRanked = false;
 storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.", "Aye");
 
 /*
@@ -69,7 +68,7 @@ storageAvailable ? settings = window.localStorage : displayMessage("Browser Issu
  * Loads in the last saved settings, or the default if nothing was set.
  */
 function changeChat(){
-    if(!settings || (!lobby.soloMode && !inRanked)){
+    if(!settings || (!lobby.soloMode && !inRanked())){
         return;
     }
     old_gcC_css = $("#gcContent").css(["backgroundImage", "backgroundRepeat", "backgroundAttachment", "backgroundPosition", "backgroundSize", "transform", "opacity"]);
@@ -102,4 +101,9 @@ function updateSettings(bg, repeat, attachment, bgpos, size, transform, opacity)
 function restoreChat(){
     $("#gcContent").css(old_gcC_css);
     $("#gcChatContent").css("display", "block");
+}
+
+function inRanked(){
+    let rankedChat = settings.getItem("blockRankedChat") ? (settings.getItem("blockRankedChat") == "true") : function(){settings.setItem("blockRankedChat", false); return false;}();
+    return rankedChat && lobby.settings.gameMode === "Ranked";
 }
