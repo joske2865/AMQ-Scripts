@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      0.6
-// @description  Puts a nice image over the chat in solo rooms, customizable.
+// @version      0.7
+// @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye // FokjeM
 // @match        https://animemusicquiz.com/*
 // @grant        none
@@ -15,8 +15,8 @@ const SCRIPT_INFO = {
         name: "AMQ Solo Chat Block",
         author: "RivenSkaye",
         description: `
-            <p>Hides the chat in Solo rooms, since it's useless anyway.</p>
-            <p>This should hopefully be configurable, someday. For now, you can manually change stuff by setting new values on the SoloChatBlock entry in localStorage.</p>
+            <p>Hides the chat in Solo rooms, since it's useless anyway. Also allows for killing Ranked chat</p>
+            <p>This should hopefully be configurable, someday. For now, you can manually change stuff by setting new values on the SoloChatBlock and BlockRankedChat entries in localStorage.</p>
         `
     };
 AMQ_addScriptData(SCRIPT_INFO);
@@ -61,6 +61,7 @@ const gcC_css_default = {
 let gcC_css;
 let old_gcC_css;
 let settings;
+let updateBlockLive = false;
 storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.", "Aye");
 
 /*
@@ -79,6 +80,19 @@ function changeChat(){
     // Apply the CSS and hide the chat
     $("#gcContent").css(gcC_css);
     $("#gcChatContent").css("display", "none");
+    updateBlockLive = true;
+    gameChat._newMessageListner.unbindListener();
+	gameChat._newSpectatorListner.unbindListener();
+	gameChat._spectatorLeftListner.unbindListener();
+	gameChat._playerLeaveListner.unbindListener();
+	gameChat._spectatorChangeToPlayer.unbindListener();
+	gameChat._newQueueEntryListener.unbindListener();
+	gameChat._playerLeftQueueListener.unbindListener();
+	gameChat._hostPromotionListner.unbindListener();
+	gameChat._playerNameChangeListner.unbindListener();
+	gameChat._spectatorNameChangeListner.unbindListener();
+	gameChat._deletePlayerMessagesListener.unbindListener();
+	gameChat._deleteChatMessageListener.unbindListener();
 }
 
 /*
@@ -101,9 +115,9 @@ function updateSettings(bg, repeat, attachment, bgpos, size, transform, opacity)
 function restoreChat(){
     $("#gcContent").css(old_gcC_css);
     $("#gcChatContent").css("display", "block");
+    updateBlockLive = false;
 }
 
 function inRanked(){
-    let rankedChat = settings.getItem("blockRankedChat") ? (settings.getItem("blockRankedChat") == "true") : function(){settings.setItem("blockRankedChat", false); return false;}();
-    return rankedChat && lobby.settings.gameMode === "Ranked";
+    return settings.getItem("BlockRankedChat") ? (settings.getItem("BlockRankedChat") == "true") : function(){settings.setItem("BlockRankedChat", false); return false;}() && lobby.settings.gameMode === "Ranked";
 }
