@@ -85,8 +85,8 @@ let updateBlockLive = false;
 storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.", "Aye");
 
 /*
- * unbind listeners if chat is blocked.
- * Since the listeners fire before gameChat.openView, it means that chat listeners are unbound (via changeChat function) and then bound again.
+ * unbind chat listeners if chat is blocked.
+ * Since the host/join/spectate listeners fire before gameChat.openView, it means that chat listeners are unbound (via changeChat function) and then bound again.
  * overloading gameChat.openView fixes that
  */
 let oldOpenView = GameChat.prototype.openView.bind(gameChat);
