@@ -7,8 +7,8 @@
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @downloadURL  https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
-// @updateURL    https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
+// @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/test/amqSoloChatBlocker.user.js
+// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/test/amqSoloChatBlocker.user.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
