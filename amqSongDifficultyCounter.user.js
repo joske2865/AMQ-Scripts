@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2
+// @version      1.2.1
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
@@ -43,6 +43,8 @@ let insertsDiffSlider;
 let oldSettingsChangeListener;
 let oldQuizNoSongsListener;
 let oldQuizOverListener;
+
+let buttonHidden = false;
 
 function setup() {
     if (document.getElementById('startPage')) {
@@ -174,6 +176,10 @@ function setup() {
             <p>To stop counting, simply either wait for the tool to finish or you can click "Stop Counter" which can be found at the top right of your screen in the shape of the "ban" icon</p>
         `
     });
+
+    hostGameListener.bindListener();
+    joinGameListener.bindListener();
+    spectateGameListener.bindListener();
 }
 
 function createSongCounterModal() {
@@ -567,6 +573,46 @@ let settingsChangeListener = new Listener("Room Settings Changed", payload => {
 
     lobby.updatePlayerCounter();
 });
+
+// show the counter button when hosting a solo game, otherwise hide it
+let hostGameListener = new Listener("Host Game", payload => {
+    if (payload.soloMode) {
+        showCounterButton();
+    }
+    else {
+        hideCounterButton();
+    }
+});
+
+// hide the counter button when joining non-solo lobbies
+let joinGameListener = new Listener("Join Game", payload => {
+    hideCounterButton();
+});
+
+// hide the counter button when spectating non-solo lobbies
+let spectateGameListener = new Listener("Spectate Game", payload => {
+    hideCounterButton();
+});
+
+function showCounterButton() {
+    $("#lbCounterButton").show();
+    if (buttonHidden) {
+        let oldWidth = $("#qpOptionContainer").width();
+        $("#qpOptionContainer").width(oldWidth + 35);
+        $("#qpStopCounter").show();
+        buttonHidden = false;
+    }
+}
+
+function hideCounterButton() {
+    $("#lbCounterButton").hide();
+    if (!buttonHidden) {
+        let oldWidth = $("#qpOptionContainer").width();
+        $("#qpOptionContainer").width(oldWidth - 35);
+        $("#qpStopCounter").hide();
+        buttonHidden = true;
+    }
+}
 
 // open the counter modal window
 function openCounterModal() {
