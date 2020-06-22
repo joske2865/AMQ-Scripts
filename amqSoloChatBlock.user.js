@@ -66,7 +66,6 @@ let settings;
 let updateBlockLive = false;
 // Fix for joining a game by invite from a modified room
 let switchGameListener = new Listener("Spectate Game", () => {
-    console.log("Joining a new game, restoring chat in 3... 2... 1...")
     setTimeout(restoreChat, 100);
 });
 // Set settings or error out
@@ -78,7 +77,6 @@ storageAvailable ? settings = window.localStorage : displayMessage("Browser Issu
  */
 function changeChat(){
     if(!settings || (!inRanked() && lobby.settings.roomSize > 1)){
-        console.log("Restoring chat");
         restoreChat();
         return;
     }
