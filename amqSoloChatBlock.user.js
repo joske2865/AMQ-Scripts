@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      0.5
+// @version      0.6
 // @description  Puts a nice image over the chat in solo rooms, customizable.
 // @author       Riven Skaye // FokjeM
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
+// @updateURL    https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
 // ==/UserScript==
 
 const SCRIPT_INFO = {
