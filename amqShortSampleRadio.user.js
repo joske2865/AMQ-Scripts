@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Short Sample Radio
-// @namespace    https://github.com/TheJoseph98
-// @version      1.0
+// @namespace    SkayeScripts
+// @version      1.1
 // @description  Loops through your entire list to not answer songs. Pushes difficulty for them down as fast as possible.
 // @author       Riven Skaye // FokjeM
 // @author       TheJoseph98
