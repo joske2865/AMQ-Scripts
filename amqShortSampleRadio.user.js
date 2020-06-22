@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Short Sample Radio
 // @namespace    SkayeScripts
-// @version      1.2
+// @version      1.3
 // @description  Loops through your entire list to not answer songs. Pushes difficulty for them down as fast as possible.
 // @author       Riven Skaye // FokjeM
 // @author       TheJoseph98
@@ -12,6 +12,7 @@
 // @updateURL    https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqShortSampleRadio.user.js
 // ==/UserScript==
 // Thanks a million for the help and some of the code bud!
+
 const SCRIPT_INFO = {
         name: "AMQ Short Sample Radio",
         author: "RivenSkaye",
@@ -22,9 +23,12 @@ const SCRIPT_INFO = {
         `
     };
 AMQ_addScriptData(SCRIPT_INFO);
+
+if(document.getElementById('startPage')) return;
+
 let ASSRButton = document.createElement("div");
 ASSRButton.id = "ASSR";
-ASSRButton.innerHTML = "<h1>ASSR</h1>"
+ASSRButton.innerHTML = "<h1>AMQ pls</h1>"
 $(ASSRButton).addClass("clickAble topMenuButton topMenuBigButton");
 $(ASSRButton).css("right", "70.5%");
 $(ASSRButton).click(() => {
@@ -53,12 +57,6 @@ let oldQuizOver;
 let noSongs;
 let quizNoSongs;
 let playMore = false;
-
-function setup(){
-    if(document.getElementById('startPage')) {
-        return;
-    }
-}
 
 function ASSR_START(OPs=true, EDs=true, INS=true){
     if(!(lobby.inLobby && lobby.soloMode)){
