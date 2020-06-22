@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      0.8
+// @version      0.8.1
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye // FokjeM
 // @match        https://animemusicquiz.com/*
@@ -11,6 +11,7 @@
 // @updateURL    https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
 // ==/UserScript==
 
+// Register the script to Joseph's list of installed scripts
 const SCRIPT_INFO = {
         name: "AMQ Solo Chat Block",
         author: "RivenSkaye",
@@ -21,7 +22,9 @@ const SCRIPT_INFO = {
     };
 AMQ_addScriptData(SCRIPT_INFO);
 
+// Don't do anything on the sign-in page
 if (!window.setupDocumentDone) return;
+
 // Function to check if localStorage even exists here. If it doesn't, people are using a weird browser and we can't support them.
 function storageAvailable() {
     let storage;
@@ -35,6 +38,7 @@ function storageAvailable() {
         return false;
     }
 }
+
 /*
  * Callback function for the MutationObserver on the lobby. Should make sure the script only runs when a lobby is entered.
  */
@@ -45,7 +49,7 @@ function lobbyOpen(mutations, observer){
 }
 // Create the observer for opening a lobby
 let lobbyObserver = new MutationObserver(lobbyOpen);
-// create and start the observer
+// Start the observer
 lobbyObserver.observe($("#lobbyPage")[0], {attributes: true, attributeOldValue: true, characterDataOldValue: true, attributeFilter: ["class"]});
 
 //These are the defaults. Laevateinn should be bliss to everyone. JQuery CSS notation since we leverage Ege's resources.
@@ -58,15 +62,20 @@ const gcC_css_default = {
     "transform": "scale(1, 1)",
     "opacity": 1.0
 };
+
+// Variables to store old and new stuff so we can unfuck later
 let gcC_css;
 let old_gcC_css;
 let settings;
 let updateBlockLive = false;
+
+// Grab the local storage or error out
 storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.", "Aye");
 
 /*
  * Function that actually replaces the chatbox with an image.
  * Loads in the last saved settings, or the default if nothing was set.
+ * Unbinds a lot of listeners for improving performance. Mainly an issue in Ranked.
  */
 function changeChat(){
     if(!settings || (!lobby.soloMode && !inRanked())){
@@ -112,12 +121,21 @@ function updateSettings(bg, repeat, attachment, bgpos, size, transform, opacity)
     localStorage.setItem("SoloChatBlock", JSON.stringify(gcC_css_default));
 }
 
+/*
+ * The actual unfucking of the chat
+ * We don't need to bind the listeners again, the game does so when entering a lobby.
+ * Binding them will probably cause more issues since the game unbinds when leaving as well.
+ */
 function restoreChat(){
     $("#gcContent").css(old_gcC_css);
     $("#gcChatContent").css("display", "block");
     updateBlockLive = false;
 }
 
+/*
+ * A utility function to determine whether or not to block the chat in Ranked.
+ * Defaults to NOPE
+ */
 function inRanked(){
     return settings.getItem("BlockRankedChat") ? (settings.getItem("BlockRankedChat") == "true") : function(){settings.setItem("BlockRankedChat", false); return false;}() && lobby.settings.gameMode === "Ranked";
 }
