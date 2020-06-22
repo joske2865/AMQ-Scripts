@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      0.7
+// @version      0.8
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye // FokjeM
 // @match        https://animemusicquiz.com/*
