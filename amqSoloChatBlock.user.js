@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      0.10
+// @version      0.11
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye // FokjeM
 // @match        https://animemusicquiz.com/*
@@ -82,6 +82,7 @@ function changeChat(){
     }
     updateBlockLive = true;
     old_gcC_css = $("#gcContent").css(["backgroundImage", "backgroundRepeat", "backgroundAttachment", "backgroundPosition", "backgroundSize", "transform", "opacity"]);
+    console.log(old_gcC_css.backgroundImage);
     // If it's not set yet, create the object in localStorage using the defaults. Hail persistence!
     !settings.getItem("SoloChatBlock") ? localStorage.setItem("SoloChatBlock", JSON.stringify(gcC_css_default)) : null;
     // Load in whatever the last saved ssettings were, or the defaults if we just set them
@@ -131,7 +132,8 @@ function updateSettings(bg, repeat, attachment, bgpos, size, transform, opacity)
 function restoreChat(){
     switchGameListener.unbindListener();
     $("#gcContent").css(old_gcC_css);
-    $("#gcChatContent").css("display", "");
+    $("#gcContent").css("backgroundImage", "");
+    $("#gcChatContent").css("display", ""); // Attempt to fix Impogna's miscellaneous bug
     updateBlockLive = false;
 }
 
