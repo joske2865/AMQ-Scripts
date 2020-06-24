@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2.3
+// @version      1.3
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -95,11 +95,19 @@ let settingsData = [
                 default: true
             },
             {
-                label: "Display missed from own list",
+                label: "Display missed from list",
                 id: "smRigTrackerMissedOwn",
                 popover: "Display the number of songs you missed from your own list in the chat at the end of the quiz",
+                enables: ["smRigTrackerMissedAll"],
                 offset: 1,
                 default: true
+            },
+            {
+                label: "Display missed from all lists",
+                id: "smRigTrackerMissedAll",
+                popover: "Display the number of songs all players missed from their own lists in the chat at the end of the quiz",
+                offset: 2,
+                default: false
             }
         ]
     },
@@ -317,13 +325,14 @@ let answerResultsRigTracker = new Listener("answer results", (result) => {
     }
     if (playerDataReady) {
         for (let player of result.players) {
-            if (quiz.players[player.gamePlayerId]._name === selfName) {
-                if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0 && player.correct === false) {
-                    missedFromOwnList++;
-                }
-            }
             if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0) {
                 playerData[player.gamePlayerId].rig++;
+                if (player.correct === false) {
+                    playerData[player.gamePlayerId].missedList++;
+                }
+                if (player.correct === false && quiz.players[player.gamePlayerId]._name === selfName) {
+                    missedFromOwnList++;
+                }
             }
             if (player.correct === true) {
                 playerData[player.gamePlayerId].score++;
@@ -343,9 +352,7 @@ let quizEndRigTracker = new Listener("quiz end result", (result) => {
     if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerQuizEnd").prop("checked")) {
         writeResultsToChat();
     }
-    if ($("#smRigTrackerMissedOwn").prop("checked")) {
-        gameChat.systemMessage(`Missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from own list`);
-    }
+    displayMissedList();
 });
 
 // stuff to do on returning to lobby
@@ -355,9 +362,7 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
         if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerLobby").prop("checked")) {
             writeResultsToChat();
         }
-        if ($("#smRigTrackerMissedOwn").prop("checked")) {
-            gameChat.systemMessage(`Missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from own list`);
-        }
+        //displayMissedList();
     }
 });
 
@@ -378,9 +383,7 @@ function initialiseScoreboard() {
     clearScoreboard();
     for (let entryId in quiz.scoreboard.playerEntries) {
         let tmp = quiz.scoreboard.playerEntries[entryId];
-        let rig = $("<span></span>");
-        rig.text("0");
-        rig.addClass("qpsPlayerRig");
+        let rig = $(`<span class="qpsPlayerRig">0</span>`);
         tmp.$entry.find(".qpsPlayerName").before(rig);
     }
     scoreboardReady = true;
@@ -393,6 +396,7 @@ function initialisePlayerData() {
          playerData[entryId] = {
              rig: 0,
              score: 0,
+             missedList: 0,
              name: quiz.players[entryId]._name
          };
     }
@@ -518,6 +522,18 @@ function writeResultsToChat() {
     }
 
     gameChat.$chatInputField.val(oldMessage);
+}
+
+function displayMissedList() {
+    let inQuiz = Object.values(quiz.players).some(player => player.isSelf === true);
+    if ($("#smRigTrackerMissedOwn").prop("checked") && !$("#smRigTrackerMissedAll").prop("checked") && inQuiz) {
+        gameChat.systemMessage(`You missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from your own list`);
+    }
+    if ($("#smRigTrackerMissedAll").prop("checked")) {
+        for (let id in playerData) {
+            gameChat.systemMessage(`${playerData[id].name} missed ${playerData[id].missedList === 1 ? playerData[id].missedList + " song" : playerData[id].missedList + " songs"} from their own list`);
+        }
+    }
 }
 
 // Enable or disable rig tracking on checking or unchecking the rig tracker checkbox
