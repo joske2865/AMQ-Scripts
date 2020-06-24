@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3
+// @version      1.3.1
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -297,7 +297,7 @@ options.$SETTING_CONTAINERS = $(".settingContentContainer");
 let quizReadyRigTracker = new Listener("quiz ready", (data) => {
     returningToLobby = false;
     clearPlayerData();
-    if ($("#smRigTracker").prop("checked")) {
+    if ($("#smRigTracker").prop("checked") && quiz.gameMode !== "Ranked") {
         if ($("#smRigTrackerScoreboard").prop("checked")) {
             initialiseScoreboard();
         }
@@ -308,12 +308,14 @@ let quizReadyRigTracker = new Listener("quiz ready", (data) => {
         answerResultsRigTracker.unbindListener();
         quizEndRigTracker.unbindListener();
         returnLobbyVoteListener.unbindListener();
-        newRoomsListener.unbindListener();
     }
 });
 
 // stuff to do on answer reveal
 let answerResultsRigTracker = new Listener("answer results", (result) => {
+    if (quiz.gameMode === "Ranked") {
+        return;
+    }
     if (!playerDataReady) {
         initialisePlayerData();
     }
@@ -368,12 +370,24 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
 
 // Reset data when joining a lobby
 let joinLobbyListener = new Listener("Join Game", (payload) => {
+    if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
+        quizReadyRigTracker.bindListener();
+        answerResultsRigTracker.bindListener();
+        quizEndRigTracker.bindListener();
+        returnLobbyVoteListener.bindListener();
+    }
     clearPlayerData();
     clearScoreboard();
 });
 
 // Reset data when spectating a lobby
 let spectateLobbyListener = new Listener("Spectate Game", (payload) => {
+    if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
+        quizReadyRigTracker.bindListener();
+        answerResultsRigTracker.bindListener();
+        quizEndRigTracker.bindListener();
+        returnLobbyVoteListener.bindListener();
+    }
     clearPlayerData();
     clearScoreboard();
 });
@@ -526,12 +540,33 @@ function writeResultsToChat() {
 
 function displayMissedList() {
     let inQuiz = Object.values(quiz.players).some(player => player.isSelf === true);
-    if ($("#smRigTrackerMissedOwn").prop("checked") && !$("#smRigTrackerMissedAll").prop("checked") && inQuiz) {
+    if ($("#smRigTrackerMissedOwn").prop("checked") && !$("#smRigTrackerMissedAll").prop("checked") && inQuiz && quiz.gameMode !== "Ranked") {
         gameChat.systemMessage(`You missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from your own list`);
     }
-    if ($("#smRigTrackerMissedAll").prop("checked")) {
+    if ($("#smRigTrackerMissedAll").prop("checked") && quiz.gameMode !== "Ranked") {
         for (let id in playerData) {
             gameChat.systemMessage(`${playerData[id].name} missed ${playerData[id].missedList === 1 ? playerData[id].missedList + " song" : playerData[id].missedList + " songs"} from their own list`);
+        }
+    }
+}
+
+function resetRigTracker() {
+    let rigTrackerEnabled = $("#smRigTracker").prop("checked");
+    if (!rigTrackerEnabled || quiz.gameMode === "Ranked") {
+        quizReadyRigTracker.unbindListener();
+        answerResultsRigTracker.unbindListener();
+        quizEndRigTracker.unbindListener();
+        returnLobbyVoteListener.unbindListener();
+        clearScoreboard();
+    }
+    else {
+        quizReadyRigTracker.bindListener();
+        answerResultsRigTracker.bindListener();
+        quizEndRigTracker.bindListener();
+        returnLobbyVoteListener.bindListener();
+        if ($("#smRigTrackerScoreboard").prop("checked")) {
+            initialiseScoreboard();
+            writeRigToScoreboard();
         }
     }
 }
@@ -544,7 +579,6 @@ $("#smRigTracker").click(function () {
         answerResultsRigTracker.unbindListener();
         quizEndRigTracker.unbindListener();
         returnLobbyVoteListener.unbindListener();
-        newRoomsListener.unbindListener();
         clearScoreboard();
     }
     else {
@@ -552,7 +586,6 @@ $("#smRigTracker").click(function () {
         answerResultsRigTracker.bindListener();
         quizEndRigTracker.bindListener();
         returnLobbyVoteListener.bindListener();
-        newRoomsListener.bindListener();
         if ($("#smRigTrackerScoreboard").prop("checked")) {
             initialiseScoreboard();
             writeRigToScoreboard();
