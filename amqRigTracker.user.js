@@ -16,6 +16,7 @@ if (!window.setupDocumentDone) return;
 let scoreboardReady = false;
 let playerDataReady = false;
 let returningToLobby = false;
+let missedFromOwnList = 0;
 let playerData = {};
 
 // data for the checkboxes
@@ -28,7 +29,7 @@ let settingsData = [
                 label: "Track Rig",
                 id: "smRigTracker",
                 popover: "Enables or disabled the rig tracker",
-                enables: ["smRigTrackerChat", "smRigTrackerScoreboard"],
+                enables: ["smRigTrackerChat", "smRigTrackerScoreboard", "smRigTrackerMissedOwn"],
                 offset: 0,
                 default: true
             },
@@ -90,6 +91,13 @@ let settingsData = [
                 label: "Write rig to scoreboard",
                 id: "smRigTrackerScoreboard",
                 popover: "Writes the rig to the scoreboards next to each person's score",
+                offset: 1,
+                default: true
+            },
+            {
+                label: "Display missed from own list",
+                id: "smRigTrackerMissedOwn",
+                popover: "Display the number of songs you missed from your own list in the chat at the end of the quiz",
                 offset: 1,
                 default: true
             }
@@ -309,6 +317,11 @@ let answerResultsRigTracker = new Listener("answer results", (result) => {
     }
     if (playerDataReady) {
         for (let player of result.players) {
+            if (quiz.players[player.gamePlayerId]._name === selfName) {
+                if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0 && player.correct === false) {
+                    missedFromOwnList++;
+                }
+            }
             if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0) {
                 playerData[player.gamePlayerId].rig++;
             }
@@ -330,6 +343,9 @@ let quizEndRigTracker = new Listener("quiz end result", (result) => {
     if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerQuizEnd").prop("checked")) {
         writeResultsToChat();
     }
+    if ($("#smRigTrackerMissedOwn").prop("checked")) {
+        gameChat.systemMessage(`Missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from own list`);
+    }
 });
 
 // stuff to do on returning to lobby
@@ -338,6 +354,9 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
         returningToLobby = true;
         if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerLobby").prop("checked")) {
             writeResultsToChat();
+        }
+        if ($("#smRigTrackerMissedOwn").prop("checked")) {
+            gameChat.systemMessage(`Missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from own list`);
         }
     }
 });
@@ -390,6 +409,7 @@ function clearScoreboard() {
 function clearPlayerData() {
     playerData = {};
     playerDataReady = false;
+    missedFromOwnList = 0;
 }
 
 // Writes the current rig to scoreboard
