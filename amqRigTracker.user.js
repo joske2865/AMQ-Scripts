@@ -543,30 +543,9 @@ function displayMissedList() {
     if ($("#smRigTrackerMissedOwn").prop("checked") && !$("#smRigTrackerMissedAll").prop("checked") && inQuiz && quiz.gameMode !== "Ranked") {
         gameChat.systemMessage(`You missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from your own list`);
     }
-    if ($("#smRigTrackerMissedAll").prop("checked") && quiz.gameMode !== "Ranked") {
+    if ($("#smRigTrackerMissedAll").prop("checked") && $("#smRigTrackerMissedOwn").prop("checked") && quiz.gameMode !== "Ranked") {
         for (let id in playerData) {
             gameChat.systemMessage(`${playerData[id].name} missed ${playerData[id].missedList === 1 ? playerData[id].missedList + " song" : playerData[id].missedList + " songs"} from their own list`);
-        }
-    }
-}
-
-function resetRigTracker() {
-    let rigTrackerEnabled = $("#smRigTracker").prop("checked");
-    if (!rigTrackerEnabled || quiz.gameMode === "Ranked") {
-        quizReadyRigTracker.unbindListener();
-        answerResultsRigTracker.unbindListener();
-        quizEndRigTracker.unbindListener();
-        returnLobbyVoteListener.unbindListener();
-        clearScoreboard();
-    }
-    else {
-        quizReadyRigTracker.bindListener();
-        answerResultsRigTracker.bindListener();
-        quizEndRigTracker.bindListener();
-        returnLobbyVoteListener.bindListener();
-        if ($("#smRigTrackerScoreboard").prop("checked")) {
-            initialiseScoreboard();
-            writeRigToScoreboard();
         }
     }
 }
