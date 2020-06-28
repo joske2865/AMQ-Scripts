@@ -1,10 +1,9 @@
 // ==UserScript==
 // @name         AMQ Short Sample Radio
 // @namespace    SkayeScripts
-// @version      1.3.1
+// @version      1.3.2
 // @description  Loops through your entire list to not answer songs. Pushes difficulty for them down as fast as possible.
-// @author       Riven Skaye // FokjeM
-// @author       TheJoseph98
+// @author       Riven Skaye || FokjeM & TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
