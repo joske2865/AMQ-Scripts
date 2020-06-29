@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      2.3.7
+// @version      2.3.8
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -379,15 +379,15 @@ function addTableEntry(newSong) {
         }
     }
 
-    let songNumber = $(`<td class="songNumber">` + newSong.songNumber + `</td>`);
-    let songName = $(`<td class="songName">` + newSong.name + `</td>`);
-    let artist = $(`<td class="songArtist">` + newSong.artist + `</td>`);
-    let animeEng = $(`<td class="animeNameEnglish">` + newSong.anime.english + `</td>`);
-    let animeRomaji = $(`<td class="animeNameRomaji">` + newSong.anime.romaji + `</td>`);
-    let type = $(`<td class="songType">` + newSong.type + `</td>`);
-    let selfAnswer = $(`<td class="selfAnswer">` + (newSong.selfAnswer !== undefined ? newSong.selfAnswer : "...") + `</td>`);
-    let guessesCounter = $(`<td class="guessesCounter">` + guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)" + `</td>`);
-    let samplePoint = $(`<td class="samplePoint">` + formatSamplePoint(newSong.startSample, newSong.videoLength) + `</td>`);
+    let songNumber = $(`<td class="songNumber"></td>`).text(newSong.songNumber);
+    let songName = $(`<td class="songName"></td>`).text(newSong.name);
+    let artist = $(`<td class="songArtist"></td>`).text(newSong.artist);
+    let animeEng = $(`<td class="animeNameEnglish"></td>`).text(newSong.anime.english);
+    let animeRomaji = $(`<td class="animeNameRomaji"></td>`).text(newSong.anime.romaji);
+    let type = $(`<td class="songType"></td>`).text(newSong.type);
+    let selfAnswer = $(`<td class="selfAnswer"></td>`).text(newSong.selfAnswer !== undefined ? newSong.selfAnswer : "...");
+    let guessesCounter = $(`<td class="guessesCounter"></td>`).text(guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)");
+    let samplePoint = $(`<td class="samplePoint"></td>`).text(formatSamplePoint(newSong.startSample, newSong.videoLength));
 
     if ($("#slShowSongNumber").prop("checked")) {
         songNumber.show();
@@ -593,13 +593,18 @@ function updateInfo(song) {
 
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
-    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Song Name</b></h5><p>${song.name}</p></div>`)
-    let artistContainer = $(`<div id="artistContainer"><h5><b>Artist</b></h5><p>${song.artist}</p></div>`)
-    let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5><b>Anime English</b></h5><p>${song.anime.english}</p></div>`);
-    let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5><b>Anime Romaji</b></h5><p>${song.anime.romaji}</p></div>`);
-    let typeContainer = $(`<div id="typeContainer"><h5><b>Type</b></h5><p>${song.type}</p></div>`);
-    let sampleContainer = $(`<div id="sampleContainer"></div>`)
-        .html("<h5><b>Sample Point</b></h5><p>" + formatSamplePoint(song.startSample, song.videoLength) + "</p>");
+    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Song Name</b></h5><p></p></div>`);
+    songNameContainer.find("p").text(song.name);
+    let artistContainer = $(`<div id="artistContainer"><h5><b>Artist</b></h5><p></p></div>`);
+    artistContainer.find("p").text(song.artist);
+    let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5><b>Anime English</b></h5><p></p></div>`);
+    animeEnglishContainer.find("p").text(song.anime.english);
+    let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5><b>Anime Romaji</b></h5><p></p></div>`);
+    animeRomajiContainer.find("p").text(song.anime.romaji);
+    let typeContainer = $(`<div id="typeContainer"><h5><b>Type</b></h5><p></p></div>`);
+    typeContainer.find("p").text(song.type);
+    let sampleContainer = $(`<div id="sampleContainer"><h5><b>Sample Point</b></h5><p></p></div>`);
+    sampleContainer.find("p").text(formatSamplePoint(song.startSample, song.videoLength));
     let guessedContainer = $(`<div id="guessedContainer"></div>`)
         .html("<h5><b>Guessed<br>" + guesses.length + "/" + song.activePlayers + " (" + parseFloat((guesses.length/song.activePlayers*100).toFixed(2)) + "%)</b></h5>");
     let fromListContainer = $(`<div id="fromListContainer"></div>`)
