@@ -127,7 +127,7 @@ function noChatMode(){
         // just delete the properties altogether
         $("#gameChatContainer").css(key, val);
     });
-    $("#lobbyCountContainer").css({'right': '-25vw', 'top': '2.5vh'});
+    $("#lobbyCountContainer").css({'right': '-25vw'});
 }
 
 /*
@@ -135,7 +135,7 @@ function noChatMode(){
  */
 function undoNCM(){
     $("#gameChatContainer").css(NCM_restore);
-    $("#lobbyCountContainer").css({'right': '0px', 'top': '21px'});
+    $("#lobbyCountContainer").css({'right': '0px'});
     $("#gcContent").css(gcC_css);
     NCM_restore = null;
 }
