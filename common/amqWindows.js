@@ -171,7 +171,7 @@ class AMQWindow {
 
     setTitle(newTitle) {
         this.title = newTitle;
-        this.header.find("modal-title").text(newTitle);
+        this.header.find(".modal-title").text(newTitle);
     }
 
     setZIndex(newZIndex) {
