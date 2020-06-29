@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2.2
+// @version      1.3.2
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -16,6 +16,7 @@ if (!window.setupDocumentDone) return;
 let scoreboardReady = false;
 let playerDataReady = false;
 let returningToLobby = false;
+let missedFromOwnList = 0;
 let playerData = {};
 
 // data for the checkboxes
@@ -27,15 +28,15 @@ let settingsData = [
             {
                 label: "Track Rig",
                 id: "smRigTracker",
-                popover: "Enables or disables the rig tracker",
-                enables: ["smRigTrackerChat", "smRigTrackerScoreboard"],
+                popover: "Enables or disabled the rig tracker",
+                enables: ["smRigTrackerChat", "smRigTrackerScoreboard", "smRigTrackerMissedOwn"],
                 offset: 0,
                 default: true
             },
             {
                 label: "Write rig to chat",
                 id: "smRigTrackerChat",
-                popover: "Writes the rig to chat. Used for AMQ League games, requires exactly 2 players. Automatically disables if the requirement is not met",
+                popover: "Writes the rig to chat. Used for AMQ League games, requires 2 players, automatically disabled if the requirement is not met",
                 enables: ["smRigTrackerAnime", "smRigTrackerPlayerNames", "smRigTrackerScore", "smRigTrackerFinalResult"],
                 offset: 1,
                 default: false
@@ -92,6 +93,21 @@ let settingsData = [
                 popover: "Writes the rig to the scoreboards next to each person's score",
                 offset: 1,
                 default: true
+            },
+            {
+                label: "Display missed from list",
+                id: "smRigTrackerMissedOwn",
+                popover: "Display the number of songs you missed from your own list in the chat at the end of the quiz",
+                enables: ["smRigTrackerMissedAll"],
+                offset: 1,
+                default: true
+            },
+            {
+                label: "Display missed from all lists",
+                id: "smRigTrackerMissedAll",
+                popover: "Display the number of songs all players missed from their own lists in the chat at the end of the quiz",
+                offset: 2,
+                default: false
             }
         ]
     },
@@ -102,7 +118,7 @@ let settingsData = [
             {
                 label: "On quiz end",
                 id: "smRigTrackerQuizEnd",
-                popover: "Write the final results to chat at the end of the quiz",
+                popover: "Write the final results at the end of the quiz",
                 enables: ["smRigTrackerQuizEndNames", "smRigTrackerQuizEndScore", "smRigTrackerQuizEndRig"],
                 offset: 0,
                 default: true
@@ -131,7 +147,7 @@ let settingsData = [
             {
                 label: "On returning to lobby",
                 id: "smRigTrackerLobby",
-                popover: "Write the final results to chat when returning to lobby",
+                popover: "Write the final results when returning to lobby",
                 enables: ["smRigTrackerLobbyNames", "smRigTrackerLobbyScore", "smRigTrackerLobbyRig"],
                 offset: 0,
                 default: false
@@ -281,7 +297,7 @@ options.$SETTING_CONTAINERS = $(".settingContentContainer");
 let quizReadyRigTracker = new Listener("quiz ready", (data) => {
     returningToLobby = false;
     clearPlayerData();
-    if ($("#smRigTracker").prop("checked")) {
+    if ($("#smRigTracker").prop("checked") && quiz.gameMode !== "Ranked") {
         if ($("#smRigTrackerScoreboard").prop("checked")) {
             initialiseScoreboard();
         }
@@ -292,12 +308,14 @@ let quizReadyRigTracker = new Listener("quiz ready", (data) => {
         answerResultsRigTracker.unbindListener();
         quizEndRigTracker.unbindListener();
         returnLobbyVoteListener.unbindListener();
-        newRoomsListener.unbindListener();
     }
 });
 
 // stuff to do on answer reveal
 let answerResultsRigTracker = new Listener("answer results", (result) => {
+    if (quiz.gameMode === "Ranked") {
+        return;
+    }
     if (!playerDataReady) {
         initialisePlayerData();
     }
@@ -311,6 +329,12 @@ let answerResultsRigTracker = new Listener("answer results", (result) => {
         for (let player of result.players) {
             if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0) {
                 playerData[player.gamePlayerId].rig++;
+                if (player.correct === false) {
+                    playerData[player.gamePlayerId].missedList++;
+                }
+                if (player.correct === false && quiz.players[player.gamePlayerId]._name === selfName) {
+                    missedFromOwnList++;
+                }
             }
             if (player.correct === true) {
                 playerData[player.gamePlayerId].score++;
@@ -330,6 +354,7 @@ let quizEndRigTracker = new Listener("quiz end result", (result) => {
     if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerQuizEnd").prop("checked")) {
         writeResultsToChat();
     }
+    displayMissedList();
 });
 
 // stuff to do on returning to lobby
@@ -339,17 +364,30 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
         if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerLobby").prop("checked")) {
             writeResultsToChat();
         }
+        //displayMissedList();
     }
 });
 
 // Reset data when joining a lobby
 let joinLobbyListener = new Listener("Join Game", (payload) => {
+    if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
+        quizReadyRigTracker.bindListener();
+        answerResultsRigTracker.bindListener();
+        quizEndRigTracker.bindListener();
+        returnLobbyVoteListener.bindListener();
+    }
     clearPlayerData();
     clearScoreboard();
 });
 
 // Reset data when spectating a lobby
 let spectateLobbyListener = new Listener("Spectate Game", (payload) => {
+    if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
+        quizReadyRigTracker.bindListener();
+        answerResultsRigTracker.bindListener();
+        quizEndRigTracker.bindListener();
+        returnLobbyVoteListener.bindListener();
+    }
     clearPlayerData();
     clearScoreboard();
 });
@@ -359,9 +397,7 @@ function initialiseScoreboard() {
     clearScoreboard();
     for (let entryId in quiz.scoreboard.playerEntries) {
         let tmp = quiz.scoreboard.playerEntries[entryId];
-        let rig = $("<span></span>");
-        rig.text("0");
-        rig.addClass("qpsPlayerRig");
+        let rig = $(`<span class="qpsPlayerRig">0</span>`);
         tmp.$entry.find(".qpsPlayerName").before(rig);
     }
     scoreboardReady = true;
@@ -374,6 +410,7 @@ function initialisePlayerData() {
          playerData[entryId] = {
              rig: 0,
              score: 0,
+             missedList: 0,
              name: quiz.players[entryId]._name
          };
     }
@@ -390,6 +427,7 @@ function clearScoreboard() {
 function clearPlayerData() {
     playerData = {};
     playerDataReady = false;
+    missedFromOwnList = 0;
 }
 
 // Writes the current rig to scoreboard
@@ -500,6 +538,18 @@ function writeResultsToChat() {
     gameChat.$chatInputField.val(oldMessage);
 }
 
+function displayMissedList() {
+    let inQuiz = Object.values(quiz.players).some(player => player.isSelf === true);
+    if ($("#smRigTrackerMissedOwn").prop("checked") && !$("#smRigTrackerMissedAll").prop("checked") && inQuiz && quiz.gameMode !== "Ranked") {
+        gameChat.systemMessage(`You missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from your own list`);
+    }
+    if ($("#smRigTrackerMissedAll").prop("checked") && $("#smRigTrackerMissedOwn").prop("checked") && quiz.gameMode !== "Ranked") {
+        for (let id in playerData) {
+            gameChat.systemMessage(`${playerData[id].name} missed ${playerData[id].missedList === 1 ? playerData[id].missedList + " song" : playerData[id].missedList + " songs"} from their own list`);
+        }
+    }
+}
+
 // Enable or disable rig tracking on checking or unchecking the rig tracker checkbox
 $("#smRigTracker").click(function () {
     let rigTrackerEnabled = $(this).prop("checked");
@@ -508,7 +558,6 @@ $("#smRigTracker").click(function () {
         answerResultsRigTracker.unbindListener();
         quizEndRigTracker.unbindListener();
         returnLobbyVoteListener.unbindListener();
-        newRoomsListener.unbindListener();
         clearScoreboard();
     }
     else {
@@ -516,7 +565,6 @@ $("#smRigTracker").click(function () {
         answerResultsRigTracker.bindListener();
         quizEndRigTracker.bindListener();
         returnLobbyVoteListener.bindListener();
-        newRoomsListener.bindListener();
         if ($("#smRigTrackerScoreboard").prop("checked")) {
             initialiseScoreboard();
             writeRigToScoreboard();
