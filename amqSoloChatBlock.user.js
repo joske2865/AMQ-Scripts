@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.1
+// @version      1.2
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
@@ -189,7 +189,7 @@ function settingsChangePreview(property, value){
         user_ack = true;
         return;
     }
-    // If it's a backgroundImage, transform or opacity value, we should set it to CSS values. These can be quite tricky and I just want it to be easy in the HTML part. Pass only property and value.
+    // If it's a backgroundImage or opacity value, we should set it to CSS values. These can be quite tricky and I just want it to be easy in the HTML part. Pass only property and value.
     property === "backgroundImage" ? value ? value = `url(${value})` : "none" : property === "opacity" ? value = Number(value)/100 : null;
     // Except for the above cases before changing them, any property-value pair should be usable as-is
     let preview_css = Object.assign({}, gcC_css);
