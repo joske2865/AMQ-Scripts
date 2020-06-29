@@ -217,11 +217,9 @@ A script that replaces the chat in Solo rooms with an image. It's completely use
 
 Features:
 - Replace the chat in Solo rooms with an image
+- Optionally also block the chat in Ranked!
 - Customization options
 - Saves settings so changes remain over sessions
-
-Planned features:
-- Making customization accessible from outside of the console
-- Previews of edits before finalizing them
-- Using the image as a background instead when not in a solo room
-- Configuration of multiple loadouts
+- Customizable with a full menu
+- Previews of edits without having to save them
+- Comes with a pretty Laev pic by default, no configuration needed
