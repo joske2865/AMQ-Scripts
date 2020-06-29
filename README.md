@@ -210,3 +210,16 @@ Features:
 
 Known bugs:
 - Shitty name, please propose something better
+
+### amqSoloChatBlock.user.js
+
+A script that replaces the chat in Solo rooms with an image. It's completely useless anyways.
+
+Features:
+- Replace the chat in Solo rooms with an image
+- Optionally also block the chat in Ranked!
+- Customization options
+- Saves settings so changes remain over sessions
+- Customizable with a full menu
+- Previews of edits without having to save them
+- Comes with a pretty Laev pic by default, no configuration needed
