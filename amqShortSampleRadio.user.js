@@ -74,7 +74,7 @@ let playMore = false;
  */
 function ASSR_START(OPs=true, EDs=true, INS=true){
     if(!(lobby.inLobby && lobby.soloMode)){
-        displayMessage("Error", "You must be in a solo lobby.\nIt is recommended that you use a guest account for the impact on your personal stats.", "Aye", ASSR_STOP());
+        displayMessage("Error", "You must be in a solo lobby.\nIt is recommended that you use a guest account for the impact on your personal stats.", ASSR_STOP);
         return;
     }
 
@@ -93,7 +93,7 @@ function ASSR_START(OPs=true, EDs=true, INS=true){
             playMore ? startGame() : null;
         }
         else {
-            displayMessage("Error", "You must be in a solo lobby.\nIt is recommended that you use a guest account for the impact on your personal stats.", "Aye", ASSR_STOP());
+            displayMessage("Error", "You must be in a solo lobby.\nIt is recommended that you use a guest account for the impact on your personal stats.", ASSR_STOP);
             stopCounting();
         }
     });

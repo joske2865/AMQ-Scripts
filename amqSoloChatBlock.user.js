@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.0
+// @version      1.3
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
@@ -59,9 +59,13 @@ const gcC_css_default = {
 let gcC_css;
 let old_gcC_css;
 let settings;
+let NCM_restore;
+// A small helper to prevent people from expecting preview stuff
+let chat_exists = false;
+let user_ack = false;
 
 // The page loaded, so we move on to testing storage. Set settings or error out
-storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.", "Aye");
+storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.");
 if(!settings) return; // Exit if we can't do anything
 
 // Initialize some stuff and create DOM objects
@@ -73,6 +77,8 @@ initSettingsWindow();
  * Loads in the last saved settings, or the default if nothing was set.
  */
 function changeChat(){
+    // This should only be false if a lobby has not been opened before
+    chat_exists = true;
     // Check if it has a value already, to prevent entering a solo room twice in one session from breaking the chat
     old_gcC_css = old_gcC_css ? old_gcC_css : getOldStyles(Object.keys(gcC_css));
     // Then check if this is valid, since we wouldn't want tp restore undefined.
@@ -95,9 +101,43 @@ function changeChat(){
     gameChat._deleteChatMessageListener.unbindListener();
     // If you join another game, we gotta restore the chat
     switchGameListener.bindListener();
-    // Apply the CSS and hide the chat
-    $("#gcContent").css(gcC_css);
+    // For the complete delete mode
+    if(settings.getItem("NoChatMode") ? settings.getItem("NoChatMode") == "true" : false){
+        noChatMode();
+    }
+    // In any other case
+    else {
+        // Apply the CSS and hide the chat
+        $("#gcContent").css(gcC_css);
+    }
+    // And always remove the input box
     $("#gcChatContent").css("display", "none");
+}
+
+/*
+ * Edgecase function, someone wants the chat block GONE
+ */
+function noChatMode(){
+    $("#gcContent").css({"backgroundImage": "none", "opacity": 0});
+    let killkeys = ['background-color', '-webkit-box-shadow', 'box-shadow'];
+    NCM_restore = $("#gameChatContainer").css(killkeys);
+    killkeys.forEach((key) => {
+        let val;
+        key == 'background-color' ? val = "rgba(0,0,0,0)" : val = "none";
+        // just delete the properties altogether
+        $("#gameChatContainer").css(key, val);
+    });
+    $("#lobbyCountContainer").css({'right': '-25vw'});
+}
+
+/*
+ * Undo the changes specific to No Chat Mode
+ */
+function undoNCM(){
+    $("#gameChatContainer").css(NCM_restore);
+    $("#lobbyCountContainer").css({'right': '0px'});
+    $("#gcContent").css(gcC_css);
+    NCM_restore = null;
 }
 
 /*
@@ -105,6 +145,8 @@ function changeChat(){
  * This should always be called when joining a new, non-targeted room
  */
 function restoreChat(){
+    // If we're in No Chat Mode, restore to script defaults first!
+    NCM_restore ? undoNCM() : null;
     switchGameListener.unbindListener();
     $("#gcContent").css(old_gcC_css);
     $("#gcChatContent").css("display", "");
@@ -131,7 +173,8 @@ function updateSettings(){
     gcC_css.transform = $("#SoloChatBlockTransform").val();
     // Opacity, we need to transform this to usable values
     gcC_css.opacity = Number($("#soloChatBlockOpacity").val())/100;
-
+    // Apply for good measure
+    $("#gcContent").css(gcC_css);
     // Save the settings to localStorage
     settings.setItem("SoloChatBlock", JSON.stringify(gcC_css));
 }
@@ -141,7 +184,12 @@ function updateSettings(){
  * Takes a property name and a value to update in the chat block
  */
 function settingsChangePreview(property, value){
-    // If it's a backgroundImage, transform or opacity value, we should set it to CSS values. These can be quite tricky and I just want it to be easy in the HTML part. Pass only property and value.
+    if(!chat_exists){
+        user_ack ? null : displayMessage("Can't change options!", "The chat object does not exist until after entering a room or lobby.\nYou may change the settings and save them, but preview mode is unavailable.");
+        user_ack = true;
+        return;
+    }
+    // If it's a backgroundImage or opacity value, we should set it to CSS values. These can be quite tricky and I just want it to be easy in the HTML part. Pass only property and value.
     property === "backgroundImage" ? value ? value = `url(${value})` : "none" : property === "opacity" ? value = Number(value)/100 : null;
     // Except for the above cases before changing them, any property-value pair should be usable as-is
     let preview_css = Object.assign({}, gcC_css);
@@ -224,6 +272,14 @@ function initSettingsWindow(){
                                 </div>
                                 <p style='font-style: italic;'>Changing this applies immediately. Re-enter ranked to trigger.</p>
                             </div>
+                            <div style='text-align: center;'>
+                                <h2 style='display: inline-block;'>No Chat Mode?</h2>
+                                <div class='customCheckbox' style='margin-left: 2vw;'>
+                                    <input type='checkbox' id='mhNoChatMode'${settings.getItem("NoChatMode") ? settings.getItem("NoChatMode") == "true" ? " checked=''" : null : settings.setItem("NoChatMode", false)} />
+                                    <label for='mhNoChatMode'><i class="fa fa-check" aria-hidden="true"></i></label>
+                                </div>
+                                <p style='font-style: italic;'>Changing this applies immediately. Deletes chat completely.</p>
+                            </div>
                             <div id="scbcContainer" style='text-align: center;'>
                             </div>
                         </div>
@@ -245,6 +301,13 @@ function initSettingsWindow(){
         $("#mhKillRankedChat").change(function(){
             // If the setting doesn't exist, or it's false, set it to true. If it's true, set it to false. Double inline if because these are much faster than if{if...else}...else
             settings.getItem("BlockRankedChat") ? settings.getItem("BlockRankedChat") == "true" ? settings.setItem("BlockRankedChat", false) : settings.setItem("BlockRankedChat", true) : settings.setItem("BlockRankedChat", true);
+        });
+
+        // Rig up for No Chat Mode
+        $("#mhNoChatMode").change(function(){
+            settings.getItem("NoChatMode") ? settings.getItem("NoChatMode") == "true" ? settings.setItem("NoChatMode", false) : settings.setItem("NoChatMode", true) : settings.setItem("NoChatMode", false)
+            // Alternate between on and off
+            NCM_restore ? undoNCM() : noChatMode();
         });
 
         // Fill up the modal with the configuration options
