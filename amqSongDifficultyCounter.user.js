@@ -9,6 +9,7 @@
 // @connect      script.googleusercontent.com
 // @match        https://animemusicquiz.com/*
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js
 // ==/UserScript==
 
 let counting = false; // counting currently active

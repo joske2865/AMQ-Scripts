@@ -8,7 +8,7 @@
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
-
+// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRollerUI.user.js
 // ==/UserScript==
 
 // Don't load the script unless the user is logged in

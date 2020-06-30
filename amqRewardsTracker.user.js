@@ -8,6 +8,7 @@
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
+// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js
 // ==/UserScript==
 
 // don't load the script on login page
