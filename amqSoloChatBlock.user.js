@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.3
+// @version      1.3.1
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
@@ -51,7 +51,7 @@ const gcC_css_default = {
     "backgroundRepeat": "no-repeat",
     "backgroundPosition": "left top",
     "backgroundSize": "cover",
-    "backgroundAttachment": "fixed",
+    "backgroundAttachment": "local",
     "transform": "scale(1)",
     "opacity": 1.0
 };
