@@ -7,6 +7,7 @@
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
