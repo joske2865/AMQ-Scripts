@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3.2
+// @version      1.3.3
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -298,14 +298,17 @@ options.$SETTING_CONTAINERS = $(".settingContentContainer");
 let quizReadyRigTracker = new Listener("quiz ready", (data) => {
     returningToLobby = false;
     clearPlayerData();
+    clearScoreboard();
     if ($("#smRigTracker").prop("checked") && quiz.gameMode !== "Ranked") {
+        answerResultsRigTracker.bindListener();
+        quizEndRigTracker.bindListener();
+        returnLobbyVoteListener.bindListener();
         if ($("#smRigTrackerScoreboard").prop("checked")) {
             initialiseScoreboard();
         }
         initialisePlayerData();
     }
     else {
-        quizReadyRigTracker.unbindListener();
         answerResultsRigTracker.unbindListener();
         quizEndRigTracker.unbindListener();
         returnLobbyVoteListener.unbindListener();
@@ -371,11 +374,18 @@ let returnLobbyVoteListener = new Listener("return lobby vote result", (payload)
 
 // Reset data when joining a lobby
 let joinLobbyListener = new Listener("Join Game", (payload) => {
+    if (payload.error) {
+        return;
+    }
     if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
-        quizReadyRigTracker.bindListener();
         answerResultsRigTracker.bindListener();
         quizEndRigTracker.bindListener();
         returnLobbyVoteListener.bindListener();
+    }
+    else {
+        answerResultsRigTracker.unbindListener();
+        quizEndRigTracker.unbindListener();
+        returnLobbyVoteListener.unbindListener();
     }
     clearPlayerData();
     clearScoreboard();
@@ -383,11 +393,18 @@ let joinLobbyListener = new Listener("Join Game", (payload) => {
 
 // Reset data when spectating a lobby
 let spectateLobbyListener = new Listener("Spectate Game", (payload) => {
+    if (payload.error) {
+        return;
+    }
     if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
-        quizReadyRigTracker.bindListener();
         answerResultsRigTracker.bindListener();
         quizEndRigTracker.bindListener();
         returnLobbyVoteListener.bindListener();
+    }
+    else {
+        answerResultsRigTracker.unbindListener();
+        quizEndRigTracker.unbindListener();
+        returnLobbyVoteListener.unbindListener();
     }
     clearPlayerData();
     clearScoreboard();
