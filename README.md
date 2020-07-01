@@ -30,7 +30,7 @@ Scripts in the "test" folder are not complete and might be full of bugs, use at 
 
 ## Script descriptions and usage information
 
-### Song List UI (amqSongListUI.user.js)
+### [Song List UI (amqSongListUI.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongListUI.user.js)
 
 Adds a window which lists all of the songs that play during a quiz in real time (during answer reveal phase). This window can be opened by pressing the "Song List" icon at the top right of the quiz screen (the same place where you change video resolution, volume and open the room settings) or by pressing the Pause/Break key on the keyboard
 
@@ -67,7 +67,7 @@ Features:
 Known bugs:
 - None
 
-### Song List (amqSongList.user.js)
+### [Song List (amqSongList.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongList.user.js)
 
 Adds a button which copies the current song info in JSON format to the user's clipboard, this button can be found at the top right of the quiz
 
@@ -90,7 +90,7 @@ Features:
 Known bugs:
 - None
 
-### Rig Tracker (amqRigTracker.user.js)
+### [Rig Tracker (amqRigTracker.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js)
 
 Counts how many times each person's list has appeared during a quiz (Note: only counts if the player has "Share Entries" enabled in their AMQ list settings)
 
@@ -121,7 +121,7 @@ Features:
 Known bugs:
 - None
 
-### Rig Tracker Lite (amqRigTrackerLite.user.js)
+### [Rig Tracker Lite (amqRigTrackerLite.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js)
 
 A less customizable version of amqRigTracker.user.js with only one feature.
 
@@ -134,21 +134,21 @@ Features:
 Known bugs:
 - None
 
-### Team Randomizer (amqTeamRandomizer.user.js)
+### [Team Randomizer (amqTeamRandomizer.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqTeamRandomizer.user.js)
 
 Randomizes all players into teams of 2 and posts each team in chat. to use, type "/teams" in AMQ chat. Only works while in lobby (before the start of the quiz). Only randomizes the players (not spectators).
 
 Known bugs:
 - None
 
-### Dice Roller (amqDiceRoller.user.js)
+### [Dice Roller (amqDiceRoller.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js)
 
 Rolls a random number between 1 and a max value (inclusive). To use, type "/roll" and add a max value, for example "/roll 10". This will roll a random number between 1 and 10. Default max value is 100.
 
 Known bugs:
 - You can add a negative number as the argument (example: "/roll -5"), but it doesn't work
 
-### Dice Roller UI (amqDiceRollerUI.user.js)
+### [Dice Roller UI (amqDiceRollerUI.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRollerUI.user.js)
 
 Adds a user interface window that allows you to roll and edit custom dice rolls. To open this window, click the box icon (supposed to represent a dice) in the top right corner while in a quiz.
 
@@ -161,7 +161,7 @@ Features:
 Known bugs:
 - None
 
-### Speedrun (amqSpeedrun.user.js)
+### [Speedrun (amqSpeedrun.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSpeedrun.user.js)
 
 Adds a user interface window that shows information about fast you answer songs. To open this window, click the clock icon in the top right corner while in a quiz.
 
@@ -183,21 +183,21 @@ Features:
 Known bugs:
 - None
 
-### Chat Timestamps (amqChatTimestamps.user.js)
+### [Chat Timestamps (amqChatTimestamps.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqChatTimestamps.user.js)
 
 Adds timestamps to messages (and system messages) in chat in HH:MM format, based on user's local system time
 
 Known bugs:
 - None
 
-### Buzzer (amqBuzzer.user.js)
+### [Buzzer (amqBuzzer.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqBuzzer.user.js)
 
 Adds a buzzer to AMQ, which mutes the current song and posts the time you buzzed in in the chat. To use, press the Enter key on an empty answer field (doesn't work if you already have something typed in)
 
 Known bugs:
 - None
 
-### Song Difficulty Counter (amqSongDifficultyCounter.user.js)
+### [Song Difficulty Counter (amqSongDifficultyCounter.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js)
 
 A counting tool which counts how many songs there are on any given difficulty. Can be customized to count any difficulty range and any song type. To use, open a solo lobby and click the "Counter" button, next to the "Room settings" button. Usage of guest account strongly recommended so you don't inflate your Songs Played and Guess Rate as the tool simulates games and you need to hear at least 1 song before you can return to lobby.
 
@@ -213,7 +213,7 @@ Features:
 Known bugs:
 - None
 
-### Rewards Tracker (amqRewardsTracker.user.js)
+### [Rewards Tracker (amqRewardsTracker.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js)
 
 A tool that counts how much XP, notes and tickets you gained and calculates how much you gain of each per hour. To use it, click the line graph icon while in a quiz and click the "Start" button.
 
@@ -223,7 +223,7 @@ Features:
 - Displays how much XP, notes and tickets you gain per hour on average depending on the time passed and your gains in the time passed, updates every 1/3rd of a second
 - Option to pause the timer and resume it later
 
-### Short Sample Radio (amqShortSampleRadio.user.js)
+### [Short Sample Radio (amqShortSampleRadio.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js)
 
 A simple script to help push your entire list down to 0-10% difficulty. Actually to 9% - 10% exactly as it only plays 10% - 100%. To use, click the nice button marked ASSR it adds. Only works with solo lobbies, errors out in public/multiplayer rooms.
 
@@ -236,7 +236,7 @@ Features:
 Known bugs:
 - Shitty name, please propose something better
 
-### Solo Chat Block (amqSoloChatBlock.user.js)
+### [Solo Chat Block (amqSoloChatBlock.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js)
 
 A script that replaces the chat in Solo rooms with an image. It's completely useless anyways.
 
