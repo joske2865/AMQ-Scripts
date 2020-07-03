@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.3
+// @version      1.3.2
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
@@ -188,6 +188,9 @@ function settingsChangePreview(property, value){
         user_ack ? null : displayMessage("Can't change options!", "The chat object does not exist until after entering a room or lobby.\nYou may change the settings and save them, but preview mode is unavailable.");
         user_ack = true;
         return;
+    }
+    if(!inRanked() || lobby.settings.roomSize > 1){
+       return;
     }
     // If it's a backgroundImage or opacity value, we should set it to CSS values. These can be quite tricky and I just want it to be easy in the HTML part. Pass only property and value.
     property === "backgroundImage" ? value ? value = `url(${value})` : "none" : property === "opacity" ? value = Number(value)/100 : null;
