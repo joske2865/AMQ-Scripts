@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.3.3
+// @version      1.3.4
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
@@ -26,6 +26,8 @@ AMQ_addScriptData(SCRIPT_INFO);
 if (!window.setupDocumentDone) return;
 
 /*** Setup for this script ***/
+// Added bugfix
+let lobbyBypass = true;
 /*
  * Callback function for the MutationObserver on the lobby.
  * This observer makes sure the script only runs when a lobby is entered without using eventspace.
@@ -34,7 +36,7 @@ if (!window.setupDocumentDone) return;
  */
 function lobbyOpen(mutations, observer){
     mutations.forEach((mutation) => {
-        mutation.oldValue == "text-center hidden" ? setTimeout(function(){alert("getrekkerd"); lobbyBypass = false; changeChat();}, 50) : null;
+        mutation.oldValue == "text-center hidden" ? setTimeout(function(){lobbyBypass = false; changeChat();}, 50) : null;
     });
 }
 function rankedOpen(mutations, observer){
@@ -68,7 +70,6 @@ let NCM_restore;
 // A small helper to prevent people from expecting preview stuff
 let chat_exists = false;
 let user_ack = false;
-let lobbyBypass = true;
 
 // The page loaded, so we move on to testing storage. Set settings or error out
 storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.");
