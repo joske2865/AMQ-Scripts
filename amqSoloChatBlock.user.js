@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.3.2
+// @version      1.3.3
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
@@ -34,8 +34,13 @@ if (!window.setupDocumentDone) return;
  */
 function lobbyOpen(mutations, observer){
     mutations.forEach((mutation) => {
-        mutation.oldValue == "text-center hidden" ? setTimeout(changeChat, 50) : null;
+        mutation.oldValue == "text-center hidden" ? setTimeout(function(){alert("getrekkerd"); lobbyBypass = false; changeChat();}, 50) : null;
     });
+}
+function rankedOpen(mutations, observer){
+    mutations.forEach((mutation) => {
+        (mutation.oldValue == "text-center hidden" && quiz.gameMode === "Ranked") ? setTimeout(changeChat, 50) : null;
+    })
 }
 // Create the observer for opening a lobby and start it. Listen for class changes on the object, since those signal hiding/showing it
 let lobbyObserver = new MutationObserver(lobbyOpen);
@@ -63,11 +68,14 @@ let NCM_restore;
 // A small helper to prevent people from expecting preview stuff
 let chat_exists = false;
 let user_ack = false;
+let lobbyBypass = true;
 
 // The page loaded, so we move on to testing storage. Set settings or error out
 storageAvailable ? settings = window.localStorage : displayMessage("Browser Issue", "Your current browser or session does not support localStorage.\nGet a different browser or change applicable settings.");
 if(!settings) return; // Exit if we can't do anything
-
+// If we know someone wants Ranked dead, make sure they can spectate too
+let rankedObserver = settings.getItem("BlockRankedChat") ? settings.getItem("BlockRankedChat") == "true" ? new MutationObserver(rankedOpen) : null : null;
+rankedObserver.observe($("#quizPage")[0], {attributes: true, attributeOldValue: true, characterDataOldValue: true, attributeFilter: ["class"]});
 // Initialize some stuff and create DOM objects
 initSettingsWindow();
 
@@ -81,10 +89,12 @@ function changeChat(){
     chat_exists = true;
     // Check if it has a value already, to prevent entering a solo room twice in one session from breaking the chat
     old_gcC_css = old_gcC_css ? old_gcC_css : getOldStyles(Object.keys(gcC_css));
-    // Then check if this is valid, since we wouldn't want tp restore undefined.
-    if(!settings || (!inRanked() && lobby.settings.roomSize > 1)){
-        restoreChat();
-        return;
+    // Then check if this is valid, since we wouldn't want to restore undefined.
+    if(!lobbyBypass) { // This is a fix for spectating Ranked before having entered a lobby
+        if(!settings || (!inRanked() && lobby.settings.roomSize > 1)){
+            restoreChat();
+            return;
+        }
     }
     // unbind all listeners
     gameChat._newMessageListner.unbindListener();
@@ -118,6 +128,15 @@ function changeChat(){
  * Edgecase function, someone wants the chat block GONE
  */
 function noChatMode(){
+    if(!lobbyBypass){
+        if(lobby.settings.roomSize > 1 && !lobby.settings.gameMode == "Ranked"){
+            return;
+        }
+    } else {
+        if(!quiz.gameMode == "Ranked"){
+            return;
+        }
+    }
     $("#gcContent").css({"backgroundImage": "none", "opacity": 0});
     let killkeys = ['background-color', '-webkit-box-shadow', 'box-shadow'];
     NCM_restore = $("#gameChatContainer").css(killkeys);
@@ -189,8 +208,12 @@ function settingsChangePreview(property, value){
         user_ack = true;
         return;
     }
-    if(!inRanked() || lobby.settings.roomSize > 1){
-       return;
+    if(!lobbyBypass) {
+        if(!inRanked() || lobby.settings.roomSize > 1){
+        return;
+        }
+    } else if(!inRanked()){
+        return;
     }
     // If it's a backgroundImage or opacity value, we should set it to CSS values. These can be quite tricky and I just want it to be easy in the HTML part. Pass only property and value.
     property === "backgroundImage" ? value ? value = `url(${value})` : "none" : property === "opacity" ? value = Number(value)/100 : null;
@@ -205,7 +228,11 @@ function settingsChangePreview(property, value){
  * Helper function to determine if the user is in Ranked
  */
 function inRanked(){
-    return settings.getItem("BlockRankedChat") ? (settings.getItem("BlockRankedChat") == "true" && lobby.settings.gameMode === "Ranked") : function(){settings.setItem("BlockRankedChat", false); return false;}() && lobby.settings.gameMode === "Ranked";
+    if(!lobbyBypass){
+        return settings.getItem("BlockRankedChat") ? (settings.getItem("BlockRankedChat") == "true" && lobby.settings.gameMode === "Ranked") : function(){settings.setItem("BlockRankedChat", false); return false;}() && lobby.settings.gameMode === "Ranked";
+    } else {
+        return settings.getItem("BlockRankedChat") ? (settings.getItem("BlockRankedChat") == "true" && quiz.gameMode === "Ranked") : function(){settings.setItem("BlockRankedChat", false); return false;}() && quiz.gameMode === "Ranked";
+    }
 }
 /*
  * Function to check if localStorage even exists here. If it doesn't, people are using a weird browser and we can't support them.
