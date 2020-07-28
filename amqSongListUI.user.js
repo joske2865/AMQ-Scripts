@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      2.3.8
+// @version      2.3.9
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -239,8 +239,16 @@ function updateCorrectAll() {
 }
 
 function exportSongData() {
+    let d = new Date();
+    let fileName = "song_export_";
+    fileName += d.getFullYear() + "-";
+    fileName += (d.getMonth() + 1 < 10 ? "0" + (d.getMonth() + 1) : d.getMonth() + 1) + "-";
+    fileName += (d.getDate() < 10 ? ("0" + d.getDate()) : d.getDate()) + "_";
+    fileName += (d.getHours() < 10 ? ("0" + d.getHours()) : d.getHours()) + "-";
+    fileName += (d.getMinutes() < 10 ? ("0" + d.getMinutes()) : d.getMinutes()) + "-";
+    fileName += (d.getSeconds() < 10 ? ("0" + d.getSeconds()) : d.getSeconds()) + ".json";
     let JSONData = new Blob([JSON.stringify(exportData)], {type: "application/json"});
-    let tmpLink = $(`<a href=` + URL.createObjectURL(JSONData) + ` download="export.json"></a>`);
+    let tmpLink = $(`<a href="${URL.createObjectURL(JSONData)}" download="${fileName}"></a>`);
     $(document.body).append(tmpLink);
     tmpLink.get(0).click();
     tmpLink.remove();
