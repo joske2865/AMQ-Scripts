@@ -33,7 +33,7 @@ let types = []; // types ("opening", "ending" and "insert")
 
 let yearRanges = []; // year ranges array for counting by years
 let yearIndex = 0; // current index of the year ranges array
-let curYearRange = [1950, 2020]; // default year range
+let curYearRange = [1944, 2020]; // default year range
 
 // difficulty sliders
 let openingsDiffSlider;
@@ -859,8 +859,8 @@ function updateYearRange() {
 }
 
 function splitYears() {
-    // divide into 5 on the initial 1950, 2020 split
-    if (curYearRange[0] === 1950 && curYearRange[1] === 2020) {
+    // divide into 5 on the initial 1944, 2020 split
+    if (curYearRange[0] === 1944 && curYearRange[1] === 2020) {
         let splits = [1995, 2005, 2010, 2015];
         for (let i = 0; i < splits.length; i++) {
             if (i === 0) {
@@ -884,9 +884,9 @@ function splitYears() {
 
 // reset year ranges and yearIndex
 function resetYears() {
-    yearRanges = [[1950, 2020]];
+    yearRanges = [[1944, 2020]];
     yearIndex = 0;
-    curYearRange = [1950, 2020];
+    curYearRange = [1944, 2020];
     countingAdvanced = false;
 }
 
