@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Expand Search ANN ID
 // @namespace    https://github.com/TheJoseph98
-// @version      1.0
+// @version      1.0.1
 // @description  Allows the user to search anime by ANNID in Expand Library
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -12,6 +12,8 @@
 
 // don't run on login page
 if (!window.setupDocumentDone) return;
+
+$("#elQuestionFilterInput").attr("placeholder", "Search anime, song, artist or ANN ID");
 
 ExpandQuestionListEntry.prototype.applySearchFilter = function (regexFilter, stricter) {
     if (this.annId === parseInt($("#elQuestionFilterInput").val())) {
