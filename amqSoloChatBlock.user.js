@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.3.4
-// @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
+// @version      1.3.5
+// @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance in Ranked.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
 // @grant        none
@@ -76,7 +76,8 @@ storageAvailable ? settings = window.localStorage : displayMessage("Browser Issu
 if(!settings) return; // Exit if we can't do anything
 // If we know someone wants Ranked dead, make sure they can spectate too
 let rankedObserver = settings.getItem("BlockRankedChat") ? settings.getItem("BlockRankedChat") == "true" ? new MutationObserver(rankedOpen) : null : null;
-rankedObserver.observe($("#quizPage")[0], {attributes: true, attributeOldValue: true, characterDataOldValue: true, attributeFilter: ["class"]});
+// Hacky workaround to prevent crashes
+rankedObserver ? rankedObserver.observe($("#quizPage")[0], {attributes: true, attributeOldValue: true, characterDataOldValue: true, attributeFilter: ["class"]}) : null;
 // Initialize some stuff and create DOM objects
 initSettingsWindow();
 
@@ -88,8 +89,6 @@ initSettingsWindow();
 function changeChat(){
     // This should only be false if a lobby has not been opened before
     chat_exists = true;
-    // Check if it has a value already, to prevent entering a solo room twice in one session from breaking the chat
-    old_gcC_css = old_gcC_css ? old_gcC_css : getOldStyles(Object.keys(gcC_css));
     // Then check if this is valid, since we wouldn't want to restore undefined.
     if(!lobbyBypass) { // This is a fix for spectating Ranked before having entered a lobby
         if(!settings || (!inRanked() && lobby.settings.roomSize > 1)){
@@ -97,6 +96,8 @@ function changeChat(){
             return;
         }
     }
+    // Check if it has a value already, to prevent entering a solo room twice in one session from breaking the chat
+    old_gcC_css = old_gcC_css ? old_gcC_css : getOldStyles(Object.keys(gcC_css));
     // unbind all listeners
     gameChat._newMessageListner.unbindListener();
     gameChat._newSpectatorListner.unbindListener();
