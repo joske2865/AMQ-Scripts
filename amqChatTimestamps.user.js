@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Chat Timestamps
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3
+// @version      1.3.1
 // @description  Adds timestamps to chat messages
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -27,7 +27,12 @@ let gameChatObserver = new MutationObserver(mutations => {
             let mins = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes();
             let hours = d.getHours() < 10 ? "0" + d.getHours() : d.getHours();
             let timeFormat = hours + ":" + mins;
-            $(node).find(".gcTeamMessageIcon").after($(`<span class="gcTimestamp" style="opacity: 0.5;">${timeFormat}</span>`));
+            if ($(node).find(".gcTeamMessageIcon").length === 1) {
+                $(node).find(".gcTeamMessageIcon").after($(`<span class="gcTimestamp" style="opacity: 0.5;">${timeFormat}</span>`));
+            }
+            else {
+                $(node).prepend($(`<span class="gcTimestamp" style="opacity: 0.5;">${timeFormat}</span>`));
+            }
 
             // scroll to bottom
             let chat = gameChat.$chatMessageContainer;
