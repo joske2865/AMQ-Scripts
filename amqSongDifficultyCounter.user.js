@@ -805,19 +805,26 @@ function clearCountData() {
 
 // set default game settings
 function setSettings() {
-    if ($("#scWatchingType").val() === "watched") {
-        hostModal.$songPool.slider('setValue', 3); // set only watched
-    }
-    else {
-        hostModal.$songPool.slider('setValue', 1); // set random
-    }
     hostModal.numberOfSongsSliderCombo.setValue(100); // set 100 songs
     hostModal.songDiffAdvancedSwitch.setOn(true); // set advanced difficulty sliders on
     hostModal.playLengthSliderCombo.setValue(5); // set 5 seconds guess time
 
+    if ($("#scWatchingType").val() === "watched") {
+        hostModal.watchedSliderCombo.setValue(100);
+        hostModal.unwatchedSliderCombo.setValue(0)
+        hostModal.randomWatchedSliderCombo.setValue(0);
+    }
+    else {
+        hostModal.watchedSliderCombo.setValue(0);
+        hostModal.unwatchedSliderCombo.setValue(0)
+        hostModal.randomWatchedSliderCombo.setValue(100);
+    }
+
     // enable auto skip during replay
     options.$AUTO_VOTE_REPLAY.prop("checked", true)
     options.updateAutoVoteSkipReplay();
+
+    lobby.changeGameSettings();
 }
 
 // increment difficulty
