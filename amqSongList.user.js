@@ -13,7 +13,7 @@
 if (!window.setupDocumentDone) return;
 
 let songs = [];
-let videoHosts = ["catbox", "animethemes", "openingsmoe"];
+let videoHosts = ["catbox", "openingsmoe"];
 let mp3Hosts = ["catbox"];
 let videoResolutions = [720, 480];
 
