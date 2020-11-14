@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2.2
+// @version      1.3
 // @description  Prints a copyable list to console at the end of each game
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -45,6 +45,7 @@ let resultListener = new Listener("answer results", result => {
         songNumber: parseInt($("#qpCurrentSongCount").text()),
         animeEnglish: result.songInfo.animeNames.english,
         animeRomaji: result.songInfo.animeNames.romaji,
+        annId: result.songInfo.annId,
         songName: result.songInfo.songName,
         artist: result.songInfo.artist,
         type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
