@@ -211,7 +211,7 @@ Features:
 - Option to automatically divide the difficulty into years if you find more than 100 songs
 
 Known bugs:
-- None
+- Sometimes, it skips if there is only 1 song in a given difficulty range, cause unknown
 
 ### [Rewards Tracker (amqRewardsTracker.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js)
 
