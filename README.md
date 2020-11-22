@@ -41,6 +41,7 @@ Features:
   - Artist of the song
   - Which anime it was from
   - Which song type the song is
+  - What the ANN ID of the anime is
   - What your answer was for that song
   - How many people guessed the song
   - Which sample of the song played (the start point of the song)
@@ -80,6 +81,7 @@ Features:
   - Artist of the song
   - English and Romaji anime titles
   - Song type
+  - ANN ID of the anime
   - Number of players who guessed the song
   - Number of total (active) players
   - Start sample of the song
