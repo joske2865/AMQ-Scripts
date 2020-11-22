@@ -439,13 +439,13 @@ function setup() {
 }
 
 // Wait until the LOADING... screen is hidden and load script
-let loadInterval = setInterval(() => {
+let windowLoadInterval = setInterval(() => {
     // don't load on login page
     if (document.getElementById("startPage")) {
-        clearInterval(loadInterval);
+        clearInterval(windowLoadInterval);
     }
     if (document.getElementById("loadingScreen").classList.contains("hidden")) {
         setup();
-        clearInterval(loadInterval);
+        clearInterval(windowLoadInterval);
     }
 }, 500);
