@@ -12,7 +12,7 @@ Scripts:
 - [Song List](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongList.user.js)
 - [Rig Tracker](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js)
 - [Rig Tracker Lite](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js)
-- [Team Randomizer](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqTeamRandomizer.user.js)
+- ~[Team Randomizer](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqTeamRandomizer.user.js)~ Deprecated, teams are now an official game mode
 - [Dice Roller](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js)
 - [Dice Roller UI](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRollerUI.user.js)
 - [Speedrun](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSpeedrun.user.js)
@@ -134,12 +134,14 @@ Features:
 Known bugs:
 - None
 
-### [Team Randomizer (amqTeamRandomizer.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqTeamRandomizer.user.js)
+### ~[Team Randomizer (amqTeamRandomizer.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqTeamRandomizer.user.js)~
 
-Randomizes all players into teams of 2 and posts each team in chat. to use, type "/teams" in AMQ chat. Only works while in lobby (before the start of the quiz). Only randomizes the players (not spectators).
+~Randomizes all players into teams of 2 and posts each team in chat. to use, type "/teams" in AMQ chat. Only works while in lobby (before the start of the quiz). Only randomizes the players (not spectators).~
 
-Known bugs:
-- None
+~Known bugs:~
+- ~None~
+
+Deprecated, teams are now an official game mode
 
 ### [Dice Roller (amqDiceRoller.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js)
 
@@ -211,7 +213,7 @@ Features:
 - Option to automatically divide the difficulty into years if you find more than 100 songs
 
 Known bugs:
-- Sometimes, it skips if there is only 1 song in a given difficulty range, cause unknown
+- Sometimes, it skips if there is only 1 song in a given difficulty range, the cause of the bug is unknown
 
 ### [Rewards Tracker (amqRewardsTracker.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js)
 
