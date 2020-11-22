@@ -20,6 +20,7 @@ Scripts:
 - [Buzzer](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqBuzzer.user.js)
 - [Song Difficulty Counter](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js)
 - [Rewards Tracker](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js)
+- [Expand Library Search by ANN ID](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js)
 - [Short Sample Radio](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js)
 - [Solo Chat Block](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js)
 
@@ -226,6 +227,16 @@ Features:
 - Displays how much XP, notes and tickets you gained in that time
 - Displays how much XP, notes and tickets you gain per hour on average depending on the time passed and your gains in the time passed, updates every 1/3rd of a second
 - Option to pause the timer and resume it later
+
+Known bugs:
+- None
+
+### [Expand Library Search by ANN ID (amqSearchExpandANNID.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js)
+
+A simple script that allows you to search the Expand Library by ANN ID in addition to searching by anime, song or artist
+
+Known bugs:
+- None
 
 ### [Short Sample Radio (amqShortSampleRadio.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js)
 
