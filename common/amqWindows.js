@@ -375,7 +375,7 @@ function addStyle(css) {
     style.appendChild(document.createTextNode(css));
 }
 
-function setup() {
+function windowSetup() {
     if ($("#customWindowStyle").length === 0) {
         addStyle(`
             .customWindow {
@@ -445,7 +445,7 @@ let windowLoadInterval = setInterval(() => {
         clearInterval(windowLoadInterval);
     }
     if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+        windowSetup();
         clearInterval(windowLoadInterval);
     }
 }, 500);
