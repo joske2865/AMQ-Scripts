@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Dice Roller UI
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.2
+// @version      1.1.3
 // @description  Adds a window where you can roll dice
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -11,8 +11,16 @@
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRollerUI.user.js
 // ==/UserScript==
 
-// Don't load the script unless the user is logged in
-if (!window.setupDocumentDone) return;
+// don't load on login page
+if (document.getElementById("startPage")) return;
+
+// Wait until the LOADING... screen is hidden and load script
+let loadInterval = setInterval(() => {
+    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+        setup();
+        clearInterval(loadInterval);
+    }
+}, 500);
 
 let diceRolls = {};
 
@@ -268,114 +276,116 @@ function loadDice() {
     }
 }
 
-loadDice();
-createDiceManagerWindow();
-createDiceWindow();
+function setup() {
+    loadDice();
+    createDiceManagerWindow();
+    createDiceWindow();
 
-$(".modal").on("show.bs.modal", () => {
-    diceWindow.setZIndex(1025);
-    diceManagerWindow.setZIndex(1022);
-});
+    $(".modal").on("show.bs.modal", () => {
+        diceWindow.setZIndex(1025);
+        diceManagerWindow.setZIndex(1022);
+    });
 
-$(".modal").on("hidden.bs.modal", () => {
-    diceWindow.setZIndex(1055);
-    diceManagerWindow.setZIndex(1052);
-});
+    $(".modal").on("hidden.bs.modal", () => {
+        diceWindow.setZIndex(1055);
+        diceManagerWindow.setZIndex(1052);
+    });
 
-$(".slCheckbox label").hover(() => {
-    diceWindow.setZIndex(1025);
-    diceManagerWindow.setZIndex(1022);
-}, () => {
-    diceWindow.setZIndex(1055);
-    diceManagerWindow.setZIndex(1052);
-});
+    $(".slCheckbox label").hover(() => {
+        diceWindow.setZIndex(1025);
+        diceManagerWindow.setZIndex(1022);
+    }, () => {
+        diceWindow.setZIndex(1055);
+        diceManagerWindow.setZIndex(1052);
+    });
 
-AMQ_addScriptData({
-    name: "Dice Roller UI",
-    author: "TheJoseph98",
-    description: `
-        <p>Adds a window where you can select a dice and roll a random value associated with that dice</p>
-        <p>This window can be opened by clicking the cube icon at the top right while in quiz (there is no dice icon available, blame Egerod)</p>
-        <a href="https://i.imgur.com/e0ZmrQY.png" target="_blank"><img src="https://i.imgur.com/e0ZmrQY.png" /></a>
-        <a href="https://i.imgur.com/xElzT2s.png" target="_blank"><img src="https://i.imgur.com/xElzT2s.png" /></a>
-    `
-});
+    AMQ_addScriptData({
+        name: "Dice Roller UI",
+        author: "TheJoseph98",
+        description: `
+            <p>Adds a window where you can select a dice and roll a random value associated with that dice</p>
+            <p>This window can be opened by clicking the cube icon at the top right while in quiz (there is no dice icon available, blame Egerod)</p>
+            <a href="https://i.imgur.com/e0ZmrQY.png" target="_blank"><img src="https://i.imgur.com/e0ZmrQY.png" /></a>
+            <a href="https://i.imgur.com/xElzT2s.png" target="_blank"><img src="https://i.imgur.com/xElzT2s.png" /></a>
+        `
+    });
 
-AMQ_addStyle(`
-    #qpDiceRoll {
-        width: 30px;
-        margin-right: 5px;
-    }
-    #diceWindow .customWindowPanel {
-        border-bottom: 1px solid #6d6d6d;
-    }
-    #diceSelectContainer {
-        line-height: 50px;
-        text-align: center;
-    }
-    #diceSelect {
-        color: black;
-    }
-    #diceRollButtonContainer {
-        line-height: 50px;
-        text-align: center;
-    }
-    #diceRollButtonContainer > button {
-        margin: 0px 5px;
-    }
-    #diceChoiceContainer {
-        display: table;
-        text-align: center;
-    }
-    #diceChoice {
-        display: table-cell;
-        vertical-align: middle;
-        font-size: 16px;
-    }
-    #diceKeysManager {
-        border-right: 1px solid #6d6d6d;
-    }
-    #diceValuesManager {
-        border-bottom: 1px solid #6d6d6d;
-    }
-    .diceManagerInputContainer {
-        margin: 10px 0px 20px 0px;
-        text-align: center;
-    }
-    .diceManagerInputContainer > button {
-        width: 66px;
-        padding: 6px;
-        margin: 5px 5px;
-    }
-    #diceManagerSelect {
-        color: black;
-        width: 170px;
-        margin: 5px 0px;
-    }
-    #diceManagerKeyInput {
-        color: black;
-        width: 170px;
-        margin: 5px;
-    }
-    #diceValueInputContainer {
-        text-align: center;
-        padding: 8px;
-    }
-    #diceManagerValueInput {
-        color: black;
-    }
-    #diceValueInputContainer > * {
-        margin: 0px 6px;
-    }
-    .diceManagerValueContainer {
-        height: 31px;
-        margin: 10px 10px 0px 10px;
-    }
-    .diceManagerValueContainer > span {
-        font-size: 22px;
-    }
-    .diceManagerValueContainer > button {
-        float: right;
-        padding: 6px;
-    }
-`);
+    AMQ_addStyle(`
+        #qpDiceRoll {
+            width: 30px;
+            margin-right: 5px;
+        }
+        #diceWindow .customWindowPanel {
+            border-bottom: 1px solid #6d6d6d;
+        }
+        #diceSelectContainer {
+            line-height: 50px;
+            text-align: center;
+        }
+        #diceSelect {
+            color: black;
+        }
+        #diceRollButtonContainer {
+            line-height: 50px;
+            text-align: center;
+        }
+        #diceRollButtonContainer > button {
+            margin: 0px 5px;
+        }
+        #diceChoiceContainer {
+            display: table;
+            text-align: center;
+        }
+        #diceChoice {
+            display: table-cell;
+            vertical-align: middle;
+            font-size: 16px;
+        }
+        #diceKeysManager {
+            border-right: 1px solid #6d6d6d;
+        }
+        #diceValuesManager {
+            border-bottom: 1px solid #6d6d6d;
+        }
+        .diceManagerInputContainer {
+            margin: 10px 0px 20px 0px;
+            text-align: center;
+        }
+        .diceManagerInputContainer > button {
+            width: 66px;
+            padding: 6px;
+            margin: 5px 5px;
+        }
+        #diceManagerSelect {
+            color: black;
+            width: 170px;
+            margin: 5px 0px;
+        }
+        #diceManagerKeyInput {
+            color: black;
+            width: 170px;
+            margin: 5px;
+        }
+        #diceValueInputContainer {
+            text-align: center;
+            padding: 8px;
+        }
+        #diceManagerValueInput {
+            color: black;
+        }
+        #diceValueInputContainer > * {
+            margin: 0px 6px;
+        }
+        .diceManagerValueContainer {
+            height: 31px;
+            margin: 10px 10px 0px 10px;
+        }
+        .diceManagerValueContainer > span {
+            font-size: 22px;
+        }
+        .diceManagerValueContainer > button {
+            float: right;
+            padding: 6px;
+        }
+    `);
+}

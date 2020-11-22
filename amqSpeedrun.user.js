@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Speedrun
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.2
+// @version      1.1.3
 // @description  Tracks guess times for each song, including total and average times
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -11,7 +11,16 @@
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSpeedrun.user.js
 // ==/UserScript==
 
-if (!window.setupDocumentDone) return;
+// don't load on login page
+if (document.getElementById("startPage")) return;
+
+// Wait until the LOADING... screen is hidden and load script
+let loadInterval = setInterval(() => {
+    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+        setup();
+        clearInterval(loadInterval);
+    }
+}, 500);
 
 let fastestGuess = 999999;
 let slowestGuess = 0;
@@ -141,74 +150,6 @@ function createSpeedrunWindow() {
         `);
 }
 
-createSpeedrunWindow();
-
-// clear times on quiz ready
-let quizReadyListener = new Listener("quiz ready", data => {
-    resetTimes();
-    $("#qpAnswerInput").off("keypress", answerHandler);
-    $("#qpAnswerInput").on("keypress", answerHandler);
-});
-
-// start timer on song start
-let quizPlayNextSongListener = new Listener("play next song", data => {
-    songStartTime = Date.now();
-    autoSubmitFlag = true;
-});
-
-
-// set time on answer reveal
-let quizAnswerResultsListener = new Listener("answer results", result => {
-    // check if the player is playing the game
-    let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
-        return tmpPlayer._name === selfName && tmpPlayer.avatarSlot._disabled === false
-    });
-    if (findPlayer !== undefined) {
-        let playerIdx = Object.values(result.players).findIndex(tmpPlayer => {
-            return findPlayer.gamePlayerId === tmpPlayer.gamePlayerId
-        });
-        let tmpGuessTime = answerSubmitTime - songStartTime;
-        let tmpCorrect = result.players[playerIdx].correct;
-        let songNumber = parseInt($("#qpCurrentSongCount").text());
-        if (tmpCorrect === false) {
-            tmpGuessTime = (quizVideoController.getCurrentPlayer().bufferLength - 13) * 1000;
-            guessRate = (guessRate*(songNumber-1) + 0) / songNumber;
-            if (tmpGuessTime < fastestGuess) {
-                fastestGuess = tmpGuessTime;
-            }
-        }
-        else {
-            correctCount++;
-            if (autoSubmitFlag === true) {
-                tmpGuessTime = (quizVideoController.getCurrentPlayer().bufferLength - 13) * 1000;
-            }
-            if (tmpGuessTime < fastestGuess) {
-                fastestGuess = tmpGuessTime;
-            }
-            if (tmpGuessTime > slowestGuess) {
-                slowestGuess = tmpGuessTime;
-            }
-            averageCorrect = (averageCorrect*(correctCount-1) + tmpGuessTime) / correctCount;
-            guessRate = (guessRate*(songNumber-1) + 1) / songNumber;
-        }
-        previousGuess = tmpGuessTime;
-        averageTotal = (averageTotal*(songNumber-1) + tmpGuessTime) / songNumber;
-        totalTime += tmpGuessTime;
-        times[songNumber] = {
-            correct: tmpCorrect,
-            time: tmpGuessTime
-        }
-        updateInfo(songNumber, times[songNumber]);
-    }
-});
-
-let answerHandler = function (event) {
-    if (event.which === 13) {
-        answerSubmitTime = Date.now();
-        autoSubmitFlag = false;
-    }
-}
-
 function updateInfo(songNumber, newTime) {
     $("#srFastestTime").text(formatTime(fastestGuess));
     $("#srSlowestTime").text(formatTime(slowestGuess));
@@ -270,60 +211,130 @@ function resetTimes() {
     times = {};
 }
 
-quizReadyListener.bindListener();
-quizAnswerResultsListener.bindListener();
-quizPlayNextSongListener.bindListener();
+function setup() {
+    createSpeedrunWindow();
 
-$(".modal").on("show.bs.modal", () => {
-    speedrunWindow.setZIndex(1025);
-});
+    // clear times on quiz ready
+    let quizReadyListener = new Listener("quiz ready", data => {
+        resetTimes();
+        $("#qpAnswerInput").off("keypress", answerHandler);
+        $("#qpAnswerInput").on("keypress", answerHandler);
+    });
 
-$(".modal").on("hidden.bs.modal", () => {
-    speedrunWindow.setZIndex(1055);
-});
+    // start timer on song start
+    let quizPlayNextSongListener = new Listener("play next song", data => {
+        songStartTime = Date.now();
+        autoSubmitFlag = true;
+    });
 
-$(".slCheckbox label").hover(() => {
-    speedrunWindow.setZIndex(1025);
-}, () => {
-    speedrunWindow.setZIndex(1055);
-});
 
-AMQ_addScriptData({
-    name: "Speedrun",
-    author: "TheJoseph98",
-    description: `
-        <p>Adds a new window which can be accessed by clicking the clock icon in the top right while in a quiz which tracks how fast you guessed each song, including total time, average time, fastest time and more</p>
-        <a href="https://i.imgur.com/LOJCzWm.png" target="_blank"><img src="https://i.imgur.com/LOJCzWm.png" /></a>
-        <p>Timer start when the guess phase starts (not when you get sound) and ends on your latest Enter key input</p>
-        <p>An incorrect answer counts as the full guess time for the song, not submitting an answer with the Enter key (ie. using autosubmit) also counts as full guess time</p>
-        <a href="https://i.imgur.com/1uJEh39.png" target="_blank"><img src="https://i.imgur.com/1uJEh39.png" /></a>
-    `
-});
+    // set time on answer reveal
+    let quizAnswerResultsListener = new Listener("answer results", result => {
+        // check if the player is playing the game
+        let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
+            return tmpPlayer._name === selfName && tmpPlayer.avatarSlot._disabled === false
+        });
+        if (findPlayer !== undefined) {
+            let playerIdx = Object.values(result.players).findIndex(tmpPlayer => {
+                return findPlayer.gamePlayerId === tmpPlayer.gamePlayerId
+            });
+            let tmpGuessTime = answerSubmitTime - songStartTime;
+            let tmpCorrect = result.players[playerIdx].correct;
+            let songNumber = parseInt($("#qpCurrentSongCount").text());
+            if (tmpCorrect === false) {
+                tmpGuessTime = (quizVideoController.getCurrentPlayer().bufferLength - 13) * 1000;
+                guessRate = (guessRate*(songNumber-1) + 0) / songNumber;
+                if (tmpGuessTime < fastestGuess) {
+                    fastestGuess = tmpGuessTime;
+                }
+            }
+            else {
+                correctCount++;
+                if (autoSubmitFlag === true) {
+                    tmpGuessTime = (quizVideoController.getCurrentPlayer().bufferLength - 13) * 1000;
+                }
+                if (tmpGuessTime < fastestGuess) {
+                    fastestGuess = tmpGuessTime;
+                }
+                if (tmpGuessTime > slowestGuess) {
+                    slowestGuess = tmpGuessTime;
+                }
+                averageCorrect = (averageCorrect*(correctCount-1) + tmpGuessTime) / correctCount;
+                guessRate = (guessRate*(songNumber-1) + 1) / songNumber;
+            }
+            previousGuess = tmpGuessTime;
+            averageTotal = (averageTotal*(songNumber-1) + tmpGuessTime) / songNumber;
+            totalTime += tmpGuessTime;
+            times[songNumber] = {
+                correct: tmpCorrect,
+                time: tmpGuessTime
+            }
+            updateInfo(songNumber, times[songNumber]);
+        }
+    });
 
-AMQ_addStyle(`
-    #qpSpeedrun {
-        width: 30px;
-        margin-right: 5px;
+    let answerHandler = function (event) {
+        if (event.which === 13) {
+            answerSubmitTime = Date.now();
+            autoSubmitFlag = false;
+        }
     }
-    #speedrunWindowUpper {
-        border-bottom: 1px solid #6d6d6d;
-    }
-    #speedrunInfoLeft > p {
-        font-size: 14px;
-        margin-bottom: 0px;
-    }
-    #speedrunInfoRight > p {
-        font-size: 14px;
-        margin-bottom: 0px;
-        text-align: right;
-    }
-    #speedrunTimesLeft > p {
-        font-size: 18px;
-        margin-bottom: 0px;
-    }
-    #speedrunTimesRight > p {
-        font-size: 18px;
-        margin-bottom: 0px;
-        text-align: right;
-    }
-`);
+
+    quizReadyListener.bindListener();
+    quizAnswerResultsListener.bindListener();
+    quizPlayNextSongListener.bindListener();
+
+    $(".modal").on("show.bs.modal", () => {
+        speedrunWindow.setZIndex(1025);
+    });
+
+    $(".modal").on("hidden.bs.modal", () => {
+        speedrunWindow.setZIndex(1055);
+    });
+
+    $(".slCheckbox label").hover(() => {
+        speedrunWindow.setZIndex(1025);
+    }, () => {
+        speedrunWindow.setZIndex(1055);
+    });
+
+    AMQ_addScriptData({
+        name: "Speedrun",
+        author: "TheJoseph98",
+        description: `
+            <p>Adds a new window which can be accessed by clicking the clock icon in the top right while in a quiz which tracks how fast you guessed each song, including total time, average time, fastest time and more</p>
+            <a href="https://i.imgur.com/LOJCzWm.png" target="_blank"><img src="https://i.imgur.com/LOJCzWm.png" /></a>
+            <p>Timer start when the guess phase starts (not when you get sound) and ends on your latest Enter key input</p>
+            <p>An incorrect answer counts as the full guess time for the song, not submitting an answer with the Enter key (ie. using autosubmit) also counts as full guess time</p>
+            <a href="https://i.imgur.com/1uJEh39.png" target="_blank"><img src="https://i.imgur.com/1uJEh39.png" /></a>
+        `
+    });
+
+    AMQ_addStyle(`
+        #qpSpeedrun {
+            width: 30px;
+            margin-right: 5px;
+        }
+        #speedrunWindowUpper {
+            border-bottom: 1px solid #6d6d6d;
+        }
+        #speedrunInfoLeft > p {
+            font-size: 14px;
+            margin-bottom: 0px;
+        }
+        #speedrunInfoRight > p {
+            font-size: 14px;
+            margin-bottom: 0px;
+            text-align: right;
+        }
+        #speedrunTimesLeft > p {
+            font-size: 18px;
+            margin-bottom: 0px;
+        }
+        #speedrunTimesRight > p {
+            font-size: 18px;
+            margin-bottom: 0px;
+            text-align: right;
+        }
+    `);
+}

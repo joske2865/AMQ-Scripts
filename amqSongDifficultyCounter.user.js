@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2.3
+// @version      1.2.4
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
@@ -11,6 +11,17 @@
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js
 // ==/UserScript==
+
+// don't load on login page
+if (document.getElementById("startPage")) return;
+
+// Wait until the LOADING... screen is hidden and load script
+let loadInterval = setInterval(() => {
+    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+        setup();
+        clearInterval(loadInterval);
+    }
+}, 500);
 
 let counting = false; // counting currently active
 let countingAdvanced = false; // counting currently active by years
@@ -45,143 +56,17 @@ let oldSettingsChangeListener;
 let oldQuizNoSongsListener;
 let oldQuizOverListener;
 
+// new listeners
+let quizReadyListener;
+let playNextSongListener;
+let quizNoSongsListener;
+let quizOverListener;
+let settingsChangeListener;
+let hostGameListener;
+let joinGameListener;
+let spectateGameListener;
+
 let buttonHidden = false;
-
-function setup() {
-    if (document.getElementById('startPage')) {
-        return
-    }
-
-    // set old listeners
-    oldQuizOverListener = quiz._quizOverListner;
-    oldSettingsChangeListener = lobby._settingListener;
-    oldQuizNoSongsListener = quiz._noSongsListner;
-
-    createSongCounterModal();
-
-    // stop counting button
-    let oldWidth = $("#qpOptionContainer").width();
-    $("#qpOptionContainer").width(oldWidth + 35);
-    $("#qpOptionContainer > div").append($("<div></div>")
-        .attr("id", "qpStopCounter")
-        .attr("class", "clickAble qpOption")
-        .html(`<i aria-hidden="true" class="fa fa-ban qpMenuItem"></i>`)
-        .click(() => {
-            if (counting) {
-                stopCounting();
-            }
-        })
-        .popover({
-            content: "Stop Counting",
-            trigger: "hover",
-            placement: "bottom"
-        })
-    );
-
-    AMQ_addStyle(`
-        #lbCounterButton {
-            width: 100px;
-            right: 30%;
-        }
-        #qpStopCounter {
-            width: 30px;
-            height: auto;
-            margin-right: 5px;
-        }
-        #songCounterModal .modal-dialog {
-            width: 650px;
-        }
-        #songCounterModal .modal-body {
-            padding: 0px;
-        }
-        #scDifficultySliderContainer {
-            width: 430px;
-            height: 180px;
-            border-right: 1px solid #6d6d6d;
-            padding: 15px;
-            float: left;
-        }
-        .scTypeContainer {
-            height: 45px;
-            width: 400px;
-        }
-        .scTypeCheckboxContainer {
-            float: left;
-            display: table;
-        }
-        .scTypeCheckboxContainer span {
-            vertical-align: top;
-        }
-        .scTypeDifficultySlider {
-            width: 300px;
-            float: right;
-        }
-        .scTypeDifficultySlider .slider {
-            width: 200px !important;
-        }
-        #scExtraOptionsContainer {
-            width: 215px;
-            height: 180px;
-            padding: 15px;
-            float: left;
-        }
-        #scSpreadsheetContainer {
-            display: table;
-        }
-        #scAdvancedCountContainer {
-            margin-top: 15px;
-            display: table;
-        }
-        #scAdvancedCountLabel {
-            vertical-align: top;
-        }
-        #scSpreadsheetContainer span {
-            vertical-align: top;
-        }
-        #scUsernameContainer {
-            margin-top: 10px;
-        }
-        #scUsername {
-            width: 100%;
-            border-radius: 4px;
-            color: black;
-        }
-        #scWatchingType {
-            color: black;
-            border-radius: 4px;
-            width: 100%;
-            margin-top: 15px;
-        }
-        #scCountinueCounter {
-            float: left;
-        }
-        #scSpreadsheetLink {
-            float: left;
-            margin-top: 5px;
-            margin-left: 15px;
-        }
-    `)
-
-    AMQ_addScriptData({
-        name: "Song Difficulty Counter",
-        author: "TheJoseph98",
-        description: `
-            <p>Adds a counting tool that automatically counts the number of songs on each difficulty</p>
-            <p>Can be customized to count only certain difficulty ranges and certain song types and has an option to automatically split by years if you get 100 songs or more to get a more accurate result</p>
-            <p>With a provided username, you can share your song breakdown by difficulty to a
-            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing">public Spreadsheet</a>.
-            The tool will automatically create a data sheet and a graph sheet with all of the data you collect and add it to the Index page</p>
-            <p>You can update your data by inputting the same username as it is on the spreadsheet (NOTE: username is case-sensitive. For example "thejoseph98" and "THEJOSEPH98" are NOT the same)</p>
-            <p>To use the tool, simply click "Counter" button while in lobby, next to the "Room settings" button. You must be in a solo lobby to use this tool. Usage of guest accounts is strongly recommended to not inflate your Songs Played and guess rate due to the nature of this tool.
-            Simply select your preferred settings and click "Start", the tool will automatically set all other settings for you (100 songs, 5 seconds guess time, only watched/random depending on your tool settings and more)</p>
-            <p>To stop counting, simply either wait for the tool to finish or you can click "Stop Counter" which can be found at the top right of your screen in the shape of the "ban" icon</p>
-        `
-    });
-
-    hostGameListener.bindListener();
-    joinGameListener.bindListener();
-    spectateGameListener.bindListener();
-}
 
 function createSongCounterModal() {
     let buttonHTML = $(`
@@ -463,137 +348,6 @@ function initializeRanges() {
     curDiffRange[1] = typeRanges[0][0];
     curType = 0;
 }
-
-// listen for if the quiz returns no songs
-let quizNoSongsListener = new Listener("Quiz no songs", payload => {
-    // check if counting years flag is active and increment yearIndex by 1
-    if (countingAdvanced) {
-        yearIndex += 1;
-    }
-    else {
-        // set that song difficulty to 0 songs
-        addSongCounter(curDiffRange, types[curType], 0);
-    }
-    saveCounterData();
-});
-
-// listen for if the quiz starts normally
-let quizReadyListener = new Listener("quiz ready", payload => {
-    // check if the user has advanced counting enabled
-    if (countingAdvanced) {
-        // first, check if there are less than 100 songs (there are more than 0 guaranteed if "quiz ready" listener fires) and increment yearIndex by 1;
-        if (payload.numberOfSongs < 100) {
-            yearIndex += 1;
-            addSongCounter(curDiffRange, types[curType], payload.numberOfSongs);
-        }
-        // else, check if there are 100 songs and check that the year range can be split into halves then split years into halves
-        else if (payload.numberOfSongs === 100 && curYearRange[0] !== curYearRange[1]) {
-            gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]} in ${curDiffRange[0]}-${curDiffRange[1]}%, splitting years`);
-            splitYears();
-        }
-        // else, check if the year range is 1 year, then increment yearIndex by 1
-        else {
-            yearIndex += 1;
-            addSongCounter(currDiffRane, types[curType], payload.numberOfSongs);
-        }
-    }
-    else {
-        // if the user has "Advanced counting" option enabled and there are 100 songs, split the years and count again
-        if (payload.numberOfSongs === 100 && autoCountAdvanced) {
-            resetYears();
-            splitYears();
-            countingAdvanced = true;
-            gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]} in ${curDiffRange[0]}-${curDiffRange[1]}%, splitting years`);
-        }
-        // else just add the number of songs to that difficulty range
-        else {
-            addSongCounter(curDiffRange, types[curType], payload.numberOfSongs);
-        }
-    }
-    // return to lobby vote
-    quiz.startReturnLobbyVote();
-    saveCounterData();
-});
-
-// skip song when playing next song
-let playNextSongListener = new Listener("play next song", payload => {
-    // 500 ms delay because race conditions
-    setTimeout(function () {
-        quiz.skipClicked();
-    }, 500);
-});
-
-// listen for when the quiz ends
-let quizOverListener = new Listener("quiz over", payload => {
-    lobby.setupLobby(payload, quiz.isSpectator);
-    viewChanger.changeView("lobby", {
-        supressServerMsg: true,
-        keepChatOpen: true
-    });
-    if (lobby.inLobby && lobby.soloMode) {
-        // if advanced counting is active, increment the year
-        if (countingAdvanced) {
-            updateYearRange();
-            startGame();
-        }
-        // otherwise, increment difficulty
-        else {
-            updateSongDifficulty();
-            startGame();
-        }
-    }
-    else {
-        displayMessage("Error", "You must be in a solo lobby");
-        stopCounting();
-    }
-});
-
-// listen for when room settings change
-let settingsChangeListener = new Listener("Room Settings Changed", payload => {
-    hostModal.changeSettings(payload);
-    Object.keys(payload).forEach(key => {
-        let newValue = payload[key];
-        let oldValue = lobby.settings[key];
-        lobby.settings[key] = newValue;
-    });
-
-    if (payload.roomSize) {
-        lobby.settings.roomSize = payload.roomSize;
-    }
-
-    Object.values(lobby.players).forEach(player => {
-        player.ready = false;
-    });
-
-    lobby.isReady = false;
-    lobby.toggleRuleButton();
-    lobby.updateMainButton();
-    if (payload.roomName) {
-        lobby.$roomName.text(payload.roomName);
-    }
-
-    lobby.updatePlayerCounter();
-});
-
-// show the counter button when hosting a solo game, otherwise hide it
-let hostGameListener = new Listener("Host Game", payload => {
-    if (payload.soloMode) {
-        showCounterButton();
-    }
-    else {
-        hideCounterButton();
-    }
-});
-
-// hide the counter button when joining non-solo lobbies
-let joinGameListener = new Listener("Join Game", payload => {
-    hideCounterButton();
-});
-
-// hide the counter button when spectating non-solo lobbies
-let spectateGameListener = new Listener("Spectate Game", payload => {
-    hideCounterButton();
-});
 
 function showCounterButton() {
     $("#lbCounterButton").show();
@@ -982,6 +736,265 @@ function displayHtmlOption(title, msg, acceptMsg, declineMsg, callback, callback
     }
 }
 
-$(document).ready(function () {
-    setup();
-});
+function setup() {
+    // listen for if the quiz returns no songs
+    quizNoSongsListener = new Listener("Quiz no songs", payload => {
+        // check if counting years flag is active and increment yearIndex by 1
+        if (countingAdvanced) {
+            yearIndex += 1;
+        }
+        else {
+            // set that song difficulty to 0 songs
+            addSongCounter(curDiffRange, types[curType], 0);
+        }
+        saveCounterData();
+    });
+
+    // listen for if the quiz starts normally
+    quizReadyListener = new Listener("quiz ready", payload => {
+        // check if the user has advanced counting enabled
+        if (countingAdvanced) {
+            // first, check if there are less than 100 songs (there are more than 0 guaranteed if "quiz ready" listener fires) and increment yearIndex by 1;
+            if (payload.numberOfSongs < 100) {
+                yearIndex += 1;
+                addSongCounter(curDiffRange, types[curType], payload.numberOfSongs);
+            }
+            // else, check if there are 100 songs and check that the year range can be split into halves then split years into halves
+            else if (payload.numberOfSongs === 100 && curYearRange[0] !== curYearRange[1]) {
+                gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]} in ${curDiffRange[0]}-${curDiffRange[1]}%, splitting years`);
+                splitYears();
+            }
+            // else, check if the year range is 1 year, then increment yearIndex by 1
+            else {
+                yearIndex += 1;
+                addSongCounter(currDiffRane, types[curType], payload.numberOfSongs);
+            }
+        }
+        else {
+            // if the user has "Advanced counting" option enabled and there are 100 songs, split the years and count again
+            if (payload.numberOfSongs === 100 && autoCountAdvanced) {
+                resetYears();
+                splitYears();
+                countingAdvanced = true;
+                gameChat.systemMessage(`100 songs found in ${curYearRange[0]}-${curYearRange[1]} in ${curDiffRange[0]}-${curDiffRange[1]}%, splitting years`);
+            }
+            // else just add the number of songs to that difficulty range
+            else {
+                addSongCounter(curDiffRange, types[curType], payload.numberOfSongs);
+            }
+        }
+        // return to lobby vote
+        quiz.startReturnLobbyVote();
+        saveCounterData();
+    });
+
+    // skip song when playing next song
+    playNextSongListener = new Listener("play next song", payload => {
+        // 500 ms delay because race conditions
+        setTimeout(function () {
+            quiz.skipClicked();
+        }, 500);
+    });
+
+    // listen for when the quiz ends
+    quizOverListener = new Listener("quiz over", payload => {
+        lobby.setupLobby(payload, quiz.isSpectator);
+        viewChanger.changeView("lobby", {
+            supressServerMsg: true,
+            keepChatOpen: true
+        });
+        if (lobby.inLobby && lobby.soloMode) {
+            // if advanced counting is active, increment the year
+            if (countingAdvanced) {
+                updateYearRange();
+                startGame();
+            }
+            // otherwise, increment difficulty
+            else {
+                updateSongDifficulty();
+                startGame();
+            }
+        }
+        else {
+            displayMessage("Error", "You must be in a solo lobby");
+            stopCounting();
+        }
+    });
+
+    // listen for when room settings change
+    settingsChangeListener = new Listener("Room Settings Changed", payload => {
+        hostModal.changeSettings(payload);
+        Object.keys(payload).forEach(key => {
+            let newValue = payload[key];
+            let oldValue = lobby.settings[key];
+            lobby.settings[key] = newValue;
+        });
+
+        if (payload.roomSize) {
+            lobby.settings.roomSize = payload.roomSize;
+        }
+
+        Object.values(lobby.players).forEach(player => {
+            player.ready = false;
+        });
+
+        lobby.isReady = false;
+        lobby.toggleRuleButton();
+        lobby.updateMainButton();
+        if (payload.roomName) {
+            lobby.$roomName.text(payload.roomName);
+        }
+
+        lobby.updatePlayerCounter();
+    });
+
+    // show the counter button when hosting a solo game, otherwise hide it
+    hostGameListener = new Listener("Host Game", payload => {
+        if (payload.soloMode) {
+            showCounterButton();
+        }
+        else {
+            hideCounterButton();
+        }
+    });
+
+    // hide the counter button when joining non-solo lobbies
+    joinGameListener = new Listener("Join Game", payload => {
+        hideCounterButton();
+    });
+
+    // hide the counter button when spectating non-solo lobbies
+    spectateGameListener = new Listener("Spectate Game", payload => {
+        hideCounterButton();
+    });
+
+    // set old listeners
+    oldQuizOverListener = quiz._quizOverListner;
+    oldSettingsChangeListener = lobby._settingListener;
+    oldQuizNoSongsListener = quiz._noSongsListner;
+
+    createSongCounterModal();
+
+    // stop counting button
+    let oldWidth = $("#qpOptionContainer").width();
+    $("#qpOptionContainer").width(oldWidth + 35);
+    $("#qpOptionContainer > div").append($("<div></div>")
+        .attr("id", "qpStopCounter")
+        .attr("class", "clickAble qpOption")
+        .html(`<i aria-hidden="true" class="fa fa-ban qpMenuItem"></i>`)
+        .click(() => {
+            if (counting) {
+                stopCounting();
+            }
+        })
+        .popover({
+            content: "Stop Counting",
+            trigger: "hover",
+            placement: "bottom"
+        })
+    );
+
+    AMQ_addStyle(`
+        #lbCounterButton {
+            width: 100px;
+            right: 30%;
+        }
+        #qpStopCounter {
+            width: 30px;
+            height: auto;
+            margin-right: 5px;
+        }
+        #songCounterModal .modal-dialog {
+            width: 650px;
+        }
+        #songCounterModal .modal-body {
+            padding: 0px;
+        }
+        #scDifficultySliderContainer {
+            width: 430px;
+            height: 180px;
+            border-right: 1px solid #6d6d6d;
+            padding: 15px;
+            float: left;
+        }
+        .scTypeContainer {
+            height: 45px;
+            width: 400px;
+        }
+        .scTypeCheckboxContainer {
+            float: left;
+            display: table;
+        }
+        .scTypeCheckboxContainer span {
+            vertical-align: top;
+        }
+        .scTypeDifficultySlider {
+            width: 300px;
+            float: right;
+        }
+        .scTypeDifficultySlider .slider {
+            width: 200px !important;
+        }
+        #scExtraOptionsContainer {
+            width: 215px;
+            height: 180px;
+            padding: 15px;
+            float: left;
+        }
+        #scSpreadsheetContainer {
+            display: table;
+        }
+        #scAdvancedCountContainer {
+            margin-top: 15px;
+            display: table;
+        }
+        #scAdvancedCountLabel {
+            vertical-align: top;
+        }
+        #scSpreadsheetContainer span {
+            vertical-align: top;
+        }
+        #scUsernameContainer {
+            margin-top: 10px;
+        }
+        #scUsername {
+            width: 100%;
+            border-radius: 4px;
+            color: black;
+        }
+        #scWatchingType {
+            color: black;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 15px;
+        }
+        #scCountinueCounter {
+            float: left;
+        }
+        #scSpreadsheetLink {
+            float: left;
+            margin-top: 5px;
+            margin-left: 15px;
+        }
+    `)
+
+    AMQ_addScriptData({
+        name: "Song Difficulty Counter",
+        author: "TheJoseph98",
+        description: `
+            <p>Adds a counting tool that automatically counts the number of songs on each difficulty</p>
+            <p>Can be customized to count only certain difficulty ranges and certain song types and has an option to automatically split by years if you get 100 songs or more to get a more accurate result</p>
+            <p>With a provided username, you can share your song breakdown by difficulty to a
+            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1mvwE_7CPN0jV5C76vHVX67ijo4VfhgIkkSxc5LOJLJE/edit?usp=sharing">public Spreadsheet</a>.
+            The tool will automatically create a data sheet and a graph sheet with all of the data you collect and add it to the Index page</p>
+            <p>You can update your data by inputting the same username as it is on the spreadsheet (NOTE: username is case-sensitive. For example "thejoseph98" and "THEJOSEPH98" are NOT the same)</p>
+            <p>To use the tool, simply click "Counter" button while in lobby, next to the "Room settings" button. You must be in a solo lobby to use this tool. Usage of guest accounts is strongly recommended to not inflate your Songs Played and guess rate due to the nature of this tool.
+            Simply select your preferred settings and click "Start", the tool will automatically set all other settings for you (100 songs, 5 seconds guess time, only watched/random depending on your tool settings and more)</p>
+            <p>To stop counting, simply either wait for the tool to finish or you can click "Stop Counter" which can be found at the top right of your screen in the shape of the "ban" icon</p>
+        `
+    });
+
+    hostGameListener.bindListener();
+    joinGameListener.bindListener();
+    spectateGameListener.bindListener();
+}

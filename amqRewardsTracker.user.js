@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rewards Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.0
+// @version      1.0.1
 // @description  Tracks rewards gained per hour such as xp, notes and tickets
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -11,8 +11,16 @@
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js
 // ==/UserScript==
 
-// don't load the script on login page
-if (!window.setupDocumentDone) return;
+// don't load on login page
+if (document.getElementById("startPage")) return;
+
+// Wait until the LOADING... screen is hidden and load script
+let loadInterval = setInterval(() => {
+    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+        setup();
+        clearInterval(loadInterval);
+    }
+}, 500);
 
 let startXP;
 let startNotes;
@@ -27,98 +35,9 @@ let elapsedTime;
 let trackerWindow;
 let trackerPaused = false;
 
+let quizXPGainListener;
+
 let updateInterval = setInterval(function () {}, 333);
-
-function setup() {
-    trackerWindow = new AMQWindow({
-        title: "Reward Tracker",
-        width: 300,
-        height: 400,
-        zIndex: 1054,
-        draggable: true
-    });
-
-    trackerWindow.addPanel({
-        width: 1.0,
-        height: 50,
-        id: "trackerWindowControls"
-    });
-
-    trackerWindow.addPanel({
-        width: 1.0,
-        height: 275,
-        position: {
-            x: 0,
-            y: 50
-        },
-        id: "trackerWindowResults"
-    });
-
-    trackerWindow.panels[0].panel.append(
-        $(`<div id="trackerWindowControlsContainer"></div>`)
-        .append(
-            $(`<button id="trackerWindowControlsReset" class="btn btn-default">Reset</button>`).click(function () {
-                resetTracker();
-            })
-        )
-        .append(
-            $(`<button id="trackerWindowControlsStart" class="btn btn-primary">Start</button>`).click(function () {
-                startTracker();
-            })
-        )
-    );
-
-    trackerWindow.panels[1].panel.append(
-        $(`<div id="trackerWindowResultsContainer"></div>`)
-        .append(
-            $(
-                `<div id="trackerWindowResultsLeft">
-                    <p>Elapsed Time</p>
-                    <p>XP gained</p>
-                    <p>Notes gained</p>
-                    <p>Tickets gained</p>
-                    <p>XP/hour</p>
-                    <p>Notes/hour</p>
-                    <p>Tickets/hour</p>
-                </div>`
-            )
-        )
-        .append(
-            $(
-                `<div id="trackerWindowResultsRight">
-                    <p id="resultsElapsedTime">00:00:00</p>
-                    <p id="resultsXPGained">0</p>
-                    <p id="resultsNotesGained">0</p>
-                    <p id="resultsTicketsGained">0</p>
-                    <p id="resultsXPPerHour">0</p>
-                    <p id="resultsNotesPerHour">0</p>
-                    <p id="resultsTicketsPerHour">0</p>
-                </div>`
-            )
-        )
-    )
-
-    let oldWidth = $("#qpOptionContainer").width();
-    $("#qpOptionContainer").width(oldWidth + 35);
-    $("#qpOptionContainer > div").append($(`<div id="qpResultsTracker" class="clickAble qpOption"><i aria-hidden="true" class="fa fa-line-chart qpMenuItem"></i></div>`)
-        .click(() => {
-            if (trackerWindow.isVisible()) {
-                trackerWindow.close();
-            }
-            else {
-                trackerWindow.open();
-            }
-        })
-        .popover({
-            content: "Results Tracker",
-            trigger: "hover",
-            placement: "bottom"
-        })
-    );
-
-    resetTracker();
-    console.log("tracker setup");
-}
 
 function startTracker() {
     if (trackerPaused) {
@@ -194,43 +113,140 @@ function formatTime(time) {
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 
-let quizXPGainListener = new Listener("quiz xp credit gain", data => {
-    gainedNotes = data.credit - startNotes;
-    gainedXP += data.xpInfo.lastGain;
-    gainedTickets = data.tickets - startTickets;
-});
+function setup() {
+    trackerWindow = new AMQWindow({
+        title: "Reward Tracker",
+        width: 300,
+        height: 270,
+        zIndex: 1054,
+        draggable: true
+    });
 
-setup();
+    trackerWindow.addPanel({
+        width: 1.0,
+        height: 50,
+        id: "trackerWindowControls"
+    });
 
-AMQ_addStyle(`
-    #qpResultsTracker {
-        width: 30px;
-        margin-right: 5px;
-    }
-    #trackerWindowResultsLeft {
-        width: 50%;
-        float: left;
-        text-align: left;
-        padding-left: 5px;
-    }
-    #trackerWindowResultsRight {
-        width: 50%;
-        float: right;
-        text-align: right;
-        padding-right: 5px;
-    }
-    #trackerWindowResultsLeft > p {
-        margin-bottom: 0;
-    }
-    #trackerWindowResultsRight > p {
-        margin-bottom: 0;
-    }
-    #trackerWindowControls {
-        border-bottom: 1px solid #6d6d6d;
-        text-align: center;
-    }
-    #trackerWindowControlsContainer > button {
-        width: 70px;
-        margin: 7px;
-    }
-`)
+    trackerWindow.addPanel({
+        width: 1.0,
+        height: 135,
+        position: {
+            x: 0,
+            y: 50
+        },
+        id: "trackerWindowResults"
+    });
+
+    trackerWindow.panels[0].panel.append(
+        $(`<div id="trackerWindowControlsContainer"></div>`)
+        .append(
+            $(`<button id="trackerWindowControlsReset" class="btn btn-default">Reset</button>`).click(function () {
+                resetTracker();
+            })
+        )
+        .append(
+            $(`<button id="trackerWindowControlsStart" class="btn btn-primary">Start</button>`).click(function () {
+                startTracker();
+            })
+        )
+    );
+
+    trackerWindow.panels[1].panel.append(
+        $(`<div id="trackerWindowResultsContainer"></div>`)
+        .append(
+            $(
+                `<div id="trackerWindowResultsLeft">
+                    <p>Elapsed Time</p>
+                    <p>XP gained</p>
+                    <p>Notes gained</p>
+                    <p>Tickets gained</p>
+                    <p>XP/hour</p>
+                    <p>Notes/hour</p>
+                    <p>Tickets/hour</p>
+                </div>`
+            )
+        )
+        .append(
+            $(
+                `<div id="trackerWindowResultsRight">
+                    <p id="resultsElapsedTime">00:00:00</p>
+                    <p id="resultsXPGained">0</p>
+                    <p id="resultsNotesGained">0</p>
+                    <p id="resultsTicketsGained">0</p>
+                    <p id="resultsXPPerHour">0</p>
+                    <p id="resultsNotesPerHour">0</p>
+                    <p id="resultsTicketsPerHour">0</p>
+                </div>`
+            )
+        )
+    )
+
+    let oldWidth = $("#qpOptionContainer").width();
+    $("#qpOptionContainer").width(oldWidth + 35);
+    $("#qpOptionContainer > div").append($(`<div id="qpResultsTracker" class="clickAble qpOption"><i aria-hidden="true" class="fa fa-line-chart qpMenuItem"></i></div>`)
+        .click(() => {
+            if (trackerWindow.isVisible()) {
+                trackerWindow.close();
+            }
+            else {
+                trackerWindow.open();
+            }
+        })
+        .popover({
+            content: "Results Tracker",
+            trigger: "hover",
+            placement: "bottom"
+        })
+    );
+
+    quizXPGainListener = new Listener("quiz xp credit gain", data => {
+        gainedNotes = data.credit - startNotes;
+        gainedXP += data.xpInfo.lastGain;
+        gainedTickets = data.tickets - startTickets;
+    });
+
+    resetTracker();
+
+    AMQ_addScriptData({
+        name: "Rewards Tracker",
+        author: "TheJoseph98",
+        description: `
+            <p>Adds a new window where you can start or stop a tracker which counts how much XP, notes and tickets you gained since starting and calculates approximate gains per hour.</p>
+            <p>The tracker can be opened by clicking the graph icon at the top right corner of the quiz screen.</p>
+        `
+    });
+
+    AMQ_addStyle(`
+        #qpResultsTracker {
+            width: 30px;
+            margin-right: 5px;
+        }
+        #trackerWindowResultsLeft {
+            width: 50%;
+            float: left;
+            text-align: left;
+            padding-left: 5px;
+        }
+        #trackerWindowResultsRight {
+            width: 50%;
+            float: right;
+            text-align: right;
+            padding-right: 5px;
+        }
+        #trackerWindowResultsLeft > p {
+            margin-bottom: 0;
+        }
+        #trackerWindowResultsRight > p {
+            margin-bottom: 0;
+        }
+        #trackerWindowControls {
+            border-bottom: 1px solid #6d6d6d;
+            text-align: center;
+        }
+        #trackerWindowControlsContainer > button {
+            width: 70px;
+            margin: 7px;
+        }
+    `);
+}
