@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Dice Roller UI
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.3
+// @version      1.1.4
 // @description  Adds a window where you can roll dice
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Speedrun
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.3
+// @version      1.1.4
 // @description  Tracks guess times for each song, including total and average times
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*

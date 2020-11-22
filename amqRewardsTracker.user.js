@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rewards Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.0.1
+// @version      1.0.2
 // @description  Tracks rewards gained per hour such as xp, notes and tickets
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
