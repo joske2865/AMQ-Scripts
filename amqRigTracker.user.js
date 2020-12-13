@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3.2
+// @version      1.3.4
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -12,13 +12,30 @@
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
 // ==/UserScript==
 
-if (!window.setupDocumentDone) return;
+// don't load on login page
+if (document.getElementById("startPage")) return;
+
+// Wait until the LOADING... screen is hidden and load script
+let loadInterval = setInterval(() => {
+    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+        setup();
+        clearInterval(loadInterval);
+    }
+}, 500);
 
 let scoreboardReady = false;
 let playerDataReady = false;
 let returningToLobby = false;
 let missedFromOwnList = 0;
 let playerData = {};
+
+// listeners
+let quizReadyRigTracker;
+let answerResultsRigTracker;
+let quizEndRigTracker;
+let returnLobbyVoteListener;
+let joinLobbyListener;
+let spectateLobbyListener;
 
 // data for the checkboxes
 let settingsData = [
@@ -290,109 +307,6 @@ function updateEnabled(settingId) {
     }
 }
 
-// Updates the preset settings tabs and container, this is mostly to allow interaction with the newly added "Custom" tab
-options.$SETTING_TABS = $("#settingModal .tab");
-options.$SETTING_CONTAINERS = $(".settingContentContainer");
-
-// Initial setup on quiz start
-let quizReadyRigTracker = new Listener("quiz ready", (data) => {
-    returningToLobby = false;
-    clearPlayerData();
-    if ($("#smRigTracker").prop("checked") && quiz.gameMode !== "Ranked") {
-        if ($("#smRigTrackerScoreboard").prop("checked")) {
-            initialiseScoreboard();
-        }
-        initialisePlayerData();
-    }
-    else {
-        quizReadyRigTracker.unbindListener();
-        answerResultsRigTracker.unbindListener();
-        quizEndRigTracker.unbindListener();
-        returnLobbyVoteListener.unbindListener();
-    }
-});
-
-// stuff to do on answer reveal
-let answerResultsRigTracker = new Listener("answer results", (result) => {
-    if (quiz.gameMode === "Ranked") {
-        return;
-    }
-    if (!playerDataReady) {
-        initialisePlayerData();
-    }
-    if (!scoreboardReady && $("#smRigTrackerScoreboard").prop("checked")) {
-        initialiseScoreboard();
-        if (playerDataReady) {
-            writeRigToScoreboard();
-        }
-    }
-    if (playerDataReady) {
-        for (let player of result.players) {
-            if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0) {
-                playerData[player.gamePlayerId].rig++;
-                if (player.correct === false) {
-                    playerData[player.gamePlayerId].missedList++;
-                }
-                if (player.correct === false && quiz.players[player.gamePlayerId]._name === selfName) {
-                    missedFromOwnList++;
-                }
-            }
-            if (player.correct === true) {
-                playerData[player.gamePlayerId].score++;
-            }
-        }
-        if ($("#smRigTrackerChat").prop("checked") && !returningToLobby) {
-            writeRigToChat(result.songInfo.animeNames);
-        }
-        if (scoreboardReady) {
-            writeRigToScoreboard();
-        }
-    }
-});
-
-// stuff to do on quiz end
-let quizEndRigTracker = new Listener("quiz end result", (result) => {
-    if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerQuizEnd").prop("checked")) {
-        writeResultsToChat();
-    }
-    displayMissedList();
-});
-
-// stuff to do on returning to lobby
-let returnLobbyVoteListener = new Listener("return lobby vote result", (payload) => {
-    if (payload.passed) {
-        returningToLobby = true;
-        if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerLobby").prop("checked")) {
-            writeResultsToChat();
-        }
-        //displayMissedList();
-    }
-});
-
-// Reset data when joining a lobby
-let joinLobbyListener = new Listener("Join Game", (payload) => {
-    if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
-        quizReadyRigTracker.bindListener();
-        answerResultsRigTracker.bindListener();
-        quizEndRigTracker.bindListener();
-        returnLobbyVoteListener.bindListener();
-    }
-    clearPlayerData();
-    clearScoreboard();
-});
-
-// Reset data when spectating a lobby
-let spectateLobbyListener = new Listener("Spectate Game", (payload) => {
-    if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
-        quizReadyRigTracker.bindListener();
-        answerResultsRigTracker.bindListener();
-        quizEndRigTracker.bindListener();
-        returnLobbyVoteListener.bindListener();
-    }
-    clearPlayerData();
-    clearScoreboard();
-});
-
 // Creates the rig counters on the scoreboard and sets them to 0
 function initialiseScoreboard() {
     clearScoreboard();
@@ -551,90 +465,212 @@ function displayMissedList() {
     }
 }
 
-// Enable or disable rig tracking on checking or unchecking the rig tracker checkbox
-$("#smRigTracker").click(function () {
-    let rigTrackerEnabled = $(this).prop("checked");
-    if (!rigTrackerEnabled) {
-        quizReadyRigTracker.unbindListener();
-        answerResultsRigTracker.unbindListener();
-        quizEndRigTracker.unbindListener();
-        returnLobbyVoteListener.unbindListener();
+function setup() {
+    // Updates the preset settings tabs and container, this is mostly to allow interaction with the newly added "Custom" tab
+    options.$SETTING_TABS = $("#settingModal .tab");
+    options.$SETTING_CONTAINERS = $(".settingContentContainer");
+
+    // Initial setup on quiz start
+    quizReadyRigTracker = new Listener("quiz ready", (data) => {
+        returningToLobby = false;
+        clearPlayerData();
         clearScoreboard();
-    }
-    else {
-        quizReadyRigTracker.bindListener();
-        answerResultsRigTracker.bindListener();
-        quizEndRigTracker.bindListener();
-        returnLobbyVoteListener.bindListener();
-        if ($("#smRigTrackerScoreboard").prop("checked")) {
+        if ($("#smRigTracker").prop("checked") && quiz.gameMode !== "Ranked") {
+            answerResultsRigTracker.bindListener();
+            quizEndRigTracker.bindListener();
+            returnLobbyVoteListener.bindListener();
+            if ($("#smRigTrackerScoreboard").prop("checked")) {
+                initialiseScoreboard();
+            }
+            initialisePlayerData();
+        }
+        else {
+            answerResultsRigTracker.unbindListener();
+            quizEndRigTracker.unbindListener();
+            returnLobbyVoteListener.unbindListener();
+        }
+    });
+
+    // stuff to do on answer reveal
+    answerResultsRigTracker = new Listener("answer results", (result) => {
+        if (quiz.gameMode === "Ranked") {
+            return;
+        }
+        if (!playerDataReady) {
+            initialisePlayerData();
+        }
+        if (!scoreboardReady && $("#smRigTrackerScoreboard").prop("checked")) {
+            initialiseScoreboard();
+            if (playerDataReady) {
+                writeRigToScoreboard();
+            }
+        }
+        if (playerDataReady) {
+            for (let player of result.players) {
+                if (player.listStatus !== null && player.listStatus !== undefined && player.listStatus !== false && player.listStatus !== 0) {
+                    playerData[player.gamePlayerId].rig++;
+                    if (player.correct === false) {
+                        playerData[player.gamePlayerId].missedList++;
+                    }
+                    if (player.correct === false && quiz.players[player.gamePlayerId]._name === selfName) {
+                        missedFromOwnList++;
+                    }
+                }
+                if (player.correct === true) {
+                    playerData[player.gamePlayerId].score++;
+                }
+            }
+            if ($("#smRigTrackerChat").prop("checked") && !returningToLobby) {
+                writeRigToChat(result.songInfo.animeNames);
+            }
+            if (scoreboardReady) {
+                writeRigToScoreboard();
+            }
+        }
+    });
+
+    // stuff to do on quiz end
+    quizEndRigTracker = new Listener("quiz end result", (result) => {
+        if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerQuizEnd").prop("checked")) {
+            writeResultsToChat();
+        }
+        displayMissedList();
+    });
+
+    // stuff to do on returning to lobby
+    returnLobbyVoteListener = new Listener("return lobby vote result", (payload) => {
+        if (payload.passed) {
+            returningToLobby = true;
+            if ($("#smRigTrackerChat").prop("checked") && $("#smRigTrackerFinalResult").prop("checked") && $("#smRigTrackerLobby").prop("checked")) {
+                writeResultsToChat();
+            }
+            //displayMissedList();
+        }
+    });
+
+    // Reset data when joining a lobby
+    joinLobbyListener = new Listener("Join Game", (payload) => {
+        if (payload.error) {
+            return;
+        }
+        if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
+            answerResultsRigTracker.bindListener();
+            quizEndRigTracker.bindListener();
+            returnLobbyVoteListener.bindListener();
+        }
+        else {
+            answerResultsRigTracker.unbindListener();
+            quizEndRigTracker.unbindListener();
+            returnLobbyVoteListener.unbindListener();
+        }
+        clearPlayerData();
+        clearScoreboard();
+    });
+
+    // Reset data when spectating a lobby
+    spectateLobbyListener = new Listener("Spectate Game", (payload) => {
+        if (payload.error) {
+            return;
+        }
+        if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
+            answerResultsRigTracker.bindListener();
+            quizEndRigTracker.bindListener();
+            returnLobbyVoteListener.bindListener();
+        }
+        else {
+            answerResultsRigTracker.unbindListener();
+            quizEndRigTracker.unbindListener();
+            returnLobbyVoteListener.unbindListener();
+        }
+        clearPlayerData();
+        clearScoreboard();
+    });
+
+    // Enable or disable rig tracking on checking or unchecking the rig tracker checkbox
+    $("#smRigTracker").click(function () {
+        let rigTrackerEnabled = $(this).prop("checked");
+        if (!rigTrackerEnabled) {
+            quizReadyRigTracker.unbindListener();
+            answerResultsRigTracker.unbindListener();
+            quizEndRigTracker.unbindListener();
+            returnLobbyVoteListener.unbindListener();
+            clearScoreboard();
+        }
+        else {
+            quizReadyRigTracker.bindListener();
+            answerResultsRigTracker.bindListener();
+            quizEndRigTracker.bindListener();
+            returnLobbyVoteListener.bindListener();
+            if ($("#smRigTrackerScoreboard").prop("checked")) {
+                initialiseScoreboard();
+                writeRigToScoreboard();
+            }
+        }
+    });
+
+    // Enable or disable rig display on the scoreboard on checking or unchecking the scoreboard checkbox
+    $("#smRigTrackerScoreboard").click(function () {
+        let rigTrackerScoreboardEnabled = $(this).prop("checked");
+        if (rigTrackerScoreboardEnabled) {
             initialiseScoreboard();
             writeRigToScoreboard();
         }
-    }
-});
+        else {
+            clearScoreboard();
+        }
+    });
 
-// Enable or disable rig display on the scoreboard on checking or unchecking the scoreboard checkbox
-$("#smRigTrackerScoreboard").click(function () {
-    let rigTrackerScoreboardEnabled = $(this).prop("checked");
-    if (rigTrackerScoreboardEnabled) {
-        initialiseScoreboard();
-        writeRigToScoreboard();
-    }
-    else {
-        clearScoreboard();
-    }
-});
+    // bind listeners
+    quizReadyRigTracker.bindListener();
+    answerResultsRigTracker.bindListener();
+    quizEndRigTracker.bindListener();
+    returnLobbyVoteListener.bindListener();
+    joinLobbyListener.bindListener();
+    spectateLobbyListener.bindListener();
 
-// bind listeners
-quizReadyRigTracker.bindListener();
-answerResultsRigTracker.bindListener();
-quizEndRigTracker.bindListener();
-returnLobbyVoteListener.bindListener();
-joinLobbyListener.bindListener();
-spectateLobbyListener.bindListener();
+    AMQ_addScriptData({
+        name: "Rig Tracker",
+        author: "TheJoseph98",
+        description: `
+            <p>Rig tracker for AMQ counts how many times a certain player's list has appeared in a quiz, mainly created for AMQ League games to reduce the need for dedicated players who track the rig</p>
+            <p>Rig is only counted if the player has enabled "Share Entries" in their AMQ list settings (noted by the blue ribbon in their answer field during answer reveal)</p>
+            <p>Rig tracker has multiple options available which can be accessed by opening AMQ settings and selecting the "Rig Tracker" tab</p>
+            <a href="https://i.imgur.com/LQE4PGg.png" target="_blank"><img src="https://i.imgur.com/LQE4PGg.png" /></a>
+            <p>Rig tracker also has an option of writing rig to the scoreboard next to players' scores for non-league and more than 2 players games</p>
+            <a href="https://i.imgur.com/4jF8vja.png" target="_blank"><img src="https://i.imgur.com/4jF8vja.png" /></a>
+            <p>If you're looking for a smaller version without these options and which can only write rig to scoreboard, check out <a href="https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js">Rig Tracker Lite</a>
+        `
+    });
 
-AMQ_addScriptData({
-    name: "Rig Tracker",
-    author: "TheJoseph98",
-    description: `
-        <p>Rig tracker for AMQ counts how many times a certain player's list has appeared in a quiz, mainly created for AMQ League games to reduce the need for dedicated players who track the rig</p>
-        <p>Rig is only counted if the player has enabled "Share Entries" in their AMQ list settings (noted by the blue ribbon in their answer field during answer reveal)</p>
-        <p>Rig tracker has multiple options available which can be accessed by opening AMQ settings and selecting the "Rig Tracker" tab</p>
-        <a href="https://i.imgur.com/LQE4PGg.png" target="_blank"><img src="https://i.imgur.com/LQE4PGg.png" /></a>
-        <p>Rig tracker also has an option of writing rig to the scoreboard next to players' scores for non-league and more than 2 players games</p>
-        <a href="https://i.imgur.com/4jF8vja.png" target="_blank"><img src="https://i.imgur.com/4jF8vja.png" /></a>
-        <p>If you're looking for a smaller version without these options and which can only write rig to scoreboard, check out <a href="https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js">Rig Tracker Lite</a>
-    `
-});
-
-// CSS stuff
-AMQ_addStyle(`
-    .qpsPlayerRig {
-        padding-right: 5px;
-        opacity: 0.3;
-    }
-    .customCheckboxContainer {
-        display: flex;
-    }
-    .customCheckboxContainer > div {
-        display: inline-block;
-        margin: 5px 0px;
-    }
-    .customCheckboxContainer > .customCheckboxContainerLabel {
-        margin-left: 5px;
-        margin-top: 5px;
-        font-weight: normal;
-    }
-    .offset1 {
-        margin-left: 20px;
-    }
-    .offset2 {
-        margin-left: 40px;
-    }
-    .offset3 {
-        margin-left: 60px;
-    }
-    .offset4 {
-        margin-left: 80px;
-    }
-`);
+    // CSS stuff
+    AMQ_addStyle(`
+        .qpsPlayerRig {
+            padding-right: 5px;
+            opacity: 0.3;
+        }
+        .customCheckboxContainer {
+            display: flex;
+        }
+        .customCheckboxContainer > div {
+            display: inline-block;
+            margin: 5px 0px;
+        }
+        .customCheckboxContainer > .customCheckboxContainerLabel {
+            margin-left: 5px;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+        .offset1 {
+            margin-left: 20px;
+        }
+        .offset2 {
+            margin-left: 40px;
+        }
+        .offset3 {
+            margin-left: 60px;
+        }
+        .offset4 {
+            margin-left: 80px;
+        }
+    `);
+}

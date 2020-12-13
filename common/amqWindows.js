@@ -375,7 +375,7 @@ function addStyle(css) {
     style.appendChild(document.createTextNode(css));
 }
 
-if (window.setupDocumentDone) {
+function windowSetup() {
     if ($("#customWindowStyle").length === 0) {
         addStyle(`
             .customWindow {
@@ -435,5 +435,17 @@ if (window.setupDocumentDone) {
                 cursor: nwse-resize;
             }
         `);
-    } 
+    }
 }
+
+// Wait until the LOADING... screen is hidden and load script
+let windowLoadInterval = setInterval(() => {
+    // don't load on login page
+    if (document.getElementById("startPage")) {
+        clearInterval(windowLoadInterval);
+    }
+    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+        windowSetup();
+        clearInterval(windowLoadInterval);
+    }
+}, 500);
