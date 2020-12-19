@@ -67,6 +67,7 @@ replace = False
 lang = 'romaji'
 path = './'
 infile = "./export.json"
+verbose = False
 # Use some butcher-style argument parsing. sys.argv[0] is this script, ignore that
 args = sys.argv[1:]
 if 'help' in args:
