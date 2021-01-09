@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.0.2
+// @version      3.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -609,7 +609,8 @@ function createInfoWindow() {
         draggable: true,
         resizable: true,
         closeHandler: closeInfoHandler,
-        zIndex: 1065
+        zIndex: 1065,
+        id: "infoWindow"
     });
 
     infoWindow.addPanel({
@@ -632,13 +633,17 @@ function updateInfo(song) {
 
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
-    let songNameContainer = $(`<div id="songNameContainer"><h5><b>Song Name</b></h5><p>${song.name}</p></div>`);
-    let artistContainer = $(`<div id="artistContainer"><h5><b>Artist</b></h5><p>${song.artist}</p></div>`);
-    let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5><b>Anime English</b></h5><p>${song.anime.english}</p></div>`);
-    let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5><b>Anime Romaji</b></h5><p>${song.anime.romaji}</p></div>`);
+    let songNameContainer = $(`<div id="songNameContainer"><h5>
+        <b>Song Name</b> <i class="fa fa-files-o clickAble" id="songNameCopy"></i></h5><p>${song.name}</p></div>`);
+    let artistContainer = $(`<div id="artistContainer"><h5>
+        <b>Artist</b> <i class="fa fa-files-o clickAble" id="artistCopy"></i></h5><p>${song.artist}</p></div>`);
+    let animeEnglishContainer = $(`<div id="animeEnglishContainer"><h5>
+        <b>Anime English</b> <i class="fa fa-files-o clickAble" id="animeEnglishCopy"></i></h5><p>${song.anime.english}</p></div>`);
+    let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5>
+        <b>Anime Romaji</b> <i class="fa fa-files-o clickAble" id="animeRomajiCopy"></i></h5><p>${song.anime.romaji}</p></div>`);
     let typeContainer = $(`<div id="typeContainer"><h5><b>Type</b></h5><p>${song.type}</p></div>`);
     let sampleContainer = $(`<div id="sampleContainer"><h5><b>Sample Point</b></h5><p>${formatSamplePoint(song.startSample, song.videoLength)}</p></div>`);
-    let annIdContainer = $(`<div id="annIdContainer"><h5 style="margin-bottom: 0;"><b>ANN ID: </b>${song.annId}</h5>
+    let annIdContainer = $(`<div id="annIdContainer"><h5 style="margin-bottom: 0;"><b>ANN ID: </b>${song.annId} <i class="fa fa-files-o clickAble" id="annIdCopy"></i></h5>
             <a target="_blank" href="https://www.animenewsnetwork.com/encyclopedia/anime.php?id=${song.annId}">https://www.animenewsnetwork.com/encyclopedia/anime.php?id=${song.annId}</a>
         </div>`);
     let guessedContainer = $(`<div id="guessedContainer"></div>`)
@@ -737,6 +742,66 @@ function updateInfo(song) {
     infoWindow.panels[0].panel.append(infoRow3);
     infoWindow.panels[0].panel.append(infoRow4);
     infoWindow.panels[0].panel.append(infoRow5);
+
+    $("#songNameCopy").click(function () {
+        $("#copyBox").val(song.name).select();
+        document.execCommand("copy");
+        $("#copyBox").val("").blur();
+    }).popover({
+        content: "Copy Song Name",
+        trigger: "hover",
+        placement: "top",
+        container: "#infoWindow",
+        animation: false
+    });
+
+    $("#artistCopy").click(function () {
+        $("#copyBox").val(song.artist).select();
+        document.execCommand("copy");
+        $("#copyBox").val("").blur();
+    }).popover({
+        content: "Copy Artist",
+        trigger: "hover",
+        placement: "top",
+        container: "#infoWindow",
+        animation: false
+    });
+
+    $("#animeEnglishCopy").click(function () {
+        $("#copyBox").val(song.anime.english).select();
+        document.execCommand("copy");
+        $("#copyBox").val("").blur();
+    }).popover({
+        content: "Copy English Anime Name",
+        trigger: "hover",
+        placement: "top",
+        container: "#infoWindow",
+        animation: false
+    });
+
+    $("#animeRomajiCopy").click(function () {
+        $("#copyBox").val(song.anime.romaji).select();
+        document.execCommand("copy");
+        $("#copyBox").val("").blur();
+    }).popover({
+        content: "Copy Romaji Anime Name",
+        trigger: "hover",
+        placement: "top",
+        container: "#infoWindow",
+        animation: false
+    });
+
+    $("#annIdCopy").click(function () {
+        $("#copyBox").val(song.annId).select();
+        document.execCommand("copy");
+        $("#copyBox").val("").blur();
+    }).popover({
+        content: "Copy ANN ID",
+        trigger: "hover",
+        placement: "top",
+        container: "#infoWindow",
+        animation: false
+    });
 }
 
 function clearInfo() {
@@ -1476,6 +1541,9 @@ function setup() {
             width: 18%;
         }
         #urlContainer {
+            width: 100%;
+        }
+        #annIdContainer {
             width: 100%;
         }
         #guessedListLeft {
