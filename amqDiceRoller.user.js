@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Dice Roller
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.2
+// @version      1.1.3
 // @description  Dice roller for general usage, type "/roll" in chat to output a random number from 1-100
 // @author       Anopob & TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -37,25 +37,27 @@ function sendChatMessage(message) {
 }
 
 function setup() {
-    let commandListener = new Listener("Game Chat Message", (payload) => {
-        if (payload.sender === selfName && payload.message.startsWith(command)) {
-            let args = payload.message.split(/\s+/);
-            if (args[1] !== undefined) {
-                maxRoll = parseInt(args[1].trim());
-                if (isNaN(maxRoll)) {
-                    sendChatMessage("Please enter a valid number");
+    let commandListener = new Listener("game chat update", (payload) => {
+        payload.messages.forEach(message => {
+            if (message.sender === selfName && message.message.startsWith(command)) {
+                let args = message.message.split(/\s+/);
+                if (args[1] !== undefined) {
+                    maxRoll = parseInt(args[1].trim());
+                    if (isNaN(maxRoll)) {
+                        sendChatMessage("Please enter a valid number");
+                    }
+                    else {
+                        diceResult = getRandomIntInclusive(1, maxRoll);
+                        sendChatMessage(" rolls " + diceResult);
+                    }
                 }
                 else {
+                    maxRoll = 100;
                     diceResult = getRandomIntInclusive(1, maxRoll);
                     sendChatMessage(" rolls " + diceResult);
                 }
             }
-            else {
-                maxRoll = 100;
-                diceResult = getRandomIntInclusive(1, maxRoll);
-                sendChatMessage(" rolls " + diceResult);
-            }
-        }
+        });
     });
 
     commandListener.bindListener();
