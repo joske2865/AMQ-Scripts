@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.1
+// @version      3.2
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
+// @require      https://github.com/amq-script-project/AMQ-Scripts/raw/master/gameplay/amqAnswerTimesUtility.user.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongListUI.user.js
 
 // ==/UserScript==
@@ -683,10 +684,10 @@ function updateInfo(song) {
             let i = 0;
             for (let guessed of guesses) {
                 if (i++ % 2 === 0) {
-                    guessedListLeft.append($(`<li>${guessed.name} (${guessed.score})</li>`));
+                    guessedListLeft.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
                 }
                 else {
-                    guessedListRight.append($(`<li>${guessed.name} (${guessed.score})</li>`));
+                    guessedListRight.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
                 }
             }
             guessedContainer.append(guessedListLeft);
@@ -695,7 +696,7 @@ function updateInfo(song) {
         else {
             listContainer = $(`<ul id="guessedListContainer"></ul>`);
             for (let guessed of guesses) {
-                listContainer.append($(`<li>${guessed.name} (${guessed.score})</li>`));
+                listContainer.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
             }
             guessedContainer.append(listContainer);
         }
@@ -705,7 +706,7 @@ function updateInfo(song) {
         listContainer = $(`<ul id="guessedListContainer"></ul>`);
         fromListContainer.show();
         for (let guessed of guesses) {
-            listContainer.append($(`<li>${guessed.name} (${guessed.score})</li>`));
+            listContainer.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
         }
         guessedContainer.append(listContainer);
     }
@@ -720,7 +721,7 @@ function updateInfo(song) {
 
     listContainer = $("<ul></ul>");
     for (let fromList of song.fromList) {
-        listContainer.append($(`<li>${fromList.name} (${listStatus[fromList.listStatus]} ${((fromList.score !== null) ? (", " + fromList.score + ")") : ")")}</li>`));
+        listContainer.append($(`<li>${fromList.name} (${listStatus[fromList.listStatus]}${((fromList.score !== null) ? (", " + fromList.score + ")") : ")")}</li>`));
     }
     fromListContainer.append(listContainer);
 
@@ -1220,6 +1221,7 @@ function setup() {
                         correctGuesses: (quiz.gameMode !== "Standard" && quiz.gameMode !== "Ranked") ? tmpPlayer.correctGuesses : tmpPlayer.score,
                         correct: tmpPlayer.correct,
                         answer: quiz.players[tmpPlayer.gamePlayerId].avatarSlot.$answerContainerText.text(),
+                        guessTime: amqAnswerTimesUtility.playerTimes[tmpPlayer.gamePlayerId],
                         active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled,
                         position: tmpPlayer.position,
                         positionSlot: tmpPlayer.positionSlot
