@@ -1179,7 +1179,10 @@ function loadSettings() {
     // load settings, if nothing is loaded, use default settings
     let loadedSettings = localStorage.getItem("songListSettings");
     if (loadedSettings !== null) {
-        savedSettings = JSON.parse(loadedSettings);
+        let oldSavedSettings = JSON.parse(loadedSettings); // replaces the object and deletes the key
+        for(let key of Object.keys(oldSavedSettings)){
+            savedSettings[key] = oldSavedSettings[key];
+        }
     }
     updateSettings();
 }
