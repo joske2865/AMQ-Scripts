@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2.4
+// @version      1.3
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
@@ -44,7 +44,7 @@ let types = []; // types ("opening", "ending" and "insert")
 
 let yearRanges = []; // year ranges array for counting by years
 let yearIndex = 0; // current index of the year ranges array
-let curYearRange = [1944, 2020]; // default year range
+let curYearRange = [1944, 2021]; // default year range
 
 // difficulty sliders
 let openingsDiffSlider;
@@ -427,7 +427,6 @@ function displayTotal(diffRange, type) {
 // set new difficulty
 function setDifficulty(diffRange) {
     hostModal.songDiffRangeSliderCombo.setValue(diffRange);
-    lobby.changeGameSettings();
 }
 
 // set new song type
@@ -468,19 +467,19 @@ function setSongType(type) {
             endings.click();
         }
     }
-    lobby.changeGameSettings();
 }
 
 // set year setting
 function setYears(yearRange) {
     hostModal.vintageRangeSliderCombo.setValue(yearRange);
-    lobby.changeGameSettings();
 }
 
 // start the game from lobby
 function startGame() {
     if (counting) {
-        $("#lbStartButton").click();
+        if ($("#lbStartButton").is(":visible")) {
+            $("#lbStartButton").click();
+        }
     }
 }
 
@@ -498,6 +497,12 @@ function startCounting(startDiffRange, startType) {
         quiz._noSongsListner = new Listener("Quiz no songs", payload => {});
         quiz._quizOverListner = new Listener("quiz over", payload => {});
 
+        quizReadyListener.bindListener();
+        playNextSongListener.bindListener();
+        quizNoSongsListener.bindListener();
+        quizOverListener.bindListener();
+        settingsChangeListener.bindListener();
+
         // set difficulty range
         curDiffRange = startDiffRange;
         curType = startType;
@@ -508,13 +513,7 @@ function startCounting(startDiffRange, startType) {
         setSongType(types[curType]);
         setYears(curYearRange);
 
-        quizReadyListener.bindListener();
-        playNextSongListener.bindListener();
-        quizNoSongsListener.bindListener();
-        quizOverListener.bindListener();
-        settingsChangeListener.bindListener();
-
-        startGame();
+        lobby.changeGameSettings();
     }
     else {
         displayMessage("Error", "You are not in a lobby");
@@ -577,8 +576,6 @@ function setSettings() {
     // enable auto skip during replay
     options.$AUTO_VOTE_REPLAY.prop("checked", true)
     options.updateAutoVoteSkipReplay();
-
-    lobby.changeGameSettings();
 }
 
 // increment difficulty
@@ -604,6 +601,8 @@ function updateSongDifficulty() {
     setDifficulty(curDiffRange);
     setSongType(types[curType]);
     setYears(curYearRange);
+
+    lobby.changeGameSettings();
 }
 
 function updateYearRange() {
@@ -611,6 +610,7 @@ function updateYearRange() {
     // check that yearIndex is out of range and returns undefined, if it doesn't, set the years settings to the new range
     if (curYearRange !== undefined) {
         setYears(curYearRange);
+        lobby.changeGameSettings();
     }
     // if yearIndex is out of range, then counting by years has concluded
     else {
@@ -620,8 +620,8 @@ function updateYearRange() {
 }
 
 function splitYears() {
-    // divide into 5 on the initial 1944, 2020 split
-    if (curYearRange[0] === 1944 && curYearRange[1] === 2020) {
+    // divide into 5 on the initial 1944, 2021 split
+    if (curYearRange[0] === 1944 && curYearRange[1] === 2021) {
         let splits = [1995, 2005, 2010, 2015];
         for (let i = 0; i < splits.length; i++) {
             if (i === 0) {
@@ -645,9 +645,9 @@ function splitYears() {
 
 // reset year ranges and yearIndex
 function resetYears() {
-    yearRanges = [[1944, 2020]];
+    yearRanges = [[1944, 2021]];
     yearIndex = 0;
-    curYearRange = [1944, 2020];
+    curYearRange = [1944, 2021];
     countingAdvanced = false;
 }
 
@@ -807,12 +807,10 @@ function setup() {
             // if advanced counting is active, increment the year
             if (countingAdvanced) {
                 updateYearRange();
-                startGame();
             }
             // otherwise, increment difficulty
             else {
                 updateSongDifficulty();
-                startGame();
             }
         }
         else {
@@ -823,6 +821,7 @@ function setup() {
 
     // listen for when room settings change
     settingsChangeListener = new Listener("Room Settings Changed", payload => {
+        console.log(payload);
         hostModal.changeSettings(payload);
         Object.keys(payload).forEach(key => {
             let newValue = payload[key];
@@ -835,10 +834,10 @@ function setup() {
         }
 
         Object.values(lobby.players).forEach(player => {
-            player.ready = false;
+            player.ready = true;
         });
 
-        lobby.isReady = false;
+        lobby.isReady = true;
         lobby.toggleRuleButton();
         lobby.updateMainButton();
         if (payload.roomName) {
@@ -846,6 +845,8 @@ function setup() {
         }
 
         lobby.updatePlayerCounter();
+
+        startGame();
     });
 
     // show the counter button when hosting a solo game, otherwise hide it
