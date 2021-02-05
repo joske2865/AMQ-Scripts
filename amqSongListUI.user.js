@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.2
+// @version      3.2.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -48,7 +48,8 @@ let savedSettings = {
     type: true,
     answers: false,
     guesses: false,
-    samplePoint: false
+    samplePoint: false,
+    guessTime: true
 };
 
 function createListWindow() {
@@ -417,6 +418,7 @@ function addTableEntry(newSong) {
     let annId = $(`<td class="annId"></td>`).text(newSong.annId);
     let type = $(`<td class="songType"></td>`).text(newSong.type);
     let selfAnswer = $(`<td class="selfAnswer"></td>`).text(newSong.selfAnswer !== undefined ? newSong.selfAnswer : "...");
+    // Add an if-else for if it shouldn't display guess time based on savedSettings.guessTime
     let guessesCounter = $(`<td class="guessesCounter"></td>`).text(guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)");
     let samplePoint = $(`<td class="samplePoint"></td>`).text(formatSamplePoint(newSong.startSample, newSong.videoLength));
 
@@ -683,11 +685,12 @@ function updateInfo(song) {
             let guessedListRight = $(`<ul id="guessedListRight"></ul>`);
             let i = 0;
             for (let guessed of guesses) {
+                let closing_bracket = savedSettings.guessTime ? ", " + guessed.guessTime + "ms" : "";
                 if (i++ % 2 === 0) {
-                    guessedListLeft.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
+                    guessedListLeft.append($(`<li>${guessed.name} (${guessed.score}${closing_bracket})</li>`));
                 }
                 else {
-                    guessedListRight.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
+                    guessedListRight.append($(`<li>${guessed.name} (${guessed.score}${closing_bracket})</li>`));
                 }
             }
             guessedContainer.append(guessedListLeft);
@@ -696,7 +699,8 @@ function updateInfo(song) {
         else {
             listContainer = $(`<ul id="guessedListContainer"></ul>`);
             for (let guessed of guesses) {
-                listContainer.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
+                let closing_bracket = savedSettings.guessTime ? ", " + guessed.guessTime + "ms" : "";
+                listContainer.append($(`<li>${guessed.name} (${guessed.score}${closing_bracket})</li>`));
             }
             guessedContainer.append(listContainer);
         }
@@ -706,7 +710,8 @@ function updateInfo(song) {
         listContainer = $(`<ul id="guessedListContainer"></ul>`);
         fromListContainer.show();
         for (let guessed of guesses) {
-            listContainer.append($(`<li>${guessed.name} (${guessed.score}, ${guessed.guessTime}ms)</li>`));
+            let closing_bracket = savedSettings.guessTime ? ", " + guessed.guessTime + "ms" : "";
+            listContainer.append($(`<li>${guessed.name} (${guessed.score}${closing_bracket})</li>`));
         }
         guessedContainer.append(listContainer);
     }
@@ -831,6 +836,15 @@ function createSettingsWindow() {
         },
         id: "slTableSettings"
     });
+    settingsWindow.addPanel({
+        width: 1.0,
+        height: 50,
+        position: {
+            x: 0,
+            y: 245 // 125 + 120
+        },
+        id: "slGuessTimeSettings"
+    });
 
     settingsWindow.panels[0].panel
         .append($(`<div class="slListDisplaySettings"></div>`)
@@ -907,7 +921,7 @@ function createSettingsWindow() {
                 )
             )
         )
-            
+
         .append($(`<div id="slAnimeTitleSettings"></div>`)
             .append($(`<span style="text-align: center;display: block;"><b>Anime Titles</b></span>`))
             .append($(`<select id="slAnimeTitleSelect"></select>`)
@@ -1074,7 +1088,7 @@ function createSettingsWindow() {
                 )
                 .append($("<label>Type</label>"))
             )
-            
+
         )
         .append($(`<div class="slTableSettingsContainer"></div>`)
             .append($(`<div class="slCheckbox"></div>`)
@@ -1135,6 +1149,24 @@ function createSettingsWindow() {
                 .append($("<label>Sample Point</label>"))
             )
         )
+
+        settingsWindow.panels[2].panel
+        .append($(`<span style="width: 100%; text-align: center;display: block;"><b>Guess Time Display Settings</b></span>`))
+        .append($(`<div class="slGuessTimeSettingsContainer"></div>`)
+            .append($(`<div class="slCheckbox"></div>`)
+                .append($(`<div class="customCheckbox"></div>`)
+                    .append($("<input id='slShowGuessTime' type='checkbox'>")
+                        .prop("checked", true)
+                        .click(function () {
+                            savedSettings.guessTime = $(this).prop("checked");
+                            saveSettings();
+                        })
+                    )
+                    .append($("<label for='slShowGuessTime'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label>Guess Time</label>"))
+            )
+        )
 }
 
 // save settings to local storage
@@ -1168,6 +1200,7 @@ function updateSettings() {
     $("#slShowSelfAnswer").prop("checked", savedSettings.answers);
     $("#slShowGuesses").prop("checked", savedSettings.guesses);
     $("#slShowSamplePoint").prop("checked", savedSettings.samplePoint);
+    $("#slShowGuessTime").prop("checked", savedSettings.guessTime);
 }
 
 function applyListStyle() {
@@ -1355,6 +1388,11 @@ function setup() {
             font-weight: bold;
         }
         .slTableSettingsContainer {
+            padding-left: 10px;
+            width: 33%;
+            float: left;
+        }
+        .slGuessTimeSettingsContainer {
             padding-left: 10px;
             width: 33%;
             float: left;
