@@ -23,4 +23,6 @@ const newRooms = new MutationObserver(mutations => {
         shiftIcon(m.addedNodes[1]);
     });
 });
-newRooms.observe(document.getElementById("rbRoomContainer"), {'subtree': false, 'childList': true});
+if(document.getElementById("loadingScreen")){
+    newRooms.observe(document.getElementById("rbRoomContainer"), {'subtree': false, 'childList': true});
+}
