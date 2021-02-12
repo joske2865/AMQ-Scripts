@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Room Browser Borgar Placement
 // @namespace    SkayeScripts
-// @version      1.0
+// @version      1.1
 // @description  Moves the "All Settings Menu" icon on room browsers to keep the height consistent. It even looks decent!
 // @author       RivenSkaye
 // @match        https://animemusicquiz.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 function shiftIcon(room){
+    if(!room) return;
     let borgar = room.childNodes[9].removeChild(room.childNodes[9].childNodes[7]);
     room.insertBefore(borgar, room.childNodes[1]);
     borgar.style.marginRight = "3px";
