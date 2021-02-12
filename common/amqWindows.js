@@ -444,8 +444,10 @@ let windowLoadInterval = setInterval(() => {
     if (document.getElementById("startPage")) {
         clearInterval(windowLoadInterval);
     }
-    else if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        windowSetup();
-        clearInterval(windowLoadInterval);
+    else {
+        if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+            windowSetup();
+            clearInterval(windowLoadInterval);
+        }
     }
 }, 500);
