@@ -9,9 +9,6 @@
 // @updateURL    https://github.com/RivenSkaye/AMQ-Scripts-1/raw/master/amqRoomBrowserFix.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 function shiftIcon(room){
     let borgar = room.childNodes[9].removeChild(room.childNodes[9].childNodes[7]);
     room.insertBefore(borgar, room.childNodes[1]);
