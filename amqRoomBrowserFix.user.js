@@ -12,13 +12,6 @@
 // don't load on login page
 if (document.getElementById("startPage")) return;
 
-let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
-        clearInterval(loadInterval);
-    }
-}, 500);
-
 function shiftIcon(room){
     let borgar = room.childNodes[9].removeChild(room.childNodes[9].childNodes[7]);
     room.insertBefore(borgar, room.childNodes[1]);
@@ -30,6 +23,4 @@ const newRooms = new MutationObserver(mutations => {
         shiftIcon(m.addedNodes[1]);
     });
 });
-function setup(){
-    newRooms.observe(document.getElementById("rbRoomContainer"), {'subtree': false, 'childList': true});
-}
+newRooms.observe(document.getElementById("rbRoomContainer"), {'subtree': false, 'childList': true});
