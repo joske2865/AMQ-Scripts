@@ -23,6 +23,7 @@ Scripts:
 - [Expand Library Search by ANN ID](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js)
 - [Short Sample Radio](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js)
 - [Solo Chat Block](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js)
+- [AMQ Room Browser Placement](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRoomBrowserFix.user.js)
 
 
 ### Note
@@ -263,3 +264,16 @@ Features:
 - Customizable with a full menu
 - Previews of edits without having to save them
 - Comes with a pretty Laev pic by default, no configuration needed
+
+### [AMQ Room Browser Placement (amqRoomBrowserFix.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRoomBrowserFix.user.js)
+
+A script that moves the "View All Settings" button in the Roombrowser to the top of the displayed Room tiles. This fixes the rather annoying visual bug that causes some room tiles
+to become taller than others when the settings displayed at the bottom (guess time, song count, list type) become too wide. This most noticeably happens with custom settings that
+use variable guess times.
+
+Features:
+- Moves the icon to the top for all current and newly appearing Rooms in the Roombrowser
+- Keeps the icon clickable and functioning as it should
+- Prevents some rooms from growing taller on all screen sizes officially supported by AMQ
+
+Note: does not register in Joseph's "Installed Userscripts" to prevent adding that button if this is the only script from the repo.
