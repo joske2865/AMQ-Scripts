@@ -7,8 +7,8 @@
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @downloadURL  https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
-// @updateURL    https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
+// @downloadURL  https://github.com/RivenSkaye/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
+// @updateURL    https://github.com/RivenSkaye/AMQ-Scripts-1/raw/master/amqSoloChatBlock.user.js
 // ==/UserScript==
 
 /*** Common code to many scripts ***/
@@ -289,7 +289,7 @@ function initSettingsWindow(){
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="cancel">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="cancel" id='x-to-cancel'>
                                 <span aria-hidden="true">x</span>
                             </button>
                             <h2 class="modal-title">Solo Chat Block Configuration</h2>

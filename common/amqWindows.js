@@ -230,7 +230,7 @@ class AMQWindowPanel {
             .addClass(data.class === undefined ? "" : data.class)
             .attr("id", this.id)
             .css("position", "absolute")
-            
+
         this.updateWidth();
         this.updateHeight();
         this.updatePosition();
@@ -444,8 +444,10 @@ let windowLoadInterval = setInterval(() => {
     if (document.getElementById("startPage")) {
         clearInterval(windowLoadInterval);
     }
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        windowSetup();
-        clearInterval(windowLoadInterval);
+    else {
+        if (document.getElementById("loadingScreen").classList.contains("hidden")) {
+            windowSetup();
+            clearInterval(windowLoadInterval);
+        }
     }
 }, 500);
