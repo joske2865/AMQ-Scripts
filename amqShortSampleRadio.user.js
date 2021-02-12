@@ -7,8 +7,8 @@
 // @match        https://animemusicquiz.com/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @downloadURL  https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqShortSampleRadio.user.js
-// @updateURL    https://github.com/FokjeM/AMQ-Scripts-1/raw/master/amqShortSampleRadio.user.js
+// @downloadURL  https://github.com/RivenSkaye/AMQ-Scripts-1/raw/master/amqShortSampleRadio.user.js
+// @updateURL    https://github.com/RivenSkaye/AMQ-Scripts-1/raw/master/amqShortSampleRadio.user.js
 // ==/UserScript==
 // Thanks a million for the help and some of the code bud!
 
