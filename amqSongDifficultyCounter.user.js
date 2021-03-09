@@ -977,7 +977,7 @@ function setup() {
             margin-top: 5px;
             margin-left: 15px;
         }
-    `)
+    `);
 
     AMQ_addScriptData({
         name: "Song Difficulty Counter",
