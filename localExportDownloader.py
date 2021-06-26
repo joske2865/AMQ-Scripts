@@ -10,6 +10,11 @@ try:
 except ModuleNotFoundError:
     subprocess.Popen(["python", "-m", "pip", "install", "-U", 'requests']).wait()
     import requests
+try:
+    import eyed3
+except ModuleNotFoundError:
+    subprocess.Popen(["python", "-m", "pip", "install", "-U", 'eyed3']).wait()
+    import eyed3
 
 """
 Function that loads an export.json and returns the songlist.
@@ -99,6 +104,15 @@ for song in extract_info(filepath=infile, lang=lang):
         outfile = outfile.replace(i, "_")
     print(outfile)
     download(url=song['url'], filename=outfile, force_replace=replace)
+    id3file = eyed3.load(outfile)
+    if not id3file.tag:
+        id3file.initTag()
+    id3file.tag.clear()
+    id3file.tag.artist = song['artist']
+    id3file.tag.title = song['title']
+    id3file.tag.comment = song['type']
+    id3file.tag.album = song['anime']
+    id3file.tag.save()
     if verbose:
         print(f"\t- Downloaded {song['anime']} {song['type']} and saved to {outfile}")
 print("That should be all of the songs unless some weren't uploaded as mp3. Cya!")
