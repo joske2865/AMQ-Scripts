@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.2.2
+// @version      3.2.3
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -1230,70 +1230,72 @@ function setup() {
 
     // get song data on answer reveal
     let answerResultsListener = new Listener("answer results", (result) => {
-        let newSong = {
-            gameMode: quiz.gameMode,
-            name: result.songInfo.songName,
-            artist: result.songInfo.artist,
-            anime: result.songInfo.animeNames,
-            annId: result.songInfo.annId,
-            songNumber: parseInt($("#qpCurrentSongCount").text()),
-            activePlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
-            totalPlayers: Object.values(quiz.players).length,
-            type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
-            urls: result.songInfo.urlMap,
-            startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
-            videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
-            players: Object.values(result.players)
-                .sort((a, b) => {
-                    if (a.answerNumber !== undefined) {
-                        return a.answerNumber - b.answerNumber;
-                    }
-                    let p1name = quiz.players[a.gamePlayerId]._name;
-                    let p2name = quiz.players[b.gamePlayerId]._name;
-                    return p1name.localeCompare(p2name);
-                })
-                .map((tmpPlayer) => {
-                    let tmpObj = {
-                        name: quiz.players[tmpPlayer.gamePlayerId]._name,
-                        score: tmpPlayer.score,
-                        correctGuesses: (quiz.gameMode !== "Standard" && quiz.gameMode !== "Ranked") ? tmpPlayer.correctGuesses : tmpPlayer.score,
-                        correct: tmpPlayer.correct,
-                        answer: quiz.players[tmpPlayer.gamePlayerId].avatarSlot.$answerContainerText.text(),
-                        guessTime: amqAnswerTimesUtility.playerTimes[tmpPlayer.gamePlayerId],
-                        active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled,
-                        position: tmpPlayer.position,
-                        positionSlot: tmpPlayer.positionSlot
-                    };
-                    return tmpObj;
-                }),
-            fromList: Object.values(result.players)
-                .filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0 && tmpPlayer.listStatus !== null)
-                .sort((a, b) => {
-                    let p1name = quiz.players[a.gamePlayerId]._name;
-                    let p2name = quiz.players[b.gamePlayerId]._name;
-                    return p1name.localeCompare(p2name);
-                })
-                .map((tmpPlayer) => {
-                    let tmpObj = {
-                        name: quiz.players[tmpPlayer.gamePlayerId]._name,
-                        listStatus: tmpPlayer.listStatus,
-                        score: (tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? tmpPlayer.showScore : null
-                    };
-                    return tmpObj;
-                })
-        };
-        let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
-            return tmpPlayer._name === selfName && tmpPlayer.avatarSlot._disabled === false
-        });
-        if (findPlayer !== undefined) {
-            let playerIdx = Object.values(result.players).findIndex(tmpPlayer => {
-                return findPlayer.gamePlayerId === tmpPlayer.gamePlayerId
-            });
-            newSong.correct = result.players[playerIdx].correct;
-            newSong.selfAnswer = quiz.players[findPlayer.gamePlayerId].avatarSlot.$answerContainerText.text();
-        }
-        addTableEntry(newSong);
-        exportData.push(newSong);
+    	setTimeout(() => {
+	        let newSong = {
+	            gameMode: quiz.gameMode,
+	            name: result.songInfo.songName,
+	            artist: result.songInfo.artist,
+	            anime: result.songInfo.animeNames,
+	            annId: result.songInfo.annId,
+	            songNumber: parseInt($("#qpCurrentSongCount").text()),
+	            activePlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
+	            totalPlayers: Object.values(quiz.players).length,
+	            type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
+	            urls: result.songInfo.urlMap,
+	            startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
+	            videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
+	            players: Object.values(result.players)
+	                .sort((a, b) => {
+	                    if (a.answerNumber !== undefined) {
+	                        return a.answerNumber - b.answerNumber;
+	                    }
+	                    let p1name = quiz.players[a.gamePlayerId]._name;
+	                    let p2name = quiz.players[b.gamePlayerId]._name;
+	                    return p1name.localeCompare(p2name);
+	                })
+	                .map((tmpPlayer) => {
+	                    let tmpObj = {
+	                        name: quiz.players[tmpPlayer.gamePlayerId]._name,
+	                        score: tmpPlayer.score,
+	                        correctGuesses: (quiz.gameMode !== "Standard" && quiz.gameMode !== "Ranked") ? tmpPlayer.correctGuesses : tmpPlayer.score,
+	                        correct: tmpPlayer.correct,
+	                        answer: quiz.players[tmpPlayer.gamePlayerId].avatarSlot.$answerContainerText.text(),
+	                        guessTime: amqAnswerTimesUtility.playerTimes[tmpPlayer.gamePlayerId],
+	                        active: !quiz.players[tmpPlayer.gamePlayerId].avatarSlot._disabled,
+	                        position: tmpPlayer.position,
+	                        positionSlot: tmpPlayer.positionSlot
+	                    };
+	                    return tmpObj;
+	                }),
+	            fromList: Object.values(result.players)
+	                .filter((tmpPlayer) => tmpPlayer.listStatus !== undefined && tmpPlayer.listStatus !== false && tmpPlayer.listStatus !== 0 && tmpPlayer.listStatus !== null)
+	                .sort((a, b) => {
+	                    let p1name = quiz.players[a.gamePlayerId]._name;
+	                    let p2name = quiz.players[b.gamePlayerId]._name;
+	                    return p1name.localeCompare(p2name);
+	                })
+	                .map((tmpPlayer) => {
+	                    let tmpObj = {
+	                        name: quiz.players[tmpPlayer.gamePlayerId]._name,
+	                        listStatus: tmpPlayer.listStatus,
+	                        score: (tmpPlayer.showScore !== 0 && tmpPlayer.showScore !== null) ? tmpPlayer.showScore : null
+	                    };
+	                    return tmpObj;
+	                })
+	        };
+	        let findPlayer = Object.values(quiz.players).find((tmpPlayer) => {
+	            return tmpPlayer._name === selfName && tmpPlayer.avatarSlot._disabled === false
+	        });
+	        if (findPlayer !== undefined) {
+	            let playerIdx = Object.values(result.players).findIndex(tmpPlayer => {
+	                return findPlayer.gamePlayerId === tmpPlayer.gamePlayerId
+	            });
+	            newSong.correct = result.players[playerIdx].correct;
+	            newSong.selfAnswer = quiz.players[findPlayer.gamePlayerId].avatarSlot.$answerContainerText.text();
+	        }
+	        addTableEntry(newSong);
+	        exportData.push(newSong);
+	    },0);
     });
 
     // reset songs on returning to lobby
