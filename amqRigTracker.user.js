@@ -456,7 +456,15 @@ function writeResultsToChat() {
 function displayMissedList() {
     let inQuiz = Object.values(quiz.players).some(player => player.isSelf === true);
     if ($("#smRigTrackerMissedOwn").prop("checked") && !$("#smRigTrackerMissedAll").prop("checked") && inQuiz && quiz.gameMode !== "Ranked") {
-        gameChat.systemMessage(`You missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from your own list`);
+        if (missedFromOwnList === 0){
+            gameChat.systemMessage(`No misses. GG`);
+            // Just change anything on the message, it's your game after all.
+            // If you want the classic "You missed 0 songs" message, either edit the message or remove the if-else statement 
+        }
+        else{
+            gameChat.systemMessage(`You missed ${missedFromOwnList === 1 ? missedFromOwnList + " song" : missedFromOwnList + " songs"} from your own list`);
+            // Quick guide: If you only missed one, customize the " song" and if it's two or more, customize " songs". You can re-arrange the orders though.
+        }
     }
     if ($("#smRigTrackerMissedAll").prop("checked") && $("#smRigTrackerMissedOwn").prop("checked") && quiz.gameMode !== "Ranked") {
         for (let id in playerData) {
