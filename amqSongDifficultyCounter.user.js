@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3
+// @version      1.3.0
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
@@ -784,7 +784,10 @@ function setup() {
             }
         }
         // return to lobby vote
-        quiz.startReturnLobbyVote();
+        socket.sendCommand({
+            type: "quiz",
+            command: "start return lobby vote",
+        });
         saveCounterData();
     });
 
