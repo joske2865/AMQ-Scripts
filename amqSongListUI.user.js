@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.2.3
+// @version      3.3.0
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -49,7 +49,8 @@ let savedSettings = {
     answers: false,
     guesses: false,
     samplePoint: false,
-    guessTime: true
+    guessTime: true,
+    difficulty: true
 };
 
 function createListWindow() {
@@ -289,6 +290,7 @@ function addTableHeader() {
     let answerCol = $(`<td class="selfAnswer"><b>Answer</b></td>`);
     let guessesCol = $(`<td class="guessesCounter"><b>Guesses</b></td>`);
     let sampleCol = $(`<td class="samplePoint"><b>Sample</b></td>`);
+    let diffCol = $(`<td class="difficulty"><b>Difficulty</b></td>`);
 
     if ($("#slShowSongNumber").prop("checked")) {
         numberCol.show();
@@ -359,6 +361,13 @@ function addTableHeader() {
         sampleCol.hide();
     }
 
+    if ($("#slShowDifficulty").prop("checked")) {
+        diffCol.show();
+    }
+    else {
+        diffCol.hide();
+    }
+
     header.append(numberCol);
     header.append(nameCol);
     header.append(artistCol);
@@ -369,6 +378,7 @@ function addTableHeader() {
     header.append(answerCol);
     header.append(guessesCol);
     header.append(sampleCol);
+    header.append(diffCol);
     listWindowTable.append(header);
 }
 
@@ -421,6 +431,7 @@ function addTableEntry(newSong) {
     // Add an if-else for if it shouldn't display guess time based on savedSettings.guessTime
     let guessesCounter = $(`<td class="guessesCounter"></td>`).text(guesses.length + "/" + newSong.activePlayers + " (" + parseFloat((guesses.length/newSong.activePlayers*100).toFixed(2)) + "%)");
     let samplePoint = $(`<td class="samplePoint"></td>`).text(formatSamplePoint(newSong.startSample, newSong.videoLength));
+    let difficulty = $(`<td class="samplePoint"></td>`).text(newSong.difficulty + (Number.isInteger(newSong.difficulty) ? "%" : ""));
 
     if ($("#slShowSongNumber").prop("checked")) {
         songNumber.show();
@@ -491,6 +502,13 @@ function addTableEntry(newSong) {
         samplePoint.hide();
     }
 
+    if ($("#slShowDifficulty").prop("checked")) {
+        difficulty.show();
+    }
+    else {
+        difficulty.hide();
+    }
+
     newRow.append(songNumber);
     newRow.append(songName);
     newRow.append(artist);
@@ -501,6 +519,7 @@ function addTableEntry(newSong) {
     newRow.append(selfAnswer);
     newRow.append(guessesCounter);
     newRow.append(samplePoint);
+    newRow.append(difficulty);
     listWindowTable.append(newRow);
     updateCorrect(newRow);
 }
@@ -633,6 +652,8 @@ function updateInfo(song) {
     let infoRow3 = $(`<div class="infoRow"></div>`);
     let infoRow4 = $(`<div class="infoRow"></div>`);
     let infoRow5 = $(`<div class="infoRow"></div>`);
+    let infoRow6 = $(`<div class="infoRow"></div>`);
+    let infoRow7 = $(`<div class="infoRow"></div>`);
 
     let guesses = song.players.filter((tmpPlayer) => tmpPlayer.correct === true);
 
@@ -644,11 +665,19 @@ function updateInfo(song) {
         <b>Anime English</b> <i class="fa fa-files-o clickAble" id="animeEnglishCopy"></i></h5><p>${song.anime.english}</p></div>`);
     let animeRomajiContainer = $(`<div id="animeRomajiContainer"><h5>
         <b>Anime Romaji</b> <i class="fa fa-files-o clickAble" id="animeRomajiCopy"></i></h5><p>${song.anime.romaji}</p></div>`);
+    let altTitlesContainer = $(`<div id="altTitlesContainer"><h5>
+        <b>All Working Titles</b></h5><p style="margin-bottom: 0;">${song.altAnswers.join(`</p><p style="margin-bottom: 0;">`)}</p></div>`);
+    let difficultyContainer = $(`<div id="difficultyContainer"><h5><b>Song Difficulty</b></h5><p>${song.difficulty}%</p></div>`);
     let typeContainer = $(`<div id="typeContainer"><h5><b>Type</b></h5><p>${song.type}</p></div>`);
     let sampleContainer = $(`<div id="sampleContainer"><h5><b>Sample Point</b></h5><p>${formatSamplePoint(song.startSample, song.videoLength)}</p></div>`);
     let annIdContainer = $(`<div id="annIdContainer"><h5 style="margin-bottom: 0;"><b>ANN ID: </b>${song.annId} <i class="fa fa-files-o clickAble" id="annIdCopy"></i></h5>
             <a target="_blank" href="https://www.animenewsnetwork.com/encyclopedia/anime.php?id=${song.annId}">https://www.animenewsnetwork.com/encyclopedia/anime.php?id=${song.annId}</a>
         </div>`);
+    let animeInfoLinksContainer = $(`<div id="animeInfoLinksContainer"><h5><b>MAL/Anilist/Kitsu IDs</b></h5><p style="margin-bottom: 0;">`
+        .concat(Number.isInteger(song.siteIds.malId) ? `</p>MAL ID: <a href="https://www.myanimelist.net/anime/${song.siteIds.malId}">${song.siteIds.malId}</a><p style="margin-bottom: 0;"` : ``)
+        .concat(Number.isInteger(song.siteIds.aniListId) ? `</p>Anilist ID: <a href="https://www.anilist.co/anime/${song.siteIds.aniListId}">${song.siteIds.aniListId}</a><p style="margin-bottom: 0;">` : ``)
+        .concat(Number.isInteger(song.siteIds.kitsuId) ? `</p>Kitsu ID: <a href="https://kitsu.io/anime/${song.siteIds.kitsuId}">${song.siteIds.kitsuId}</a><p style="margin-bottom: 0;">` : ``)
+        .concat(`</p>`))
     let guessedContainer = $(`<div id="guessedContainer"></div>`)
         .html(`<h5><b>Guessed<br>${guesses.length}/${song.activePlayers} (${parseFloat((guesses.length/song.activePlayers*100).toFixed(2))}%)</b></h5>`);
     let fromListContainer = $(`<div id="fromListContainer"></div>`)
@@ -665,15 +694,22 @@ function updateInfo(song) {
     infoRow2.append(animeRomajiContainer);
     infoRow2.append(sampleContainer);
 
-    // row 3: URLs
-    infoRow3.append(urlContainer);
+    // row 3: all alt titles
+    infoRow3.append(altTitlesContainer);
+    infoRow3.append(difficultyContainer);
 
-    // row 4: ANN ID info and ANN URL
-    infoRow4.append(annIdContainer);
+    // row 4: URLs
+    infoRow4.append(urlContainer);
 
-    // row 5: guessed and rig lists
-    infoRow5.append(guessedContainer);
-    infoRow5.append(fromListContainer);
+    // row 5: ANN ID info and ANN URL
+    infoRow5.append(annIdContainer);
+
+    // row 6: other anime info site links
+    infoRow6.append(animeInfoLinksContainer);
+
+    // row 7: guessed and rig lists
+    infoRow7.append(guessedContainer);
+    infoRow7.append(fromListContainer);
 
     let listContainer;
 
@@ -748,6 +784,8 @@ function updateInfo(song) {
     infoWindow.panels[0].panel.append(infoRow3);
     infoWindow.panels[0].panel.append(infoRow4);
     infoWindow.panels[0].panel.append(infoRow5);
+    infoWindow.panels[0].panel.append(infoRow6);
+    infoWindow.panels[0].panel.append(infoRow7);
 
     $("#songNameCopy").click(function () {
         $("#copyBox").val(song.name).select();
@@ -824,15 +862,15 @@ function createSettingsWindow() {
     });
     settingsWindow.addPanel({
         width: 1.0,
-        height: 125,
+        height: 130,
         id: "slListSettings"
     });
     settingsWindow.addPanel({
         width: 1.0,
-        height: 120,
+        height: 160,
         position: {
             x: 0,
-            y: 125
+            y: 135
         },
         id: "slTableSettings"
     });
@@ -841,7 +879,7 @@ function createSettingsWindow() {
         height: 50,
         position: {
             x: 0,
-            y: 245 // 125 + 120
+            y: 300 // 125 + 120
         },
         id: "slGuessTimeSettings"
     });
@@ -1148,6 +1186,25 @@ function createSettingsWindow() {
                 )
                 .append($("<label>Sample Point</label>"))
             )
+            .append($(`<div class="slCheckbox"></div>`)
+                .append($(`<div class="customCheckbox"></div>`)
+                    .append($("<input id='slShowDifficulty' type='checkbox'>")
+                        .prop("checked", false)
+                        .click(function () {
+                            if ($(this).prop("checked")) {
+                                $(".difficulty").show();
+                            }
+                            else {
+                                $(".difficulty").hide();
+                            }
+                            savedSettings.samplePoint = $(this).prop("checked");
+                            saveSettings();
+                        })
+                    )
+                    .append($("<label for='slShowDifficulty'><i class='fa fa-check' aria-hidden='true'></i></label>"))
+                )
+                .append($("<label>Difficulty</label>"))
+            )
         )
 
         settingsWindow.panels[2].panel
@@ -1205,6 +1262,7 @@ function updateSettings() {
     $("#slShowSelfAnswer").prop("checked", savedSettings.answers);
     $("#slShowGuesses").prop("checked", savedSettings.guesses);
     $("#slShowSamplePoint").prop("checked", savedSettings.samplePoint);
+    $("#slShowDifficulty").prop("checked", savedSettings.difficulty);
     $("#slShowGuessTime").prop("checked", savedSettings.guessTime);
 }
 
@@ -1231,6 +1289,7 @@ function setup() {
     // get song data on answer reveal
     let answerResultsListener = new Listener("answer results", (result) => {
     	setTimeout(() => {
+
 	        let newSong = {
 	            gameMode: quiz.gameMode,
 	            name: result.songInfo.songName,
@@ -1242,6 +1301,14 @@ function setup() {
 	            totalPlayers: Object.values(quiz.players).length,
 	            type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
 	            urls: result.songInfo.urlMap,
+	            siteIds: result.songInfo.siteIds,
+	            difficulty: result.songInfo.animeDifficulty,
+	            animeType: result.songInfo.animeType,
+	            animeScore: result.songInfo.animeScore,
+	            vintage: result.songInfo.vintage,
+	            tags: result.songInfo.animeTags,
+	            genre: result.songInfo.animeGenre,
+	            altAnswers: [...new Set(result.songInfo.altAnimeNames.concat(result.songInfo.altAnimeNamesAnswers))],
 	            startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
 	            videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
 	            players: Object.values(result.players)
@@ -1587,10 +1654,20 @@ function setup() {
         #sampleContainer {
             width: 18%;
         }
+        #altTitlesContainer {
+            width: 78%;
+            overflow-wrap: break-word;
+        }
+        #difficultyContainer {
+            width: 18%;
+        }
         #urlContainer {
             width: 100%;
         }
         #annIdContainer {
+            width: 100%;
+        }
+        #animeInfoLinksContainer {
             width: 100%;
         }
         #guessedListLeft {
