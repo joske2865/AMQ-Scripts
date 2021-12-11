@@ -1302,7 +1302,7 @@ function setup() {
 	            type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
 	            urls: result.songInfo.urlMap,
 	            siteIds: result.songInfo.siteIds,
-	            difficulty: result.songInfo.animeDifficulty,
+	            difficulty: result.songInfo.animeDifficulty.toFixed(1),
 	            animeType: result.songInfo.animeType,
 	            animeScore: result.songInfo.animeScore,
 	            vintage: result.songInfo.vintage,
