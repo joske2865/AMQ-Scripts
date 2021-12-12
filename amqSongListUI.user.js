@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.3.0
+// @version      3.3.1
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -1302,7 +1302,7 @@ function setup() {
 	            type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
 	            urls: result.songInfo.urlMap,
 	            siteIds: result.songInfo.siteIds,
-	            difficulty: result.songInfo.animeDifficulty,
+	            difficulty: result.songInfo.animeDifficulty.toFixed(1),
 	            animeType: result.songInfo.animeType,
 	            animeScore: result.songInfo.animeScore,
 	            vintage: result.songInfo.vintage,
