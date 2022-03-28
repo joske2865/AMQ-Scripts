@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3.0
+// @version      1.3.1
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
@@ -42,9 +42,11 @@ let curDiffRange = [0, 1]; // current selected difficulty
 let curType = 0; // current selected type, index of types array
 let types = []; // types ("opening", "ending" and "insert")
 
+let minYear = 1944;
+let maxYear = 2022;
 let yearRanges = []; // year ranges array for counting by years
 let yearIndex = 0; // current index of the year ranges array
-let curYearRange = [1944, 2021]; // default year range
+let curYearRange = [minYear, maxYear]; // default year range
 
 // difficulty sliders
 let openingsDiffSlider;
@@ -620,8 +622,8 @@ function updateYearRange() {
 }
 
 function splitYears() {
-    // divide into 5 on the initial 1944, 2021 split
-    if (curYearRange[0] === 1944 && curYearRange[1] === 2021) {
+    // divide into 5 on the initial 1944, 2022 split
+    if (curYearRange[0] === minYear && curYearRange[1] === maxYear) {
         let splits = [1995, 2005, 2010, 2015];
         for (let i = 0; i < splits.length; i++) {
             if (i === 0) {
@@ -645,9 +647,9 @@ function splitYears() {
 
 // reset year ranges and yearIndex
 function resetYears() {
-    yearRanges = [[1944, 2021]];
+    yearRanges = [[minYear, maxYear]];
     yearIndex = 0;
-    curYearRange = [1944, 2021];
+    curYearRange = [minYear, maxYear];
     countingAdvanced = false;
 }
 
