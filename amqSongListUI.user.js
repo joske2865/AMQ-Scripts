@@ -1310,7 +1310,7 @@ function setup() {
 	            genre: result.songInfo.animeGenre,
 	            altAnswers: [...new Set(result.songInfo.altAnimeNames.concat(result.songInfo.altAnimeNamesAnswers))],
 	            startSample: quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].startPoint,
-	            videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player.find("video")[0].duration.toFixed(2)),
+	            videoLength: parseFloat(quizVideoController.moePlayers[quizVideoController.currentMoePlayerId].$player[0].duration.toFixed(2)),
 	            players: Object.values(result.players)
 	                .sort((a, b) => {
 	                    if (a.answerNumber !== undefined) {
