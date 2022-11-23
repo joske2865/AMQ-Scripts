@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.3.2
+// @version      3.3.3
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -1360,6 +1360,8 @@ function setup() {
 	            newSong.correct = result.players[playerIdx].correct;
 	            newSong.selfAnswer = quiz.players[findPlayer.gamePlayerId].avatarSlot.$answerContainerText.text();
 	        }
+		// check correctness for Nexus games
+		if (result.players[0].score === null) newSong.correct = result.players[0].correct === true;
 	        addTableEntry(newSong);
 	        exportData.push(newSong);
 	    },0);
