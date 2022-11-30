@@ -1360,8 +1360,10 @@ function setup() {
 	            newSong.correct = result.players[playerIdx].correct;
 	            newSong.selfAnswer = quiz.players[findPlayer.gamePlayerId].avatarSlot.$answerContainerText.text();
 	        }
-		// check correctness for Nexus games
-		if (result.players[0].score === null) newSong.correct = result.players[0].correct;
+		if (quiz.gameMode === "Nexus") {
+                    newSong.correct = result.players[0].correct;
+                    newSong.selfAnswer = quiz.avatarSlotMap[1].avatarSlot.$answerContainerText.text();
+            	}
 	        addTableEntry(newSong);
 	        exportData.push(newSong);
 	    },0);
