@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3.4
+// @version      1.4.0
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -557,42 +557,73 @@ function setup() {
     });
 
     // Reset data when joining a lobby
-    joinLobbyListener = new Listener("Join Game", (payload) => {
-        if (payload.error) {
-            return;
-        }
-        if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
-            answerResultsRigTracker.bindListener();
-            quizEndRigTracker.bindListener();
-            returnLobbyVoteListener.bindListener();
-        }
-        else {
-            answerResultsRigTracker.unbindListener();
-            quizEndRigTracker.unbindListener();
-            returnLobbyVoteListener.unbindListener();
-        }
-        clearPlayerData();
-        clearScoreboard();
-    });
+    joinLobbyListener = new Listener("Join Game", (payload) => initialiseGame(payload));
 
     // Reset data when spectating a lobby
-    spectateLobbyListener = new Listener("Spectate Game", (payload) => {
+    spectateLobbyListener = new Listener("Spectate Game", (payload) => initialiseGame(payload));
+
+    function initialiseGame(payload){
         if (payload.error) {
             return;
         }
+        clearPlayerData();
+        clearScoreboard();
         if ($("#smRigTracker").prop("checked") && payload.settings.gameMode !== "Ranked") {
             answerResultsRigTracker.bindListener();
             quizEndRigTracker.bindListener();
             returnLobbyVoteListener.bindListener();
+            initialisePlayers(payload.quizState.players);
+            window.setTimeout(() => initialiseRig(payload.quizState.songHistory), 0);
+            //forgive me lord, for I have sinned
+            //add timeout because this actually ends up happening before the room is ready
         }
         else {
             answerResultsRigTracker.unbindListener();
             quizEndRigTracker.unbindListener();
             returnLobbyVoteListener.unbindListener();
         }
-        clearPlayerData();
-        clearScoreboard();
-    });
+    }
+
+    function initialisePlayers(players){
+        for(let id in players){
+            let gamePlayerId = players[id].gamePlayerId;
+            playerData[gamePlayerId] = {
+                rig: 0,
+                score: 0,
+                missedList: 0,
+                name: players[id].name
+            }
+        }
+        playerDataReady = true;
+    }
+    function initialiseRig(songHistory){
+        initialiseScoreboard();
+        songHistory.forEach(outer => {
+            let song = outer.historyInfo
+            let playersWithSongOnList = song.listStates
+                .map(state => state.name)
+                .map(name => getPlayerByName(name))
+                .filter(player => undefined !== player);
+
+            let correctGuessPlayers = song.correctGuessPlayers
+                .map(name => getPlayerByName(name))
+                .filter(player => undefined !== player);
+
+            let playersWhoMissedRig = playersWithSongOnList.filter(player =>
+                !correctGuessPlayers
+                    .find(player2 => player2.name === player.name));
+
+            playersWithSongOnList.forEach(player => player.rig++);
+            correctGuessPlayers.forEach(player => player.score++);
+            playersWhoMissedRig.forEach(player => player.missedList++);
+        });
+        writeRigToScoreboard();
+        scoreboardReady = true;
+    }
+
+    function getPlayerByName(name){
+        return Object.values(playerData).find(player => player.name === name)
+    }
 
     // Enable or disable rig tracking on checking or unchecking the rig tracker checkbox
     $("#smRigTracker").click(function () {
