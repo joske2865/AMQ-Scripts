@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.3.4
+// @version      3.3.5
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -674,7 +674,7 @@ function updateInfo(song) {
             <a target="_blank" href="https://www.animenewsnetwork.com/encyclopedia/anime.php?id=${song.annId}">https://www.animenewsnetwork.com/encyclopedia/anime.php?id=${song.annId}</a>
         </div>`);
     let animeInfoLinksContainer = $(`<div id="animeInfoLinksContainer"><h5><b>MAL/Anilist/Kitsu IDs</b></h5><p style="margin-bottom: 0;">`
-        .concat(Number.isInteger(song.siteIds.malId) ? `</p>MAL ID: <a target="_blank" href="https://www.myanimelist.net/anime/${song.siteIds.malId}">${song.siteIds.malId}</a><p style="margin-bottom: 0;"` : ``)
+        .concat(Number.isInteger(song.siteIds.malId) ? `</p>MAL ID: <a target="_blank" href="https://myanimelist.net/anime/${song.siteIds.malId}">${song.siteIds.malId}</a><p style="margin-bottom: 0;"` : ``)
         .concat(Number.isInteger(song.siteIds.aniListId) ? `</p>Anilist ID: <a target="_blank" href="https://www.anilist.co/anime/${song.siteIds.aniListId}">${song.siteIds.aniListId}</a><p style="margin-bottom: 0;">` : ``)
         .concat(Number.isInteger(song.siteIds.kitsuId) ? `</p>Kitsu ID: <a target="_blank" href="https://kitsu.io/anime/${song.siteIds.kitsuId}">${song.siteIds.kitsuId}</a><p style="margin-bottom: 0;">` : ``)
         .concat(`</p>`))
