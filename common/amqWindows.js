@@ -1,3 +1,10 @@
+// AMQ Window Script
+// This code is fetched automatically
+// Do not attempt to add it to tampermonkey
+
+if (typeof Listener === "undefined") return;
+windowSetup();
+
 class AMQWindow {
     constructor(data) {
         this.id = data.id === undefined ? "" : data.id;
@@ -290,7 +297,7 @@ class AMQWindowPanel {
     }
 
     setPositionY(newPositionY) {
-        this.position.y = newPositiony;
+        this.position.y = newPositionY;
         this.updatePosition();
     }
 
@@ -333,8 +340,8 @@ class AMQWindowPanel {
     }
 
     updateScrollable() {
-        this.panel.css("overflow-x", this.scrollable.x === true ? "auto" : "hidden")
-        this.panel.css("overflow-y", this.scrollable.y === true ? "auto" : "hidden")
+        this.panel.css("overflow-x", this.scrollable.x === true ? "auto" : "hidden");
+        this.panel.css("overflow-y", this.scrollable.y === true ? "auto" : "hidden");
     }
 
     show() {
@@ -367,9 +374,8 @@ class AMQWindowPanel {
 }
 
 function addStyle(css) {
-    let head = document.head;
     let style = document.createElement("style");
-    head.appendChild(style);
+    document.head.appendChild(style);
     style.type = "text/css";
     style.id = "customWindowStyle";
     style.appendChild(document.createTextNode(css));
@@ -437,17 +443,3 @@ function windowSetup() {
         `);
     }
 }
-
-// Wait until the LOADING... screen is hidden and load script
-let windowLoadInterval = setInterval(() => {
-    // don't load on login page
-    if (document.getElementById("startPage")) {
-        clearInterval(windowLoadInterval);
-    }
-    else {
-        if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-            windowSetup();
-            clearInterval(windowLoadInterval);
-        }
-    }
-}, 500);
