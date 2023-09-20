@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3.1
+// @version      1.3.2
 // @description  Prints a copyable list to console at the end of each game
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -10,14 +10,12 @@
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongList.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 

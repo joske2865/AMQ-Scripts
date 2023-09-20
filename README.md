@@ -11,7 +11,7 @@ Requires Tampermonkey browser extension (Greasemonkey doesn't work).
 
 Scripts:
 - [Song List UI](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongListUI.user.js)
-- [Song List](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongList.user.js)
+- ~[Song List](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongList.user.js)~ Deprecated, use Song List UI instead
 - [Rig Tracker](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js)
 - [Rig Tracker Lite](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js)
 - ~[Team Randomizer](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqTeamRandomizer.user.js)~ Deprecated, teams are now an official game mode
@@ -72,29 +72,28 @@ Features:
 Known bugs:
 - None
 
-### [Song List (amqSongList.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongList.user.js)
+### ~[Song List (amqSongList.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongList.user.js)~
 
-Adds a button which copies the current song info in JSON format to the user's clipboard, this button can be found at the top right of the quiz
+~Adds a button which copies the current song info in JSON format to the user's clipboard, this button can be found at the top right of the quiz~
 
-Features:
-- Outputs each individual song info object to the browser's console
-- Outputs the entire song list to the browser's console at the end of the game
-- Copy JSON to clipboard button: copies the list in JSON format to the user's clipboard, which contains info such as:
-  - The number of the song
-  - Name of the song
-  - Artist of the song
-  - English and Romaji anime titles
-  - Song type
-  - ANN ID of the anime
-  - Number of players who guessed the song
-  - Number of total (active) players
-  - Start sample of the song
-  - Total length of the song
-  - URLs for both the webm and mp3 (Host priority: catbox > animethemes > openings.moe, resolution priority for webm: 720p > 480p)
-- Example of the JSON output: https://pastebin.com/LmD7k1pW (Note: this data can *not* be used with the [AMQ Song List Viewer](https://thejoseph98.github.io/AMQ-Song-List-Viewer/))
+~Features:~
+- ~Outputs each individual song info object to the browser's console~
+- ~Outputs the entire song list to the browser's console at the end of the game~
+- ~Copy JSON to clipboard button: copies the list in JSON format to the user's clipboard, which contains info such as:~
+  - ~The number of the song~
+  - ~Name of the song~
+  - ~Artist of the song~
+  - ~English and Romaji anime titles~
+  - ~Song type~
+  - ~ANN ID of the anime~
+  - ~Number of players who guessed the song~
+  - ~Number of total (active) players~
+  - ~Start sample of the song~
+  - ~Total length of the song~
+  - ~URLs for both the webm and mp3 (Host priority: catbox > animethemes > openings.moe, resolution priority for webm: 720p > 480p)~
+- ~Example of the JSON output: https://pastebin.com/LmD7k1pW (Note: this data can *not* be used with the [AMQ Song List Viewer](https://thejoseph98.github.io/AMQ-Song-List-Viewer/))~
 
-Known bugs:
-- None
+Deprecated, use Song List UI instead
 
 ### [Rig Tracker (amqRigTracker.user.js)](https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js)
 
