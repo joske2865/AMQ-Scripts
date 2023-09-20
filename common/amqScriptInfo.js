@@ -74,9 +74,9 @@ function AMQ_addScriptData(metadata) {
     AMQ_createInstalledWindow();
     $("#installedListContainer").append($("<div></div>")
         .append($("<h4></h4>")
-            .append(`<i class="fa fa-caret-right"></i>`)
-            .append(`<span class="title"></span>`).text(`${metadata.name || "Unknown"} by ${metadata.author || "Unknown"}`)
-            .append(`<span class="version"></span>`).text(metadata.version || "")
+            .append($(`<i class="fa fa-caret-right"></i>`))
+            .append($(`<span></span>`).text(`${metadata.name || "Unknown"} by ${metadata.author || "Unknown"}`))
+            .append($(`<span class="version"></span>`).text(metadata.version || ""))
             .click(function () {
                 let selector = $(this).next();
                 if (selector.is(":visible")) {
@@ -99,7 +99,7 @@ function AMQ_addScriptData(metadata) {
 
 function AMQ_addStyle(css) {
     let style = document.createElement("style");
-    document.head.appendChild(style);
     style.type = "text/css";
     style.appendChild(document.createTextNode(css));
+    document.head.appendChild(style);
 }
