@@ -1,6 +1,7 @@
-/*
-Creates the installed scripts window if it doesn't exist and adds "Installed Userscripts" button to the main page and settings
-*/
+// Creates the installed scripts window if it doesn't exist and adds "Installed Userscripts" button to the main page and settings
+// This code is fetched automatically
+// Do not attempt to add it to tampermonkey
+
 function AMQ_createInstalledWindow() {
     if (!window.setupDocumentDone) return;
     if ($("#installedModal").length === 0) {
@@ -42,6 +43,14 @@ function AMQ_createInstalledWindow() {
                 width: 95%;
                 margin: auto;
             }
+            .descriptionContainer {
+                font-weight: bold;
+                cursor: pointer;
+            }
+            .descriptionContainer .version {
+                opacity: .5;
+                margin-left: 10px;
+            }
             .descriptionContainer img {
                 width: 80%;
                 margin: 10px 10%;
@@ -57,6 +66,7 @@ Example metadata object
 metadataObj = {
     name: "AMQ Song List",
     author: "TheJoseph98",
+    version: "1.0"
     description: "Adds a song list to the game which can be accessed mid-quiz by clicking the list icon in the top right corner"
 }
 */
@@ -64,9 +74,9 @@ function AMQ_addScriptData(metadata) {
     AMQ_createInstalledWindow();
     $("#installedListContainer").append($("<div></div>")
         .append($("<h4></h4>")
-            .html('<i class="fa fa-caret-right"></i> ' + (metadata.name !== undefined ? metadata.name : "Unknown") + " by " + (metadata.author !== undefined ? metadata.author : "Unknown"))
-            .css("font-weight", "bold")
-            .css("cursor", "pointer")
+            .append(`<i class="fa fa-caret-right"></i>`)
+            .append(`<span class="title"></span>`).text(`${metadata.name || "Unknown"} by ${metadata.author || "Unknown"}`)
+            .append(`<span class="version"></span>`).text(metadata.version || "")
             .click(function () {
                 let selector = $(this).next();
                 if (selector.is(":visible")) {
@@ -81,16 +91,15 @@ function AMQ_addScriptData(metadata) {
         )
         .append($("<div></div>")
             .addClass("descriptionContainer")
-            .html(metadata.description !== undefined ? metadata.description : "No description provided")
+            .html(metadata.description || "No description provided")
             .hide()
         )
     )
 }
 
 function AMQ_addStyle(css) {
-    let head = document.head;
     let style = document.createElement("style");
-    head.appendChild(style);
+    document.head.appendChild(style);
     style.type = "text/css";
     style.appendChild(document.createTextNode(css));
 }
