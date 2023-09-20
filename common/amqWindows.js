@@ -373,73 +373,68 @@ class AMQWindowPanel {
     }
 }
 
-function addStyle(css) {
+function windowSetup() {
+    if ($("#customWindowStyle").length) return;
     let style = document.createElement("style");
-    document.head.appendChild(style);
     style.type = "text/css";
     style.id = "customWindowStyle";
-    style.appendChild(document.createTextNode(css));
-}
-
-function windowSetup() {
-    if ($("#customWindowStyle").length === 0) {
-        addStyle(`
-            .customWindow {
-                overflow-y: hidden;
-                top: 0px;
-                left: 0px;
-                margin: 0px;
-                background-color: #424242;
-                border: 1px solid rgba(27, 27, 27, 0.2);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-                user-select: text;
-                display: none;
-            }
-            .draggableWindow {
-                cursor: move;
-            }
-            .customWindowBody {
-                width: 100%;
-                overflow-y: auto;
-            }
-            .customWindowContent {
-                width: 100%;
-                position: absolute;
-                top: 0px;
-            }
-            .customWindow .close {
-                font-size: 32px;
-            }
-            .windowResizers {
-                width: 100%;
-                height: 100%;
-            }
-            .windowResizer {
-                width: 10px;
-                height: 10px;
-                position: absolute;
-                z-index: 100;
-            }
-            .windowResizer.top-left {
-                top: 0px;
-                left: 0px;
-                cursor: nwse-resize;
-            }
-            .windowResizer.top-right {
-                top: 0px;
-                right: 0px;
-                cursor: nesw-resize;
-            }
-            .windowResizer.bottom-left {
-                bottom: 0px;
-                left: 0px;
-                cursor: nesw-resize;
-            }
-            .windowResizer.bottom-right {
-                bottom: 0px;
-                right: 0px;
-                cursor: nwse-resize;
-            }
-        `);
-    }
+    style.appendChild(document.createTextNode(`
+        .customWindow {
+            overflow-y: hidden;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            background-color: #424242;
+            border: 1px solid rgba(27, 27, 27, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            user-select: text;
+            display: none;
+        }
+        .draggableWindow {
+            cursor: move;
+        }
+        .customWindowBody {
+            width: 100%;
+            overflow-y: auto;
+        }
+        .customWindowContent {
+            width: 100%;
+            position: absolute;
+            top: 0px;
+        }
+        .customWindow .close {
+            font-size: 32px;
+        }
+        .windowResizers {
+            width: 100%;
+            height: 100%;
+        }
+        .windowResizer {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            z-index: 100;
+        }
+        .windowResizer.top-left {
+            top: 0px;
+            left: 0px;
+            cursor: nwse-resize;
+        }
+        .windowResizer.top-right {
+            top: 0px;
+            right: 0px;
+            cursor: nesw-resize;
+        }
+        .windowResizer.bottom-left {
+            bottom: 0px;
+            left: 0px;
+            cursor: nesw-resize;
+        }
+        .windowResizer.bottom-right {
+            bottom: 0px;
+            right: 0px;
+            cursor: nwse-resize;
+        }
+    `));
+    document.head.appendChild(style);
 }
