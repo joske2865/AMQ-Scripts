@@ -39,19 +39,19 @@ function AMQ_createInstalledWindow() {
         `));
 
         AMQ_addStyle(`
-            .descriptionContainer {
-                width: 95%;
-                margin: auto;
-            }
-            .descriptionContainer {
+            #installedListContainer h4 {
                 font-weight: bold;
                 cursor: pointer;
             }
-            .descriptionContainer .version {
+            #installedListContainer h4 .version {
                 opacity: .5;
                 margin-left: 10px;
             }
-            .descriptionContainer img {
+            #installedListContainer .descriptionContainer {
+                width: 95%;
+                margin: auto;
+            }
+            #installedListContainer .descriptionContainer img {
                 width: 80%;
                 margin: 10px 10%;
             }
