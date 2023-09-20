@@ -39,22 +39,22 @@ function AMQ_createInstalledWindow() {
         `));
 
         AMQ_addStyle(`
-            #installedContainer h4 {
+            #installedListContainer h4 {
                 font-weight: bold;
                 cursor: pointer;
             }
-            #installedContainer h4 span.name {
+            #installedListContainer h4 span.name {
                 margin-left: 10px;
             }
-            #installedContainer h4 span.version {
+            #installedListContainer h4 span.version {
                 opacity: .5;
                 margin-left: 10px;
             }
-            #installedContainer .descriptionContainer {
+            #installedListContainer .descriptionContainer {
                 width: 95%;
                 margin: auto;
             }
-            #installedContainer .descriptionContainer img {
+            #installedListContainer .descriptionContainer img {
                 width: 80%;
                 margin: 10px 10%;
             }
@@ -75,13 +75,13 @@ metadataObj = {
 */
 function AMQ_addScriptData(metadata) {
     AMQ_createInstalledWindow();
-    $("#installedContainer").append($("<div></div>")
+    let $row = $(`<div class="installedScriptItem"></div>`)
         .append($("<h4></h4>")
             .append($(`<i class="fa fa-caret-right"></i>`))
-            .append($(`<span class="name"></span>`).text(`${metadata.name || "Unknown"}`))
+            .append($(`<span class="name"></span>`).text(metadata.name || "Unknown"))
             .append($(`<span> by </span>`))
-            .append($(`<span class="author"></span>`).text(`${metadata.author || "Unknown"}`))
-            .append($(`<span class="version"></span>`).text(metadata.version || ""))
+            .append($(`<span class="author"></span>`).text(metadata.author || "Unknown"))
+            .append($(`<span class="version"></span>`).text(" " + metadata.version || ""))
             .click(function () {
                 let selector = $(this).next();
                 if (selector.is(":visible")) {
@@ -98,8 +98,22 @@ function AMQ_addScriptData(metadata) {
             .addClass("descriptionContainer")
             .html(metadata.description || "No description provided")
             .hide()
-        )
-    );
+        );
+    let $items = $("#installedListContainer .installedScriptItem");
+    let title = `${metadata.name} by ${metadata.author} ${metadata.version}`;
+    let index = 0;
+    for (let item of $items) {
+        if (title.localeCompare(item.firstChild.innerText) < 1) {
+            break;
+        }
+        index++;
+    }
+    if ($items.length === 0 || index === $items.length - 1) {
+        $("#installedListContainer").append($row);
+    }
+    else {
+        $($items[index]).before($row);
+    }
 }
 
 function AMQ_addStyle(css) {
