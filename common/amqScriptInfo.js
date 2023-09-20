@@ -15,7 +15,7 @@ function AMQ_createInstalledWindow() {
                             </button>
                             <h2 class="modal-title">Installed Userscripts</h2>
                         </div>
-                        <div class="modal-body" style="overflow-y: auto;max-height: calc(100vh - 150px);">
+                        <div class="modal-body" style="overflow-y: auto; max-height: calc(100vh - 150px);">
                             <div id="installedContainer">
                                 You have the following scripts installed (click on each of them to learn more)<br>
                                 This window can also be opened by going to AMQ settings (the gear icon on bottom right) and clicking "Installed Userscripts"
@@ -39,19 +39,22 @@ function AMQ_createInstalledWindow() {
         `));
 
         AMQ_addStyle(`
-            #installedListContainer h4 {
+            #installedContainer h4 {
                 font-weight: bold;
                 cursor: pointer;
             }
-            #installedListContainer h4 .version {
+            #installedContainer h4 span.name {
+                margin-left: 10px;
+            }
+            #installedContainer h4 span.version {
                 opacity: .5;
                 margin-left: 10px;
             }
-            #installedListContainer .descriptionContainer {
+            #installedContainer .descriptionContainer {
                 width: 95%;
                 margin: auto;
             }
-            #installedListContainer .descriptionContainer img {
+            #installedContainer .descriptionContainer img {
                 width: 80%;
                 margin: 10px 10%;
             }
@@ -72,10 +75,12 @@ metadataObj = {
 */
 function AMQ_addScriptData(metadata) {
     AMQ_createInstalledWindow();
-    $("#installedListContainer").append($("<div></div>")
+    $("#installedContainer").append($("<div></div>")
         .append($("<h4></h4>")
             .append($(`<i class="fa fa-caret-right"></i>`))
-            .append($(`<span></span>`).text(`${metadata.name || "Unknown"} by ${metadata.author || "Unknown"}`))
+            .append($(`<span class="name"></span>`).text(`${metadata.name || "Unknown"}`))
+            .append($(`<span> by </span>`))
+            .append($(`<span class="author"></span>`).text(`${metadata.author || "Unknown"}`))
             .append($(`<span class="version"></span>`).text(metadata.version || ""))
             .click(function () {
                 let selector = $(this).next();
@@ -94,7 +99,7 @@ function AMQ_addScriptData(metadata) {
             .html(metadata.description || "No description provided")
             .hide()
         )
-    )
+    );
 }
 
 function AMQ_addStyle(css) {
