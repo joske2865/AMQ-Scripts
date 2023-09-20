@@ -302,7 +302,7 @@ class AMQWindowPanel {
     }
 
     setPosition(newPosition) {
-        this.position.y = newPosition.x;
+        this.position.x = newPosition.x;
         this.position.y = newPosition.y;
         this.updatePosition();
     }
