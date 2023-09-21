@@ -86,7 +86,7 @@ function AMQ_addScriptData(metadata) {
             .append($(`<span> by </span>`))
             .append($(`<span class="author"></span>`).text(metadata.author || "Unknown"))
             .append($(`<span class="version"></span>`).text(metadata.version || ""))
-            .append($(`<a class="link" target="_blank"></a>`).attr("href", metadata.link || "").text(metadata.link || ""))
+            .append($(`<a class="link" target="_blank"></a>`).attr("href", metadata.link || "").text(metadata.link ? "link" : ""))
             .click(function () {
                 let selector = $(this).next();
                 if (selector.is(":visible")) {
