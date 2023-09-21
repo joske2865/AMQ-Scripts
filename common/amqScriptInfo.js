@@ -104,8 +104,7 @@ function AMQ_addScriptData(metadata) {
             .html(metadata.description || "No description provided")
             .hide()
         );
-    //let $items = $("#installedListContainer .installedScriptItemm");
-    let $items = $("#installedListContainer > div");
+    let $items = $("#installedListContainer .installedScriptItem");
     let title = `${metadata.name} by ${metadata.author} ${metadata.version}`;
     let index = 0;
     for (let item of $items) {
