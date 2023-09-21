@@ -73,7 +73,7 @@ metadataObj = {
     name: "AMQ Song List",
     author: "TheJoseph98",
     version: "1.0",
-    link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqScript.js"
+    link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqScript.js",
     description: "Adds a song list to the game which can be accessed mid-quiz by clicking the list icon in the top right corner"
 }
 */
@@ -86,7 +86,7 @@ function AMQ_addScriptData(metadata) {
             .append($(`<span> by </span>`))
             .append($(`<span class="author"></span>`).text(metadata.author || "Unknown"))
             .append($(`<span class="version"></span>`).text(metadata.version || ""))
-            .append($(`<a class="link"></a>`).attr("href", metadata.link || "").text(metadata.link || ""))
+            .append($(`<a class="link" target="_blank"></a>`).attr("href", metadata.link || "").text(metadata.link || ""))
             .click(function () {
                 let selector = $(this).next();
                 if (selector.is(":visible")) {
@@ -114,7 +114,10 @@ function AMQ_addScriptData(metadata) {
         }
         index++;
     }
-    if ($items.length === 0 || index === $items.length - 1) {
+    if (index === 0) {
+        $("#installedListContainer").prepend($row);
+    }
+    else if (index === $items.length) {
         $("#installedListContainer").append($row);
     }
     else {
