@@ -1,25 +1,25 @@
 // ==UserScript==
 // @name         AMQ Chat Timestamps
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3.2
+// @version      1.4
 // @description  Adds timestamps to chat messages
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqChatTimestamps.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
+
+const version = "1.4";
 
 function setup() {
     let gameChatNode = document.getElementById("gcMessageContainer");
@@ -63,7 +63,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Chat Timestamps",
         author: "TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqChatTimestamps.user.js",
         description: `<p>Adds a timestamp to chat messages indicating when the message was sent, this is based on your local system time</p>`
     });
 }
-    

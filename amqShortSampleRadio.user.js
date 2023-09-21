@@ -1,21 +1,25 @@
 // ==UserScript==
 // @name         AMQ Short Sample Radio
 // @namespace    SkayeScripts
-// @version      1.3.2
+// @version      1.4
 // @description  Loops through your entire list to not answer songs. Pushes difficulty for them down as fast as possible.
 // @author       Riven Skaye || FokjeM & TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @downloadURL  https://github.com/RivenSkaye/AMQ-Scripts-1/raw/master/amqShortSampleRadio.user.js
-// @updateURL    https://github.com/RivenSkaye/AMQ-Scripts-1/raw/master/amqShortSampleRadio.user.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js
+// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js
 // ==/UserScript==
 // Thanks a million for the help and some of the code bud!
 
-// Register the script to Joseph's list of installed scripts
+if (typeof Listener === "undefined") return;
+
+const version = "1.4";
 const SCRIPT_INFO = {
         name: "AMQ Short Sample Radio",
         author: "RivenSkaye",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js",
         description: `
             <p>Plays all 5 second samples in your list between difficulty settings 10% - 100% until there is nothing left.</p>
             <p>Adds a button in the top bar of lobbies to start the script. Stops when manually returning to lobby or if you've pushed your entire list to below 10% guess rate.</p>
@@ -23,9 +27,6 @@ const SCRIPT_INFO = {
         `
     };
 AMQ_addScriptData(SCRIPT_INFO);
-
-// Don't do anything on the sign-in page
-if(document.getElementById('startPage')) return;
 
 // Create the button to add it later
 let ASSRButton = document.createElement("div");

@@ -1,27 +1,26 @@
 // ==UserScript==
 // @name         AMQ Speedrun
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.4
+// @version      1.2
 // @description  Tracks guess times for each song, including total and average times
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqWindows.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSpeedrun.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 
+const version = "1.2";
 let fastestGuess = 999999;
 let slowestGuess = 0;
 let totalTime = 0;
@@ -31,11 +30,9 @@ let averageTotal = 0;
 let guessRate = 0;
 let previousGuess = 0;
 let times = {};
-
 let songStartTime = 0;
 let answerSubmitTime = 0;
 let autoSubmitFlag = true;
-
 let speedrunWindow;
 
 let oldWidth = $("#qpOptionContainer").width();
@@ -301,6 +298,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Speedrun",
         author: "TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSpeedrun.user.js",
         description: `
             <p>Adds a new window which can be accessed by clicking the clock icon in the top right while in a quiz which tracks how fast you guessed each song, including total time, average time, fastest time and more</p>
             <a href="https://i.imgur.com/LOJCzWm.png" target="_blank"><img src="https://i.imgur.com/LOJCzWm.png" /></a>

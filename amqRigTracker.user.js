@@ -1,28 +1,26 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.4.0
+// @version      1.5
 // @description  Rig tracker for AMQ, supports writing rig to chat for AMQ League games and writing rig to the scoreboard for general use (supports infinitely many players and all modes), many customisable options available
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
-// @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
 // @grant        none
 // @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 
+const version = "1.5";
 let scoreboardReady = false;
 let playerDataReady = false;
 let returningToLobby = false;
@@ -670,6 +668,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Rig Tracker",
         author: "TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js",
         description: `
             <p>Rig tracker for AMQ counts how many times a certain player's list has appeared in a quiz, mainly created for AMQ League games to reduce the need for dedicated players who track the rig</p>
             <p>Rig is only counted if the player has enabled "Share Entries" in their AMQ list settings (noted by the blue ribbon in their answer field during answer reveal)</p>
