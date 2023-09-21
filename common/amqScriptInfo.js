@@ -43,12 +43,15 @@ function AMQ_createInstalledWindow() {
                 font-weight: bold;
                 cursor: pointer;
             }
-            #installedListContainer h4 span.name {
-                margin-left: 10px;
+            #installedListContainer h4 .name {
+                margin-left: 8px;
             }
-            #installedListContainer h4 span.version {
+            #installedListContainer h4 .version {
                 opacity: .5;
-                margin-left: 10px;
+                margin-left: 8px;
+            }
+            #installedListContainer h4 .link {
+                margin-left: 8px;
             }
             #installedListContainer .descriptionContainer {
                 width: 95%;
@@ -69,7 +72,8 @@ Example metadata object
 metadataObj = {
     name: "AMQ Song List",
     author: "TheJoseph98",
-    version: "1.0"
+    version: "1.0",
+    link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqScript.js"
     description: "Adds a song list to the game which can be accessed mid-quiz by clicking the list icon in the top right corner"
 }
 */
@@ -81,7 +85,8 @@ function AMQ_addScriptData(metadata) {
             .append($(`<span class="name"></span>`).text(metadata.name || "Unknown"))
             .append($(`<span> by </span>`))
             .append($(`<span class="author"></span>`).text(metadata.author || "Unknown"))
-            .append($(`<span class="version"></span>`).text(" " + metadata.version || ""))
+            .append($(`<span class="version"></span>`).text(metadata.version || ""))
+            .append($(`<a class="link"></a>`).attr("href", metadata.link || "").text(metadata.link || ""))
             .click(function () {
                 let selector = $(this).next();
                 if (selector.is(":visible")) {
@@ -99,7 +104,8 @@ function AMQ_addScriptData(metadata) {
             .html(metadata.description || "No description provided")
             .hide()
         );
-    let $items = $("#installedListContainer .installedScriptItem");
+    //let $items = $("#installedListContainer .installedScriptItemm");
+    let $items = $("#installedListContainer > div");
     let title = `${metadata.name} by ${metadata.author} ${metadata.version}`;
     let index = 0;
     for (let item of $items) {
