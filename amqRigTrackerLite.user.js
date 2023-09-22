@@ -1,26 +1,25 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker Lite
 // @namespace    https://github.com/TheJoseph98
-// @version      1.0.3
+// @version      1.1
 // @description  Rig tracker for AMQ, writes rig to scoreboard next to players' scores
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 
+const version = "1.1";
 let scoreboardReady = false;
 let playerDataReady = false;
 let playerData = {};
@@ -121,6 +120,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Rig Tracker Lite",
         author: "TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js",
         description: `
             <p>Counts how many times a certain player's list has appeared in a quiz and displays it next to each person's score</p>
             <p>Rig is only counted if the player has enabled "Share Entries" in their AMQ list settings (noted by the blue ribbon in their answer field during answer reveal)</p>

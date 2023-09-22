@@ -1,29 +1,27 @@
 // ==UserScript==
 // @name         AMQ Dice Roller UI
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.4
+// @version      1.2
 // @description  Adds a window where you can roll dice
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqWindows.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRollerUI.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 
+const version = "1.2";
 let diceRolls = {};
-
 let diceWindow;
 let diceManagerWindow;
 
@@ -302,6 +300,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Dice Roller UI",
         author: "TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRollerUI.user.js",
         description: `
             <p>Adds a window where you can select a dice and roll a random value associated with that dice</p>
             <p>This window can be opened by clicking the cube icon at the top right while in quiz (there is no dice icon available, blame Egerod)</p>

@@ -1,3 +1,10 @@
+// AMQ Window Script
+// This code is fetched automatically
+// Do not attempt to add it to tampermonkey
+
+if (typeof Listener === "undefined") return;
+windowSetup();
+
 class AMQWindow {
     constructor(data) {
         this.id = data.id === undefined ? "" : data.id;
@@ -290,12 +297,12 @@ class AMQWindowPanel {
     }
 
     setPositionY(newPositionY) {
-        this.position.y = newPositiony;
+        this.position.y = newPositionY;
         this.updatePosition();
     }
 
     setPosition(newPosition) {
-        this.position.y = newPosition.x;
+        this.position.x = newPosition.x;
         this.position.y = newPosition.y;
         this.updatePosition();
     }
@@ -333,8 +340,8 @@ class AMQWindowPanel {
     }
 
     updateScrollable() {
-        this.panel.css("overflow-x", this.scrollable.x === true ? "auto" : "hidden")
-        this.panel.css("overflow-y", this.scrollable.y === true ? "auto" : "hidden")
+        this.panel.css("overflow-x", this.scrollable.x === true ? "auto" : "hidden");
+        this.panel.css("overflow-y", this.scrollable.y === true ? "auto" : "hidden");
     }
 
     show() {
@@ -366,88 +373,68 @@ class AMQWindowPanel {
     }
 }
 
-function addStyle(css) {
-    let head = document.head;
+function windowSetup() {
+    if ($("#customWindowStyle").length) return;
     let style = document.createElement("style");
-    head.appendChild(style);
     style.type = "text/css";
     style.id = "customWindowStyle";
-    style.appendChild(document.createTextNode(css));
-}
-
-function windowSetup() {
-    if ($("#customWindowStyle").length === 0) {
-        addStyle(`
-            .customWindow {
-                overflow-y: hidden;
-                top: 0px;
-                left: 0px;
-                margin: 0px;
-                background-color: #424242;
-                border: 1px solid rgba(27, 27, 27, 0.2);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-                user-select: text;
-                display: none;
-            }
-            .draggableWindow {
-                cursor: move;
-            }
-            .customWindowBody {
-                width: 100%;
-                overflow-y: auto;
-            }
-            .customWindowContent {
-                width: 100%;
-                position: absolute;
-                top: 0px;
-            }
-            .customWindow .close {
-                font-size: 32px;
-            }
-            .windowResizers {
-                width: 100%;
-                height: 100%;
-            }
-            .windowResizer {
-                width: 10px;
-                height: 10px;
-                position: absolute;
-                z-index: 100;
-            }
-            .windowResizer.top-left {
-                top: 0px;
-                left: 0px;
-                cursor: nwse-resize;
-            }
-            .windowResizer.top-right {
-                top: 0px;
-                right: 0px;
-                cursor: nesw-resize;
-            }
-            .windowResizer.bottom-left {
-                bottom: 0px;
-                left: 0px;
-                cursor: nesw-resize;
-            }
-            .windowResizer.bottom-right {
-                bottom: 0px;
-                right: 0px;
-                cursor: nwse-resize;
-            }
-        `);
-    }
-}
-
-// Wait until the LOADING... screen is hidden and load script
-let windowLoadInterval = setInterval(() => {
-    // don't load on login page
-    if (document.getElementById("startPage")) {
-        clearInterval(windowLoadInterval);
-    }
-    else {
-        if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-            windowSetup();
-            clearInterval(windowLoadInterval);
+    style.appendChild(document.createTextNode(`
+        .customWindow {
+            overflow-y: hidden;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            background-color: #424242;
+            border: 1px solid rgba(27, 27, 27, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            user-select: text;
+            display: none;
         }
-    }
-}, 500);
+        .draggableWindow {
+            cursor: move;
+        }
+        .customWindowBody {
+            width: 100%;
+            overflow-y: auto;
+        }
+        .customWindowContent {
+            width: 100%;
+            position: absolute;
+            top: 0px;
+        }
+        .customWindow .close {
+            font-size: 32px;
+        }
+        .windowResizers {
+            width: 100%;
+            height: 100%;
+        }
+        .windowResizer {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            z-index: 100;
+        }
+        .windowResizer.top-left {
+            top: 0px;
+            left: 0px;
+            cursor: nwse-resize;
+        }
+        .windowResizer.top-right {
+            top: 0px;
+            right: 0px;
+            cursor: nesw-resize;
+        }
+        .windowResizer.bottom-left {
+            bottom: 0px;
+            left: 0px;
+            cursor: nesw-resize;
+        }
+        .windowResizer.bottom-right {
+            bottom: 0px;
+            right: 0px;
+            cursor: nwse-resize;
+        }
+    `));
+    document.head.appendChild(style);
+}

@@ -1,28 +1,27 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.3.1
+// @version      1.4
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
 // @connect      script.google.com
 // @connect      script.googleusercontent.com
 // @match        https://animemusicquiz.com/*
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 
+const version = "1.4";
 let counting = false; // counting currently active
 let countingAdvanced = false; // counting currently active by years
 let autoCountAdvanced = false; // auto counting by years for 100+ songs active
@@ -987,6 +986,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Song Difficulty Counter",
         author: "TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js",
         description: `
             <p>Adds a counting tool that automatically counts the number of songs on each difficulty</p>
             <p>Can be customized to count only certain difficulty ranges and certain song types and has an option to automatically split by years if you get 100 songs or more to get a more accurate result</p>

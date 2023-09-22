@@ -1,29 +1,25 @@
 // ==UserScript==
 // @name         AMQ Dice Roller
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1.3
-// @description  Dice roller for general usage, type "/roll" in chat to output a random number from 1-100
+// @version      1.2
+// @description  Dice roller for general usage, type "/roll" followed by a number
 // @author       Anopob & TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 
-let command = "/roll";
-let maxRoll = 100;
-let diceResult;
+const version = "1.2";
 
 function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
@@ -37,37 +33,27 @@ function sendChatMessage(message) {
 }
 
 function setup() {
-    let commandListener = new Listener("game chat update", (payload) => {
+    new Listener("game chat update", (payload) => {
         payload.messages.forEach(message => {
-            if (message.sender === selfName && message.message.startsWith(command)) {
+            if (message.sender === selfName && message.message.startsWith("/roll")) {
                 let args = message.message.split(/\s+/);
-                if (args[1] !== undefined) {
-                    maxRoll = parseInt(args[1].trim());
-                    if (isNaN(maxRoll)) {
-                        sendChatMessage("Please enter a valid number");
+                if (args[1]) {
+                    let maxRoll = parseInt(args[1].trim());
+                    if (!isNaN(maxRoll) && maxRoll > 0) {
+                        sendChatMessage("rolls " + getRandomIntInclusive(1, maxRoll));
                     }
-                    else {
-                        diceResult = getRandomIntInclusive(1, maxRoll);
-                        sendChatMessage(" rolls " + diceResult);
-                    }
-                }
-                else {
-                    maxRoll = 100;
-                    diceResult = getRandomIntInclusive(1, maxRoll);
-                    sendChatMessage(" rolls " + diceResult);
                 }
             }
         });
-    });
-
-    commandListener.bindListener();
+    }).bindListener();
 
     AMQ_addScriptData({
         name: "Dice Roller",
         author: "Anopob & TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js",
         description: `
-            <p>Adds a dice roller to AMQ, to roll a dice type "/roll" in chat, you will receive a random number between 1 and 100</p>
-            <p>You can set a max roll value by adding a number, for example "/roll 5" will roll a random number between 1 and 5</p>
+            <p>Adds a dice roller to AMQ. To roll, type "/roll #" in chat (# can be any number). You will receive a random number between 1 and the selected number</p>
             <p>Because it requires typing to chat, it does not work in ranked, due to slow mode</p>
         `
     });

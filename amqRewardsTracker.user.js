@@ -1,42 +1,37 @@
 // ==UserScript==
 // @name         AMQ Rewards Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.0.2
+// @version      1.1
 // @description  Tracks rewards gained per hour such as xp, notes and tickets
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqWindows.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js
 // ==/UserScript==
 
-// don't load on login page
-if (document.getElementById("startPage")) return;
-
 // Wait until the LOADING... screen is hidden and load script
+if (typeof Listener === "undefined") return;
 let loadInterval = setInterval(() => {
-    if (document.getElementById("loadingScreen").classList.contains("hidden")) {
-        setup();
+    if ($("#loadingScreen").hasClass("hidden")) {
         clearInterval(loadInterval);
+        setup();
     }
 }, 500);
 
+const version = "1.1";
 let startXP;
 let startNotes;
 let startTickets;
 let startTime;
-
 let gainedXP;
 let gainedNotes;
 let gainedTickets;
 let elapsedTime;
-
 let trackerWindow;
 let trackerPaused = false;
-
 let quizXPGainListener;
-
 let updateInterval = setInterval(function () {}, 333);
 
 function startTracker() {
@@ -211,6 +206,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Rewards Tracker",
         author: "TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js",
         description: `
             <p>Adds a new window where you can start or stop a tracker which counts how much XP, notes and tickets you gained since starting and calculates approximate gains per hour.</p>
             <p>The tracker can be opened by clicking the graph icon at the top right corner of the quiz screen.</p>

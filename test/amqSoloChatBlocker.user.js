@@ -1,21 +1,24 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      0.8
+// @version      0.9
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance.
 // @author       Riven Skaye // FokjeM & TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
+// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
 // @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/test/amqSoloChatBlocker.user.js
 // @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/test/amqSoloChatBlocker.user.js
 // ==/UserScript==
 
 if (!window.setupDocumentDone) return;
 
+const version = "0.9";
 const SCRIPT_INFO = {
         name: "AMQ Solo Chat Block",
         author: "RivenSkaye & TheJoseph98",
+        version: version,
+        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/test/amqSoloChatBlocker.user.js",
         description: `
             <p>Hides the chat in Solo rooms, since it's useless anyway. Also allows for killing Ranked chat</p>
             <p>This should hopefully be configurable, someday. For now, you can manually change stuff by setting new values on the SoloChatBlock and BlockRankedChat entries in localStorage.</p>
