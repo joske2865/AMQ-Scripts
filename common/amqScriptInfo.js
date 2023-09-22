@@ -67,7 +67,7 @@ function AMQ_createInstalledWindow() {
 
 
 /*
-Adds a new section to the installed scripts window containing the script info, such as name, author and description (HTML enabled)
+Adds a new section to the installed scripts window containing the script info, such as name, author, version, link, and description (HTML enabled)
 Example metadata object
 metadataObj = {
     name: "AMQ Song List",
