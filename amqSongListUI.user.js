@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.4
+// @version      3.5
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
@@ -21,7 +21,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "3.4";
+const version = "3.5";
 let listWindow;
 let listWindowOpenButton;
 let listWindowTable;
@@ -765,11 +765,14 @@ function updateInfo(song) {
     for (let host in song.urls) {
         for (let resolution in song.urls[host]) {
             let url = song.urls[host][resolution];
-            let innerHTML = "";
-            innerHTML += host === "catbox" ? "Catbox " : "OpeningsMoe ";
-            innerHTML += resolution === "0" ? "MP3: " : (resolution === "480" ? "480p: " : "720p: ");
-            innerHTML += `<a href="${url}" target="_blank">${url}</a>`;
-            listContainer.append($(`<li>${innerHTML}</li>`));
+            if (url) {
+                let formattedUrl = videoResolver.formatUrl(url);
+                let innerHTML = "";
+                innerHTML += host === "catbox" ? "Catbox " : "OpeningsMoe ";
+                innerHTML += resolution === "0" ? "MP3: " : (resolution === "480" ? "480p: " : "720p: ");
+                innerHTML += `<a href="${formattedUrl}" target="_blank">${formattedUrl}</a>`;
+                listContainer.append($(`<li>${innerHTML}</li>`));
+            }
         }
     }
     urlContainer.append(listContainer);
@@ -1295,7 +1298,7 @@ function setup() {
                 activePlayers: Object.values(quiz.players).filter(player => player.avatarSlot._disabled === false).length,
                 totalPlayers: Object.values(quiz.players).length,
                 type: result.songInfo.type === 3 ? "Insert Song" : (result.songInfo.type === 2 ? "Ending " + result.songInfo.typeNumber : "Opening " + result.songInfo.typeNumber),
-                urls: result.songInfo.urlMap,
+                urls: result.songInfo.videoTargetMap,
                 siteIds: result.songInfo.siteIds,
                 difficulty: typeof result.songInfo.animeDifficulty === "string" ? "Unrated" : result.songInfo.animeDifficulty.toFixed(1),
                 animeType: result.songInfo.animeType,
