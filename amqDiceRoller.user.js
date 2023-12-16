@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         AMQ Dice Roller
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2
+// @version      1.3
 // @description  Dice roller for general usage, type "/roll" followed by a number
 // @author       Anopob & TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqDiceRoller.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqDiceRoller.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -19,7 +20,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "1.2";
+const version = "1.3";
 
 function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
@@ -51,7 +52,7 @@ function setup() {
         name: "Dice Roller",
         author: "Anopob & TheJoseph98",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqDiceRoller.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqDiceRoller.user.js",
         description: `
             <p>Adds a dice roller to AMQ. To roll, type "/roll #" in chat (# can be any number). You will receive a random number between 1 and the selected number</p>
             <p>Because it requires typing to chat, it does not work in ranked, due to slow mode</p>

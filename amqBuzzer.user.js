@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         AMQ Buzzer
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2
+// @version      1.3
 // @description  Mutes the song on the buzzer (Enter key on empty answer field) and displays time you buzzed in
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqBuzzer.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqBuzzer.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqBuzzer.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -19,7 +20,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "1.2";
+const version = "1.3";
 let songStartTime = 0;
 let buzzerTime = 0;
 let isPlayer = false;
@@ -105,7 +106,7 @@ function setup() {
         name: "Buzzer",
         author: "TheJoseph98 & Anopob",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqBuzzer.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqBuzzer.user.js",
         description: `
             <p>Adds a buzzer to AMQ, you activate it by pressing the Enter key in the empty answer field</p>
             <p>When you buzz, your sound will be muted until the answer reveal and in chat you will receive a message stating how fast you buzzed since the start of the song</p>

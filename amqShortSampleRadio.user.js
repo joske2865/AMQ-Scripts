@@ -1,25 +1,25 @@
 // ==UserScript==
 // @name         AMQ Short Sample Radio
 // @namespace    SkayeScripts
-// @version      1.4
+// @version      1.5
 // @description  Loops through your entire list to not answer songs. Pushes difficulty for them down as fast as possible.
 // @author       Riven Skaye || FokjeM & TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js
 // ==/UserScript==
 // Thanks a million for the help and some of the code bud!
 
 if (typeof Listener === "undefined") return;
 
-const version = "1.4";
+const version = "1.5";
 const SCRIPT_INFO = {
         name: "AMQ Short Sample Radio",
         author: "RivenSkaye",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqShortSampleRadio.user.js",
         description: `
             <p>Plays all 5 second samples in your list between difficulty settings 10% - 100% until there is nothing left.</p>
             <p>Adds a button in the top bar of lobbies to start the script. Stops when manually returning to lobby or if you've pushed your entire list to below 10% guess rate.</p>

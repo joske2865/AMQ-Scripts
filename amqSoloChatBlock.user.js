@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         AMQ Solo Chat Block
 // @namespace    SkayeScripts
-// @version      1.4
+// @version      1.5
 // @description  Puts a nice image over the chat in solo and Ranked rooms, customizable. Improves overall performance in Ranked.
 // @author       Riven Skaye || FokjeM
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @downloadURL  https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js
 // ==/UserScript==
 
 // Make sure not to run on before the page is loaded
@@ -19,12 +19,12 @@ if (typeof Listener === "undefined") return;
 
 /*** Common code to many scripts ***/
 //Register to Joseph's list
-const version = "1.4";
+const version = "1.5";
 const SCRIPT_INFO = {
         name: "AMQ Solo Chat Block",
         author: "RivenSkaye",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqSoloChatBlock.user.js",
         description: `
             <p>Hides the chat in Solo rooms, since it's useless anyway. Also allows for killing Ranked chat</p>
             <p>This should hopefully be configurable, someday. For now, you can manually change stuff by setting new values on the SoloChatBlock and BlockRankedChat entries in localStorage.</p>
