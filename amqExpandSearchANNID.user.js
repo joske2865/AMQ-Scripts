@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         AMQ Expand Search ANN ID
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1
+// @version      1.2
 // @description  Allows the user to search anime by ANNID in Expand Library
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
 // @grant        none
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -19,7 +20,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "1.1";
+const version = "1.2";
 
 function setup() {
     $("#elQuestionFilterInput").attr("placeholder", "Search anime, song, artist or ANN ID");
@@ -48,7 +49,7 @@ function setup() {
         name: "Expand Search by ANN ID",
         author: "TheJoseph98",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqExpandSearchANNID.user.js",
         description: `
             <p>Allows the user to search expand library by ANN ID in addition to searching by anime name, song name and artist</p>
         `

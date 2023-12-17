@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name         AMQ Speedrun
 // @namespace    https://github.com/TheJoseph98
-// @version      1.2
+// @version      1.3
 // @description  Tracks guess times for each song, including total and average times
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqWindows.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSpeedrun.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqWindows.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqSpeedrun.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqSpeedrun.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -20,7 +21,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "1.2";
+const version = "1.3";
 let fastestGuess = 999999;
 let slowestGuess = 0;
 let totalTime = 0;
@@ -299,7 +300,7 @@ function setup() {
         name: "Speedrun",
         author: "TheJoseph98",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSpeedrun.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqSpeedrun.user.js",
         description: `
             <p>Adds a new window which can be accessed by clicking the clock icon in the top right while in a quiz which tracks how fast you guessed each song, including total time, average time, fastest time and more</p>
             <a href="https://i.imgur.com/LOJCzWm.png" target="_blank"><img src="https://i.imgur.com/LOJCzWm.png" /></a>

@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name         AMQ Song Difficulty Counter
 // @namespace    https://github.com/TheJoseph98
-// @version      1.4
+// @version      1.5
 // @description  Counts the songs by individual difficulty, per song type
 // @author       TheJoseph98
 // @grant        GM_xmlhttpRequest
 // @connect      script.google.com
 // @connect      script.googleusercontent.com
 // @match        https://animemusicquiz.com/*
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -21,7 +22,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "1.4";
+const version = "1.5";
 let counting = false; // counting currently active
 let countingAdvanced = false; // counting currently active by years
 let autoCountAdvanced = false; // auto counting by years for 100+ songs active
@@ -987,7 +988,7 @@ function setup() {
         name: "Song Difficulty Counter",
         author: "TheJoseph98",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqSongDifficultyCounter.user.js",
         description: `
             <p>Adds a counting tool that automatically counts the number of songs on each difficulty</p>
             <p>Can be customized to count only certain difficulty ranges and certain song types and has an option to automatically split by years if you get 100 songs or more to get a more accurate result</p>

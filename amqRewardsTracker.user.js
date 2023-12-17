@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name         AMQ Rewards Tracker
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1
+// @version      1.2
 // @description  Tracks rewards gained per hour such as xp, notes and tickets
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqWindows.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqWindows.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqRewardsTracker.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqRewardsTracker.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -20,7 +21,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "1.1";
+const version = "1.2";
 let startXP;
 let startNotes;
 let startTickets;
@@ -207,7 +208,7 @@ function setup() {
         name: "Rewards Tracker",
         author: "TheJoseph98",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRewardsTracker.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqRewardsTracker.user.js",
         description: `
             <p>Adds a new window where you can start or stop a tracker which counts how much XP, notes and tickets you gained since starting and calculates approximate gains per hour.</p>
             <p>The tracker can be opened by clicking the graph icon at the top right corner of the quiz screen.</p>

@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         AMQ Rig Tracker Lite
 // @namespace    https://github.com/TheJoseph98
-// @version      1.1
+// @version      1.2
 // @description  Rig tracker for AMQ, writes rig to scoreboard next to players' scores
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://github.com/TheJoseph98/AMQ-Scripts/raw/master/common/amqScriptInfo.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -19,7 +20,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "1.1";
+const version = "1.2";
 let scoreboardReady = false;
 let playerDataReady = false;
 let playerData = {};
@@ -121,12 +122,12 @@ function setup() {
         name: "Rig Tracker Lite",
         author: "TheJoseph98",
         version: version,
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js",
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqRigTrackerLite.user.js",
         description: `
             <p>Counts how many times a certain player's list has appeared in a quiz and displays it next to each person's score</p>
             <p>Rig is only counted if the player has enabled "Share Entries" in their AMQ list settings (noted by the blue ribbon in their answer field during answer reveal)</p>
             <a href="https://i.imgur.com/4jF8vja.png" target="_blank"><img src="https://i.imgur.com/4jF8vja.png" /></a>
-            <p>If you're looking for a version with customisable options including writing to chat for 1v1 games and which can be enabled or disabled at will, check out the original <a href="https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqRigTracker.user.js">Rig Tracker</a>
+            <p>If you're looking for a version with customisable options including writing to chat for 1v1 games and which can be enabled or disabled at will, check out the original <a href="https://github.com/joske2865/AMQ-Scripts/raw/master/amqRigTracker.user.js">Rig Tracker</a>
         `
     });
 

@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name         AMQ Song List UI
 // @namespace    https://github.com/TheJoseph98
-// @version      3.5
+// @version      3.6
 // @description  Adds a song list window, accessible with a button below song info while in quiz, each song in the list is clickable for extra information
 // @author       TheJoseph98
 // @match        https://animemusicquiz.com/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqScriptInfo.js
-// @require      https://raw.githubusercontent.com/TheJoseph98/AMQ-Scripts/master/common/amqWindows.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqWindows.js
 // @require      https://github.com/amq-script-project/AMQ-Scripts/raw/master/gameplay/amqAnswerTimesUtility.user.js
-// @updateURL    https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongListUI.user.js
+// @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqSongListUI.user.js
+// @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqSongListUI.user.js
 // ==/UserScript==
 
 // Wait until the LOADING... screen is hidden and load script
@@ -21,7 +22,7 @@ let loadInterval = setInterval(() => {
     }
 }, 500);
 
-const version = "3.5";
+const version = "3.6";
 let listWindow;
 let listWindowOpenButton;
 let listWindowTable;
@@ -1424,8 +1425,8 @@ function setup() {
     AMQ_addScriptData({
         name: "Song List UI",
         author: "TheJoseph98",
-        version: "3.4",
-        link: "https://github.com/TheJoseph98/AMQ-Scripts/raw/master/amqSongListUI.user.js",
+        version: version,
+        link: "https://github.com/joske2865/AMQ-Scripts/raw/master/amqSongListUI.user.js",
         description: `
             <p>Creates a window which includes the song list table with song info such as song name, artist and the anime it's from</p>
             </p>The list can be accessed by clicking the list icon in the top right while in quiz or by pressing the pause/break key on the keyboard</p>
@@ -1434,7 +1435,7 @@ function setup() {
             <p>The song list has customisable options which you can change by clicking the "Settings" button in the song list window, these settings are automatically saved</p>
             <a href="https://i.imgur.com/BKWygGP.png" target="_blank"><img src="https://i.imgur.com/BKWygGP.png" /></a>
             <a href="https://i.imgur.com/X5RMnV1.png?1" target="_blank"><img src="https://i.imgur.com/X5RMnV1.png?1" /></a>
-            <p>You can also download the list in JSON format by clicking the "Export" button, this file can then be imported to <a href="https://thejoseph98.github.io/AMQ-Song-List-Viewer/" target="_blank">AMQ Song List Viewer</a> which displays the scoreboard status for each song and has individual player search so you can see what each player answered on each individual song
+            <p>You can also download the list in JSON format by clicking the "Export" button, this file can then be imported to <a href="https://joske2865.github.io/AMQ-Song-List-Viewer/" target="_blank">AMQ Song List Viewer</a> which displays the scoreboard status for each song and has individual player search so you can see what each player answered on each individual song
             <a href="https://i.imgur.com/2BhNNb4.png" target="_blank"><img src="https://i.imgur.com/2BhNNb4.png" /></a>
             <p>the windows are draggable and resizable so they fit each user's personal experience</p>
             <a href="https://i.imgur.com/hZxRJ5M.png" target="_blank"><img src="https://i.imgur.com/hZxRJ5M.png" /></a>
