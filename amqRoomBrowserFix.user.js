@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name         AMQ Room Browser Borgar Placement
 // @namespace    SkayeScripts
-// @version      2.2
+// @version      2.3
 // @description  Moves the "All Settings Menu" icon on room browsers to keep the height consistent. It even looks decent!
 // @author       RivenSkaye, Zolhungaj
 // @match        https://animemusicquiz.com/*
 // @grant        none
+// @require      https://github.com/joske2865/AMQ-Scripts/raw/master/common/amqScriptInfo.js
 // @downloadURL  https://github.com/joske2865/AMQ-Scripts/raw/master/amqRoomBrowserFix.user.js
 // @updateURL    https://github.com/joske2865/AMQ-Scripts/raw/master/amqRoomBrowserFix.user.js
 // ==/UserScript==
 
 if (typeof Listener === "undefined") return;
-const version = "2.2";
+const version = "2.3";
 
 let loadInterval = setInterval(() => {
     if ($("#loadingScreen").hasClass("hidden")) {
